@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_conf.c,v 1.153.2.1 2005/02/15 21:36:47 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_conf.c,v 1.153.2.2 2005/02/17 15:21:16 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2303,9 +2303,11 @@ aConfItem	*find_denied(char *name, int class)
  * Parses 0w1d2h3m4s timeformat, filling in output variable in seconds.
  * Returns 0 if everything went ok.
  */
-int	wdhms2sec(char *input, int *output)
+int	wdhms2sec(char *input, time_t *output)
 {
-#define DEFAULT_MULTI 60
+#ifndef TKLINE_MULTIPLIER
+#define TKLINE_MULTIPLIER 60
+#endif
 	int multi;
 	int tmp = 0;
 	char *s;
@@ -2317,7 +2319,7 @@ int	wdhms2sec(char *input, int *output)
 	s = input;
 	while (*s)
 	{
-		switch(*s)
+		switch(tolower(*s))
 		{
 		case 'w':
 			multi = 604800; break;
@@ -2337,7 +2339,7 @@ int	wdhms2sec(char *input, int *output)
 					s++;
 				if (!*s)
 				{
-					*output += DEFAULT_MULTI * tmp;
+					*output += TKLINE_MULTIPLIER * tmp;
 				}
 				continue;
 			}
@@ -2352,7 +2354,8 @@ int	wdhms2sec(char *input, int *output)
 
 int	m_tkline(aClient *cptr, aClient *sptr, int parc, char **parv)
 {
-	int	time, status = CONF_TKILL;
+	int	status = CONF_TKILL;
+	time_t	time;
 	char	*user, *host, *reason;
 	int	i;
 
@@ -2408,7 +2411,7 @@ int	m_tkline(aClient *cptr, aClient *sptr, int parc, char **parv)
  *
  * Returns created tkline expire time.
  */
-void do_tkline(char *who, int time, char *user, char *host, char *reason, int status)
+void do_tkline(char *who, time_t time, char *user, char *host, char *reason, int status)
 {
 	char buff[BUFSIZE];
 	aClient	*acptr;
@@ -2449,7 +2452,7 @@ void do_tkline(char *who, int time, char *user, char *host, char *reason, int st
 		}
 		tkconf = aconf;
 	}
-	sendto_flag(SCH_TKILL, "TKLINE %s@%s (%d) by %s :%s",
+	sendto_flag(SCH_TKILL, "TKLINE %s@%s (%u) by %s :%s",
 		aconf->name, aconf->host, time, who, reason);
 
 	/* get rid of tklined clients */

@@ -818,6 +818,10 @@
 #undef TKLINE_MAXTIME
 #endif
 
+#if !defined(TKLINE_MAXTIME) || (TKLINE_MAXTIME > 99999999)
+#define TKLINE_MAXTIME 99999999
+#endif
+
 #if !defined(SCH_TKILL)
 #define SCH_TKILL SCH_NOTICE
 #endif
