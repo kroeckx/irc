@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.5 1998/05/17 20:29:32 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.6 1998/06/09 19:06:46 kalt Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -447,8 +447,8 @@ Reg	ResRQ	*rptr;
 	cp = (u_char *)numb->s6_addr;
 	if (cp[0]==0 && cp[1]==0 && cp[2]==0 && cp[3]==0 && cp[4]==0 && 
 	    cp[5]==0 && cp[6]==0 && cp[7]==0 && cp[8]==0 && cp[9]==0 && 
-	    cp[10]==0xff && cp[11]==0xff)
-	    { 
+	    ((cp[10]==0 && cp[11]==0) || (cp[10]==0xff && cp[11]==0xff)))
+	    {
 		(void)sprintf(ipbuf, "%u.%u.%u.%u.in-addr.arpa.",
 			      (u_int)(cp[15]), (u_int)(cp[14]),
 			      (u_int)(cp[13]), (u_int)(cp[12]));
