@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22.2.1 2000/08/15 22:17:16 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22.2.2 2000/12/08 22:15:22 q Exp $";
 #endif
 
 #include "os.h"
@@ -802,7 +802,7 @@ u_short port;
 	bzero((char *)&sk, sizeof(sk));
 	sk.SIN_FAMILY = AFINET;
 #if defined(INET6)
-	if(!inet_pton(AF_INET6, ourIP, sk.sin6_addr.s6_addr))
+	if(!inetpton(AF_INET6, ourIP, sk.sin6_addr.s6_addr))
 		bcopy(minus_one, sk.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 	sk.sin_addr.s_addr = inetaddr(ourIP);
@@ -817,7 +817,7 @@ u_short port;
 	    }
 	set_non_blocking(fd, theirIP, port);
 #if defined(INET6)
-	if(!inet_pton(AF_INET6, theirIP, sk.sin6_addr.s6_addr))
+	if(!inetpton(AF_INET6, theirIP, sk.sin6_addr.s6_addr))
 		bcopy(minus_one, sk.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 	sk.sin_addr.s_addr = inetaddr(theirIP);

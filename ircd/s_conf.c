@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.5 2000/09/28 21:45:49 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.6 2000/12/08 22:15:23 q Exp $";
 #endif
 
 #include "os.h"
@@ -125,7 +125,10 @@ aClient *cptr;
 	if (m < 0 || m > 128)
 		goto badmask;
 
-	inet_pton(AF_INET6, mask, (void *)addr.s6_addr);
+	if (inetpton(AF_INET6, mask, (void *)addr.s6_addr))
+	{
+		return -1;
+	}
 
 	j = m & 0x1F;	/* mumber not mutliple of 32 bits */
 	m >>= 5;	/* number of 32 bits */
@@ -871,7 +874,7 @@ char	*orig;
 		s++;
 	    }
 
-	i = inet_pton(AF_INET6, orig, addr.s6_addr);
+	i = inetpton(AF_INET6, orig, addr.s6_addr);
 
 	if (i > 0)
 	    {
@@ -1335,7 +1338,7 @@ Reg	aConfItem	*aconf;
 	ln.flags = ASYNC_CONF;
 
 #ifdef INET6
-	if(inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
+	if(inetpton(AF_INET6, s, aconf->ipnum.s6_addr))
 		;
 #else
 	if (isdigit(*s))

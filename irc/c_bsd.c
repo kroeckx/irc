@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.5.4.1 1999/11/03 22:00:00 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.5.4.2 2000/12/08 22:15:23 q Exp $";
 #endif
 
 #include "os.h"
@@ -61,7 +61,7 @@ aClient	*cptr;
 	if (isdigit(*host))
 #ifdef INET6
 	    {
-		if(!inet_pton(AF_INET6, host, server.sin6_addr.s6_addr))
+		if(!inetpton(AF_INET6, host, server.sin6_addr.s6_addr))
 			bcopy(minus_one, server.sin6_addr.s6_addr, IN6ADDRSZ);
 	    }
 #else

@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.1 2000/09/28 20:55:29 q Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.2 2000/12/08 22:15:21 q Exp $";
 #endif
 
 #include "os.h"
@@ -169,6 +169,7 @@ char *path;
 #ifdef INET6
 /*
  * inetntop: return the : notation of a given IPv6 internet number.
+ *	     or the dotted-decimal notation for IPv4
  *           make sure the compressed representation (rfc 1884) isn't used.
  */
 char *inetntop(af, in, out, the_size)
@@ -179,7 +180,27 @@ size_t the_size;
 {
 	static char local_dummy[MYDUMMY_SIZE];
 
-	inet_ntop(af, in, local_dummy, the_size);
+	if (!inet_ntop(af, in, local_dummy, the_size))
+	{
+		/* good that every function calling this one
+		 * checks the return value ... NOT */
+		return NULL;
+	}	
+	/* quick and dirty hack to give ipv4 just ipv4 instead of
+	 * ::ffff:ipv4 - Q */
+	if (af == AF_INET6 && IN6_IS_ADDR_V4MAPPED((struct in6_addr *)in))
+	{
+		char	*p;
+
+		/* also check for FFFF? - Q */
+		p = strstr(local_dummy, ":ffff:");	
+		if (!p)
+		{
+			return NULL;	/* crash and burn */
+		}
+		strcpy(out, p + 6);
+		return out;
+	}
 	if (strstr(local_dummy, "::"))
 	    {
 		char cnt = 0, *cp = local_dummy, *op = out;
@@ -223,6 +244,26 @@ size_t the_size;
 	else
 		bcopy(local_dummy, out, 64);
 	return out;
+}
+
+/* inetpton(af, src, dst)
+**
+** This is a wrapper for inet_pton(), so we can use ipv4 addresses with an
+** af of AF_INET6, and that it gets converted to ipv4 mapped ipv6.
+*/
+int	inetpton(int af, const char *src, void *dst)
+{
+	char	buf[23];	/* max string for ipv4 mapped ipv6 in
+				** compressed notation. */
+
+	/* an empty string should listen to all */
+	if (af == AF_INET6 && *src && !strchr(src, ':'))
+	    {
+		strcpy(buf, "::ffff:");
+		strcpy(buf + 7, src);
+		return inet_pton(af, buf, dst);
+	    }
+	return inet_pton(af, src, dst);
 }
 #endif
 

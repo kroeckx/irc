@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.9 2000/09/28 21:39:54 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.10 2000/12/08 22:15:22 q Exp $";
 #endif
 
 #include "os.h"
@@ -230,7 +230,7 @@ int	port;
 		if (!ip || (!isxdigit(*ip) && *ip != ':'))
 			server.sin6_addr = in6addr_any;
 		else
-			if(!inet_pton(AF_INET6, ip, server.sin6_addr.s6_addr))
+			if(!inetpton(AF_INET6, ip, server.sin6_addr.s6_addr))
 				bcopy(minus_one, server.sin6_addr.s6_addr,
 				      IN6ADDRSZ);
 #else
@@ -2426,7 +2426,7 @@ struct	hostent	*hp;
 		s = (char *)index(aconf->host, '@');
 		s++; /* should NEVER be NULL */
 #ifdef INET6
-		if (!inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
+		if (!inetpton(AF_INET6, s, aconf->ipnum.s6_addr))
 #else
 		if ((aconf->ipnum.s_addr = inetaddr(s)) == -1)
 #endif
@@ -2597,7 +2597,7 @@ int	*lenp;
 	 */
 #ifdef INET6
 	if (isdigit(*aconf->host) && (AND16(aconf->ipnum.s6_addr) == 255))
-		if (!inet_pton(AF_INET6, aconf->host,aconf->ipnum.s6_addr))
+		if (!inetpton(AF_INET6, aconf->host,aconf->ipnum.s6_addr))
 			bcopy(minus_one, aconf->ipnum.s6_addr, IN6ADDRSZ);
 	if (AND16(aconf->ipnum.s6_addr) == 255)
 #else
@@ -2855,7 +2855,7 @@ int	len;
 	
 	if ((aconf = find_me())->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
-		if(!inet_pton(AF_INET6, aconf->passwd, mysk.sin6_addr.s6_addr))
+		if(!inetpton(AF_INET6, aconf->passwd, mysk.sin6_addr.s6_addr))
 			bcopy(minus_one, mysk.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 		mysk.sin_addr.s_addr = inetaddr(aconf->passwd);
@@ -2934,7 +2934,7 @@ aConfItem	*aconf;
 	if (aconf->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
 	    {
-		if (!inet_pton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr))
+		if (!inetpton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr))
 			bcopy(minus_one, from.sin6_addr.s6_addr, IN6ADDRSZ);
 	    }
 #else

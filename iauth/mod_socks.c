@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.3 2000/09/28 20:15:26 q Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.4 2000/12/08 22:15:22 q Exp $";
 #endif
 
 #include "os.h"
@@ -215,10 +215,10 @@ char *strver;
 	    sendto_log(ALOG_DSOCKS|ALOG_IRCD, LOG_ERR,
 		       "socks_write%s(%d): sscanf(\"%s\") failed", 
 #else
-    if (inet_pton(AF_INET6, cldata[cl].ourip, (void *) addr.s6_addr) != 1)
+    if (inetpton(AF_INET6, cldata[cl].ourip, (void *) addr.s6_addr) != 1)
 	{
 			sendto_log(ALOG_DSOCKS|ALOG_IRCD, LOG_ERR,
-			"socks_write%s(%d): inet_pton(\"%s\") failed",
+			"socks_write%s(%d): inetpton(\"%s\") failed",
 #endif
 			strver, cl, cldata[cl].ourip);
 	    close(cldata[cl].wfd);
