@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.13.2.2 2000/12/08 20:58:12 q Exp $";
+static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.13.2.3 2000/12/08 21:01:28 q Exp $";
 #endif
 
 #include "os.h"
@@ -706,7 +706,7 @@ aConfItem *top;
 	u_int	otype = 0, valid = 0;
 
 	if (!top)
-		return 0;
+		return -1;
 
 	for (aconf = top; aconf; aconf = aconf->next)
 	    {
