@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.74 1999/09/20 22:39:56 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.4.1 1999/09/30 16:40:16 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -267,7 +267,7 @@ int	port;
 	    {
 		char	buf[1024];
 
-		(void)sprintf(buf, replies[RPL_MYPORTIS], ME, "*",
+		(void)sprintf(buf, rpl_str(RPL_MYPORTIS, "*"),
 			ntohs(server.SIN_PORT));
 		(void)write(0, buf, strlen(buf));
 	    }
@@ -1992,6 +1992,8 @@ int	ro;
 	time_t	delay2 = delay;
 	int	res, length, fd, i;
 	int	auth;
+	int	incr, skipped = -1;
+	static	time_t uncomplete_date = 0;
 
 	for (res = 0;;)
 	    {
@@ -2078,7 +2080,9 @@ int	ro;
 
 			if (IsRegisteredUser(cptr))
 			    {
-				if (cptr->since - timeofday < MAXPENALTY+1)
+				if (cptr->since - timeofday < MAXPENALTY+1 &&
+				    (uncomplete_date == 0 ||
+				     cptr->lasttime < uncomplete_date))
 					SET_READ_EVENT( fd );
 			    }
 			else if (DBufLength(&cptr->recvQ) < 4088)
@@ -2164,6 +2168,7 @@ int	ro;
 	    } /* for(res=0;;) */
 	
 	timeofday = time(NULL);
+	dog_set();
 	if (nfds > 0 &&
 #if ! USE_POLL
 	    resfd >= 0 &&
@@ -2203,12 +2208,18 @@ int	ro;
 	    }
 #endif
 
+	incr = dog_incr();
+	if (ro && incr != 500)
+		sendto_flag(SCH_DEBUG, "RO: %d %d %d", fdp->highest, nfds,
+			    incr);
 #if ! USE_POLL
 	for (i = fdp->highest; i >= 0; i--)
 #else
 	for (pfd = poll_fdarray, i = 0; i < nbr_pfds; i++, pfd++ )
 #endif
 	    {
+		if ((i % incr) == 0 && (time(NULL) - timeofday) > 2)
+			skipped = MAX(0, skipped);
 #if ! USE_POLL
 		if (!(cptr = local[fd = fdp->fd[i]]))
 			continue;
@@ -2252,6 +2263,7 @@ int	ro;
 		 */
 		if (TST_READ_EVENT(fd) && IsListening(cptr))
 		    {
+			nfds--;
 			CLR_READ_EVENT(fd);
 			cptr->lasttime = timeofday;
 			read_listener(cptr);
@@ -2259,6 +2271,8 @@ int	ro;
 		    }
 		if (IsMe(cptr))
 			continue;
+		if (TST_WRITE_EVENT(fd) || TST_READ_EVENT(fd))
+			nfds--;
 		if (TST_WRITE_EVENT(fd))
 		    {
 			int	write_err = 0;
@@ -2283,6 +2297,11 @@ deadsocket:
 		length = 1;	/* for fall through case */
 		if (!NoNewLine(cptr) || TST_READ_EVENT(fd))
 		    {
+			if (IsRegisteredUser(cptr) && skipped >= 0)
+			    {
+				skipped += 1;
+				continue;
+			    }
 			if (!DoingAuth(cptr))
 				length = read_packet(cptr, TST_READ_EVENT(fd));
 		    }
@@ -2349,6 +2368,22 @@ deadsocket:
 				  "EOF From client" :
 				  strerror(get_sockerr(cptr)));
 	    } /* for(i) */
+	if (skipped > 0)
+	    {
+		if (uncomplete_date == 0)
+			uncomplete_date = timeofday;
+		sendto_flag(SCH_DEBUG, "Skipped %d at %u [%d,%d,%d]", skipped,
+			    uncomplete_date, ret, nfds, i);
+		dog_done();
+	    }
+	else
+	    {
+		if (uncomplete_date)
+			sendto_flag(SCH_DEBUG,
+				    "Done skipping for %u [%d,%d,%d]",
+				    uncomplete_date, ret, nfds, i);
+		uncomplete_date = 0;
+	    }
 	return ret;
 }
 
@@ -2797,7 +2832,7 @@ Chat on\n\r");
 	    }
 	(void)close(fd);
 	(void)alarm(0);
-	sendto_one(who, replies[RPL_SUMMONING], ME, BadTo(who->name), namebuf);
+	sendto_one(who, rpl_str(RPL_SUMMONING, who->name), namebuf);
 	return;
 }
 #  endif

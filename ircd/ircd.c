@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: ircd.c,v 1.63 1999/08/15 21:02:53 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.4.1 1999/09/30 16:40:16 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -857,7 +857,6 @@ char	*argv[];
 	timeofday = time(NULL);
 	open_debugfile();
 	timeofday = time(NULL);
-	init_sid(NULL);
 	(void)init_sys();
 
 #ifdef USE_SYSLOG
@@ -1010,14 +1009,18 @@ void	io_loop()
 
 	/*
 	** First, try to drain traffic from servers (this includes listening
-	** ports).  Give up, either if there's no traffic, or too many
-	** iterations.
+	** ports for new clients, DNS traffic, UDP pings, and iauth traffic).
+	** Give up, either if there's no traffic, or too many iterations.
 	*/
+	timeofday = time(NULL);
 	while (maxs--)
 		if (read_message(0, &fdas, 0))
+		    {
+			dog_check(0); /* to trigger debug notices only */
 			flush_fdary(&fdas);
+		    }
 		else
-			break;
+			break;	/* Timed out (e.g. *NO* traffic at all) */
 
 	Debug((DEBUG_DEBUG, "delay for %d", delay));
 	/*
@@ -1033,6 +1036,7 @@ void	io_loop()
 		sendto_flag(SCH_DEBUG, "read_message(RO) -> 0 [%d]", delay);
 		(void)read_message(delay - 1, &fdall, 0);
 	    }
+	dog_check(1);
 	timeofday = time(NULL);
 
 	Debug((DEBUG_DEBUG ,"Got message(s)"));
