@@ -7,6 +7,7 @@
 	  all ip's instead of the selected.
 	* s_user.c/register_user(): removed some debug message
 	* channel.c/m_join(): call clean_channelname() faster.
+	* s_user.c/m_nick(): call m_user() before add_to_client_hash_table()
 
 2000-02-10  Kurt Roeckx
 
