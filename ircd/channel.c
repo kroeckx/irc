@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.20 2001/07/02 17:11:22 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.21 2001/07/07 14:29:33 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -669,10 +669,17 @@ char	flag, *chname;
 	int	count = 0, send = 0;
 
 	cp = modebuf + strlen(modebuf);
-	if (*parabuf)	/* mode +l or +k xx */
-		count = strlen(modebuf)-1;
+	if (*parabuf)
+	{
+		/*
+		** we have some modes in parabuf,
+		** so check how many of them.
+		** however, don't count initial '+'
+		*/
+		count = strlen(modebuf) - 1;
+	}
 	for (lp = top; lp; lp = lp->next)
-	    {
+	{
 		if (!(lp->flags & mask))
 			continue;
 		if (mask == CHFL_BAN || mask == CHFL_EXCEPTION ||
@@ -681,34 +688,58 @@ char	flag, *chname;
 		else
 			name = lp->value.cptr->name;
 		if (strlen(parabuf) + strlen(name) + 10 < (size_t) MODEBUFLEN)
-		    {
-			(void)strcat(parabuf, " ");
+		{
+			if (*parabuf)
+			{
+				(void)strcat(parabuf, " ");
+			}
 			(void)strcat(parabuf, name);
 			count++;
 			*cp++ = flag;
 			*cp = '\0';
-		    }
-		else if (*parabuf)
-			send = 1;
+		}
+		else
+		{
+			if (*parabuf)
+			{
+				send = 1;
+			}
+		}
 		if (count == MAXMODEPARAMS)
+		{
 			send = 1;
+		}
 		if (send)
-		    {
-			sendto_one(cptr, ":%s MODE %s %s%s",
+		{
+			/*
+			** send out MODEs, it's either MAXMODEPARAMS of them
+			** or long enough that they filled up parabuf
+			*/
+			sendto_one(cptr, ":%s MODE %s %s %s",
 				   ME, chname, modebuf, parabuf);
 			send = 0;
 			*parabuf = '\0';
 			cp = modebuf;
 			*cp++ = '+';
 			if (count != MAXMODEPARAMS)
-			    {
+			{
+				/*
+				** we weren't able to fit another 'name'
+				** into parabuf, so we have to send it
+				** in another turn, appending it now to
+				** empty parabuf and setting count to 1
+				*/
 				(void)strcpy(parabuf, name);
 				*cp++ = flag;
-			    }
-			count = 0;
+				count = 1;
+			}
+			else
+			{
+				count = 0;
+			}
 			*cp = '\0';
-		    }
-	    }
+		}
+	}
 }
 
 /*
@@ -745,7 +776,7 @@ uncommented may just lead to desynchs..
 		if (modebuf[1] || *parabuf)
 		    {
 			/* only needed to help compatibility */
-			sendto_one(cptr, ":%s MODE %s %s%s",
+			sendto_one(cptr, ":%s MODE %s %s %s",
 				   ME, chptr->chname, modebuf, parabuf);
 			*parabuf = '\0';
 			*modebuf = '+';
@@ -757,7 +788,7 @@ uncommented may just lead to desynchs..
 			       CHFL_INVITE, 'I');
 	    }
 	if (modebuf[1] || *parabuf)
-		sendto_one(cptr, ":%s MODE %s %s%s",
+		sendto_one(cptr, ":%s MODE %s %s %s",
 			   ME, chptr->chname, modebuf, parabuf);
 }
 
@@ -933,7 +964,7 @@ char	*parv[];
 					modebuf[1] = '\0';
 					channel_modes(&me, modebuf, parabuf,
 						      chptr);
-				check_services_butone(SERVICE_WANT_MODE,
+					check_services_butone(SERVICE_WANT_MODE,
 						      NULL, sptr,
 						      "MODE %s %s",
 						      name, modebuf);

@@ -2,6 +2,9 @@
 
 	* send.c/send_message(): once we adjusted pool size during
 	  netjoin, we did not add to queue parts of burst (from jv).
+	* channel.c/send_mode_list(), send_channel_modes(): reverted
+	  change from 2001-02-07 (about space in MODEs); fixed
+	  sending more than MAXMODEPARAMS modes (from Q).
 
 2001-07-05  Piotr Kucharski
 
@@ -358,8 +361,8 @@
 2000-02-04  Piotr Kucharski
 
 	* mod_socks.c/socks_read(): when using "careful" option, iauth
-	should not close connection before checking ST_V5b (from
-	KIKUCHI Takahiro)
+	  should not close connection before checking ST_V5b (from
+	  KIKUCHI Takahiro)
 
 2000-02-03  Kurt Roeckx
 
