@@ -1,3 +1,10 @@
+2001-03-13  Piotr Kucharski
+
+	* s_user.c, s_serv.c: pass whole aconf->pass to crypt(); this will
+	  allow modern crypt() to deal with MD5, Blowfish and others.
+	* contrib/mkpasswd: Walter Campbell's mkpasswd.c to generate also
+	  MD5 passwords
+
 2001-03-06  Piotr Kucharski
 
 	* tkserv.c: potential buffer overflow fixes
