@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.22 2003/10/10 22:48:16 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.23 2003/10/11 09:34:26 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1220,7 +1220,7 @@ char	*parv[], *mbuf, *pbuf;
 			    }
 			else if (whatt == MODE_DEL)
 			    {
-				if (ischop || IsServer(cptr))
+				if (*mode->key && (ischop || IsServer(cptr)))
 				    {
 					lp = &chops[opcnt++];
 					lp->value.cp = mode->key;
