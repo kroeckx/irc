@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4.2.1 1998/04/05 02:40:20 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4.2.2 1998/04/13 02:13:06 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -57,18 +57,16 @@ aClient	*cptr;
  
 	if (isdigit(*host))
 #ifdef INET6
-		inet_pton(AF_INET6,host,server.sin6_addr);
+		inet_pton(AF_INET6, host, server.sin6_addr.s6_addr);
 #else
 		server.sin_addr.s_addr = inetaddr(host);
 #endif
 	else { 
-#ifdef INET6
+#if defined(INET6) && defined(OSF)
 		res_init();
 		_res.options|=RES_USE_INET6;
-		hp = gethostbyname(host);
-#else
-		hp = gethostbyname(host);
 #endif
+		hp = gethostbyname(host);
 		if (hp == 0) {
 			fprintf(stderr, "%s: unknown host\n", host);
 			exit(2);

@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.27.2.1 1998/04/05 02:40:28 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.27.2.2 1998/04/13 02:13:08 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -1195,7 +1195,8 @@ Reg	aConfItem	*aconf;
 
 	if (isdigit(*s))
 #ifdef INET6
-		inet_pton(s, aconf->ipnum.s6_addr);
+		if(!inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
+			bcopy(minus_one,aconf->ipnum.s6_addr,16);
 #else
 		aconf->ipnum.s_addr = inetaddr(s);
 #endif

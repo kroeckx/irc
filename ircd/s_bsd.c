@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.1 1998/04/05 02:40:27 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.2 1998/04/13 02:13:07 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -234,7 +234,8 @@ int	port;
 #ifdef INET6
 			server.sin6_addr = in6addr_any;
 		else
-			inet_pton(ip, server.sin6_addr);
+			if(!inet_pton(AF_INET6, ip, server.sin6_addr.s6_addr))
+				bcopy(minus_one, server.sin6_addr.s6_addr, 16);
 #else
 			server.sin_addr.s_addr = INADDR_ANY;
 		else
@@ -648,14 +649,20 @@ Reg	aClient	*cptr;
 				break;
 		if (!hp->h_addr_list[i])
 		    {
-			sendto_flag(SCH_ERROR, "IP# Mismatch: %s != %s[%08x]",
 #ifdef INET6
+			sendto_flag(SCH_ERROR,
+				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
 				    inet_ntop(AF_INET6, (char *)&cptr->ip,
 					      mydummy, 16), hp->h_name,
+				    ((unsigned long *)hp->h_addr)[0],
+				    ((unsigned long *)hp->h_addr)[1],
+				    ((unsigned long *)hp->h_addr)[2],
+				    ((unsigned long *)hp->h_addr)[3]); 
 #else
+			sendto_flag(SCH_ERROR, "IP# Mismatch: %s != %s[%08x]",
 				    inetntoa((char *)&cptr->ip), hp->h_name,
-#endif
 				    *((unsigned long *)hp->h_addr));
+#endif
 			hp = NULL;
 		    }
 	    }
@@ -798,14 +805,20 @@ check_serverback:
 				break;
 		if (!hp->h_addr_list[i])
 		    {
-			sendto_flag(SCH_ERROR, "IP# Mismatch: %s != %s[%08x]",
 #ifdef INET6
+			sendto_flag(SCH_ERROR,
+				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
 				    inet_ntop(AF_INET6, (char *)&cptr->ip,
 					      mydummy, 16), hp->h_name,
+				    ((unsigned long *)hp->h_addr)[0],
+				    ((unsigned long *)hp->h_addr)[1],
+				    ((unsigned long *)hp->h_addr)[2],
+				    ((unsigned long *)hp->h_addr)[3]); 
 #else
+			sendto_flag(SCH_ERROR, "IP# Mismatch: %s != %s[%08x]",
 				    inetntoa((char *)&cptr->ip), hp->h_name,
-#endif
 				    *((unsigned long *)hp->h_addr));
+#endif
 			hp = NULL;
 		    }
 	    }
@@ -1607,7 +1620,11 @@ int	msg_ready;
 	    !(IsPerson(cptr) && DBufLength(&cptr->recvQ) > 6090))
 	    {
 		errno = 0;
+#ifdef INET6
+		length = recvfrom(cptr->fd, readbuf, sizeof(readbuf), 0, 0, 0);
+#else
 		length = recv(cptr->fd, readbuf, sizeof(readbuf), 0);
+#endif
 #if defined(DEBUGMODE) && defined(DEBUG_READ)
 		if (length > 0)
 			Debug((DEBUG_READ,
@@ -2140,7 +2157,7 @@ struct	hostent	*hp;
 		s = (char *)index(aconf->host, '@');
 		s++; /* should NEVER be NULL */
 #ifdef INET6
-		if (inet_pton(s, aconf->ipnum.s6_addr) == -1)
+		if (!inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
 #else
 		if ((aconf->ipnum.s_addr = inetaddr(s)) == -1)
 #endif
@@ -2311,8 +2328,9 @@ int	*lenp;
 	 */
 #ifdef INET6
 	if (isdigit(*aconf->host) && (AND16(aconf->ipnum.s6_addr) == 255))
-		/* hmm ?! */
-	if (inet_pton(aconf->host,aconf->ipnum.s6_addr) == -1 )
+		if (!inet_pton(AF_INET6, aconf->host,aconf->ipnum.s6_addr))
+			bcopy(minus_one, aconf->ipnum.s6_addr, 16);
+	if (AND16(aconf->ipnum.s6_addr) == 255)
 #else
 	if (isdigit(*aconf->host) && (aconf->ipnum.s_addr == -1))
 		aconf->ipnum.s_addr = inetaddr(aconf->host);
@@ -2562,7 +2580,8 @@ int	len;
 	
 	if ((aconf = find_me())->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
-		inet_pton(aconf->passwd, mysk.sin6_addr);
+		if(!inet_pton(AF_INET6, aconf->passwd, mysk.sin6_addr.s6_addr))
+			bcopy(minus_one,mysk.sin6_addr.s6_addr,16);
 #else
 		mysk.sin_addr.s_addr = inetaddr(aconf->passwd);
 #endif
@@ -2628,7 +2647,8 @@ aConfItem	*aconf;
 	bzero((char *)&from, sizeof(from));
 	if (aconf->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
-	  inet_pton(aconf->passwd,from.sin6_addr);
+	  if(!inet_pton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr))
+		bcopy(minus_one, from.sin6_addr.s6_addr, 16);
 #else
 	  from.sin_addr.s_addr = inetaddr(aconf->passwd);
 #endif

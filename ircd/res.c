@@ -30,10 +30,10 @@
 #endif
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.1 1998/04/05 02:40:23 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.2 1998/04/13 02:13:06 kalt Exp $";
 #endif
 
-#undef	DEBUG	/* because there is a lot of debug code in here :-) */
+/* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
 
 static	char	hostbuf[HOSTLEN+1];
 static	char	dot[] = ".";
@@ -606,13 +606,9 @@ HEADER	*hptr;
 	while (hptr->qdcount-- > 0)
 #endif
 		if ((n = __ircd_dn_skipname((u_char *)cp, (u_char *)eob)) == -1)
-{
 			break;
-}
 		else
-{
 			cp += (n + QFIXEDSZ);
-}
 	/*
 	 * proccess each answer sent to us blech.
 	 */
@@ -865,7 +861,7 @@ char	*lp;
 #ifdef INET6
 		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
 		       inet_ntop(AF_INET, sin.sin_addr, mydummy2, 16),
-		       inet_ntop(AF_INET6, rptr->he.h_addr, mydummy, 16))
+		       inet_ntop(AF_INET6, rptr->he.h_addr, mydummy, 16)));
 #else
 		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
 		       inetntoa((char *)&sin.sin_addr),
@@ -1029,8 +1025,17 @@ Reg	aCache	*ocp;
 	hashtable[hashv].num_list = ocp;
 
 #ifdef	DEBUG
+#ifdef INET6
+	Debug((DEBUG_INFO,"add_to_cache:added %s[%08x%08x%08x%08x] cache %#x.",
+	       ocp->he.h_name,
+	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[0],
+	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[1],
+	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[2],
+	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[3], ocp));
+#else
 	Debug((DEBUG_INFO, "add_to_cache:added %s[%08x] cache %#x.",
 		ocp->he.h_name, ocp->he.h_addr_list[0], ocp));
+#endif
 	Debug((DEBUG_INFO,
 		"add_to_cache:h1 %d h2 %x lnext %#x namnext %#x numnext %#x",
 		hash_name(ocp->he.h_name), hashv, ocp->list_next,
@@ -1237,10 +1242,13 @@ char	*numb;
 
 	cp = hashtable[hashv].num_list;
 #ifdef DEBUG
-	Debug((DEBUG_DNS,"find_cache_number:find %s[%08x]: hashv = %d",
 #ifdef INET6
-		inet_ntop(AF_INET6, numb, mydummy, 16), ip->s6_addr, hashv));
+	Debug((DEBUG_DNS,
+	       "find_cache_number:find %s[%08x%08x%08x%08x]: hashv = %d",
+	       inet_ntop(AF_INET6, numb, mydummy, 16), ip->s6_laddr[0],
+	       ip->s6_laddr[1], ip->s6_laddr[2], ip->s6_laddr[3], hashv));
 #else
+	Debug((DEBUG_DNS,"find_cache_number:find %s[%08x]: hashv = %d",
 		inetntoa(numb), ntohl(ip->s_addr), hashv));
 #endif
 #endif
