@@ -3,7 +3,7 @@
 **
 ** Copyright (c) 1998 Kaspar 'Kasi' Landsberg, <kl@berlin.Snafu.DE> 
 **
-** File     : tkserv.c v1.3.0
+** File     : tkserv.c v1.3.5
 ** Author   : Kaspar 'Kasi' Landsberg, <kl@snafu.de>
 ** Desc.    : Temporary K-line Service.
 **            For further info see the README file.
@@ -47,7 +47,7 @@
 #define TKS_MAXARGS 250
 
 /* The version information */
-#define TKS_VERSION "Hello, i'm TkServ v1.3.0."
+#define TKS_VERSION "Hello, i'm TkServ v1.3.5."
 
 static char *nuh;
 FILE *tks_logf;
