@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.4 2001/05/01 16:10:47 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.5 2001/05/05 23:05:10 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1499,28 +1499,36 @@ logfiles_close()
 /*
  * sendto_flog
  *	cptr		used for firsttime, auth, exitc, send/received M/K
- *	msg		replaces duration if there is one
- *			duration will be 0 in that case.
- *	duration	used if no message
+ *	msg		if this contains a message, it means rejected client,
+ *			hence we will log it in connlog; otherwise it's client
+ *			quitting, so it ends up in userlog --Beeth
  *	username	can't get it from cptr
  *	hostname	i.e.
- *
- * duration can be 0 even if msg is null! (when time was stepped back) --Beeth
  */
-void	sendto_flog(cptr, msg, duration, username, hostname)
+void	sendto_flog(cptr, msg, username, hostname)
 aClient	*cptr;
 char	*msg, *username, *hostname;
-time_t	duration;
 {
-	char	linebuf[1024]; /* auth reply might be long.. */
+	/* 
+	** One day we will rewrite linebuf to malloc()s, but for now
+	** we are lazy. The longest linebuf I saw during last year
+	** was 216. Max auth reply can be 1024, see rfc931_work() and
+	** if iauth is disabled, read_authports() makes it max 513.
+	** And the rest... just count, I got 154 --Beeth
+	*/
+	char	linebuf[1500];
+	/*
+	** This is a potential buffer overflow.
+	** I mean, when you manage to keep ircd
+	** running for almost 12 years ;-) --B.
+	*/
+	char	buf[12];
 	int	logfile;
-	char	buf[12];	/* This is potential buffer overflow.   */
-				/* I mean, when you manage to keep ircd */
-				/* running for almost 12 years ;-) --B. */
 
 	logfile = msg ? connlog : userlog;
 
-#ifndef	USE_SERVICES
+#if !defined(USE_SERVICES) && !( defined(USE_SYSLOG) && \
+	(defined(SYSLOG_USERS) || defined(SYSLOG_CONN)) )
 	if (logfile == -1)
 	{
 		return;
@@ -1528,18 +1536,30 @@ time_t	duration;
 #endif
 	if (!msg)
 	{
+		time_t	duration;
+
+		duration = timeofday - cptr->firsttime + 1;
 		(void)sprintf(buf, "%3d:%02d:%02d",
 			(int) (duration / 3600),
 			(int) ((duration % 3600) / 60),
 			(int) (duration % 60));
 	}
 
+	/*
+	** Aha, cptr->firsttime is time when user connected,
+	** so we syslog() it anyway. I'm waving big
+	** "rewrite log format" flag --Beeth.
+	*/
 	(void)sprintf(linebuf,
 		"%s (%s): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
 		myctime(cptr->firsttime), msg ? msg : buf,
 		username, hostname, cptr->auth,
 		cptr->exitc, cptr->sendM, cptr->sendK,
 		cptr->receiveM, cptr->receiveK);
+
+#if defined(USE_SYSLOG) && (defined(SYSLOG_USERS) || defined(SYSLOG_CONN))
+	syslog(LOG_NOTICE, linebuf2);
+#endif
 
 #ifdef	USE_SERVICES
 	if (!msg)

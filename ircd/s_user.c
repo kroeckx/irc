@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.18 2001/04/01 23:23:50 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.19 2001/05/05 23:05:10 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -318,15 +318,9 @@ ereject_user(cptr, shortm, longm)
 aClient *cptr;
 char *shortm, *longm;
 {
-#if defined(USE_SYSLOG) && defined(SYSLOG_CONN)
-	syslog(LOG_NOTICE, "%s ( %s ): <none>@%s [%s] %c\n",
-	       myctime(cptr->firsttime), shortm, longm,
-	       (IsUnixSocket(cptr)) ? me.sockhost :
-	       ((cptr->hostp) ? cptr->hostp->h_name : cptr->sockhost),
-	       cptr->auth, cptr->exitc);
-#endif		    
-#if defined(FNAME_CONNLOG) || defined(USE_SERVICES)
-	sendto_flog(cptr, shortm, 0, "<none>",
+#if defined(FNAME_CONNLOG) || defined(USE_SERVICES) || \
+	(defined(USE_SYSLOG) && defined(SYSLOG_CONN))
+	sendto_flog(cptr, shortm, "<none>",
 		    (IsUnixSocket(cptr)) ? me.sockhost :
 		    ((cptr->hostp) ? cptr->hostp->h_name : cptr->sockhost));
 #endif
@@ -563,13 +557,9 @@ char	*nick, *username;
 				    user->username, sptr->sockhost);
 			ircstp->is_ref++;
 			sptr->exitc = EXITC_REF;
-#if defined(USE_SYSLOG) && defined(SYSLOG_CONN)
-			syslog(LOG_NOTICE, "%s ( K lined ): %s@%s [%s] %c\n",
-			       myctime(sptr->firsttime), user->username,
-			       user->host, sptr->auth, '-');
-#endif		    
-#if defined(FNAME_CONNLOG) || defined(USE_SERVICES)
-			sendto_flog(sptr, " K lined ", 0, user->username,
+#if defined(FNAME_CONNLOG) || defined(USE_SERVICES) || \
+	(defined(USE_SYSLOG) && defined(SYSLOG_CONN))
+			sendto_flog(sptr, " K lined ", user->username,
 				    user->host);
 #endif
 			if (reason)
@@ -584,13 +574,9 @@ char	*nick, *username;
 				    user->username, sptr->sockhost);
 			ircstp->is_ref++;
 			sptr->exitc = EXITC_REF;
-# if defined(USE_SYSLOG) && defined(SYSLOG_CONN)
-			syslog(LOG_NOTICE, "%s ( R lined ): %s@%s [%s] %c\n",
-			       myctime(sptr->firsttime), user->username,
-			       user->host, sptr->username, '-');
-# endif		    
-# if defined(FNAME_CONNLOG) || defined(USE_SERVICES)
-			sendto_flog(sptr, " R lined ", 0, user->username,
+# if defined(FNAME_CONNLOG) || defined(USE_SERVICES) || \
+	(defined(USE_SYSLOG) && defined(SYSLOG_CONN))
+			sendto_flog(sptr, " R lined ", user->username,
 				    user->host);
 # endif
 			return exit_client(cptr, sptr, &me , "R-lined");

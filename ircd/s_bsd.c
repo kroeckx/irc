@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.15 2001/05/04 19:56:18 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.16 2001/05/05 23:05:09 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1602,7 +1602,7 @@ add_con_refuse:
 		sendto_flag(SCH_LOCAL, "Rejecting connection from %s[%s].",
 			    (acptr->hostp) ? acptr->hostp->h_name : "",
 			    acptr->sockhost);
-		sendto_flog(acptr, " ?Clone? ", 0, "<none>",
+		sendto_flog(acptr, " ?Clone? ", "<none>",
 			    (acptr->hostp) ? acptr->hostp->h_name :
 			    acptr->sockhost);
 		del_queries((char *)acptr);
