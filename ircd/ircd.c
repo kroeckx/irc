@@ -560,7 +560,7 @@ char	*argv[];
 			      SPATH, dpath);
 		exit(-1);
 	    }
-	res_init();
+	ircd_res_init();
 	if (chroot(DPATH))
 	    {
 		perror("chroot");

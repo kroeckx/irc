@@ -598,9 +598,9 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  * Send a message to all connected servers except the client 'one'.
  */
 /*VARARGS*/
-void	sendto_serv_butone(one, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_serv_butone(one, pattern, p1, p2, p3, p4, p5, p6, p7,p8,p9,p10)
 aClient *one;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
 {
 	Reg	int	i, len=0;
 	Reg	aClient *cptr;
@@ -610,7 +610,7 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		    (!one || cptr != one->from) && !IsMe(cptr)) {
 			if (!len)
 				len = sendprep(pattern, p1, p2, p3, p4, p5,
-					       p6, p7, p8);
+					       p6, p7, p8, p9, p10);
 			(void)send_message(cptr, sendbuf, len);
 	}
 	return;
@@ -741,10 +741,10 @@ int	what;
 	switch (what)
 	{
 	case MATCH_HOST:
-		return (matches(mask, one->user->host)==0);
+		return (match(mask, one->user->host)==0);
 	case MATCH_SERVER:
 	default:
-		return (matches(mask, one->user->server)==0);
+		return (match(mask, one->user->server)==0);
 	}
 }
 
@@ -779,7 +779,7 @@ char	*format, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
 		if (!(cptr = local[fdas.fd[i]]) || (cptr == from) ||
 		    IsMe(cptr))
 			continue;
-		if (!BadPtr(mask) && matches(mask, cptr->name))
+		if (!BadPtr(mask) && match(mask, cptr->name))
 			continue;
 #ifndef NoV28Links
 		if (chptr && *chptr->chname == '+' &&

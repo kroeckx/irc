@@ -214,7 +214,7 @@ static	Numeric	numeric_replies[] = {
 #endif
 		0, (char *)NULL, 0, (char *)NULL, 0, (char *)NULL,
 		0, (char *)NULL,
-/* 200 */	RPL_TRACELINK, "Link %s%s %s %s V%d%s",
+/* 200 */	RPL_TRACELINK, "Link %s%s %s %s V%d%s %d",
 /* 201 */	RPL_TRACECONNECTING, "Try. %d %s",
 /* 202 */	RPL_TRACEHANDSHAKE, "H.S. %d %s",
 /* 203 */	RPL_TRACEUNKNOWN, "???? %d %s",

@@ -103,7 +103,7 @@ int	op;
 	    }
 	if (op & RES_CALLINIT)
 	    {
-		ret = res_init();
+		ret = ircd_res_init();
 		if (!ircd_res.nscount)
 		    {
 			ircd_res.nscount = 1;

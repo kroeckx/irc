@@ -338,7 +338,7 @@ char	*name;
 			continue;
 		}
 		if ((aconf = acptr->serv->nline) &&
-		    (matches(my_name_for_link(ME, aconf->port), name) == 0))
+		    (match(my_name_for_link(ME, aconf->port), name) == 0))
 		{
 			acptr->flags |= FLAGS_HIDDEN;
 			j++;
@@ -688,7 +688,7 @@ char	*comment;
 			    acptr == cptr || IsMe(acptr))
 				continue;
 			if ((aconf = acptr->serv->nline) &&
-			    (matches(my_name_for_link(ME, aconf->port),
+			    (match(my_name_for_link(ME, aconf->port),
 				     sptr->name) == 0))
 				continue;
 			/*
@@ -848,7 +848,7 @@ char	*comment;
 				    || !IsServer(acptr) || acptr == cptr
 				    || IsMe(acptr))
 					continue;
-				if (matches(sptr->service->dist, acptr->name))
+				if (match(sptr->service->dist, acptr->name))
 					continue;
 				sendto_one(acptr, ":%s QUIT :%s", sptr->name,
 					   comment);

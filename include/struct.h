@@ -429,7 +429,7 @@ struct Client	{
 	anUser	*user;		/* ...defined, if this is a User */
 	aServer	*serv;		/* ...defined, if this is a server */
 	aService *service;
-	int	hashv;		/* raw hash value */
+	u_int	hashv;		/* raw hash value */
 #ifndef KRYS
 	time_t	lasttime;	/* ...should be only LOCAL clients? --msa */
 	time_t	firsttime;	/* time client was created */
@@ -592,7 +592,7 @@ struct	SLink	{
 
 struct Channel	{
 	struct	Channel *nextch, *prevch, *hnextch;
-	int	hashv;		/* raw hash value */
+	u_int	hashv;		/* raw hash value */
 	Mode	mode;
 	char	topic[TOPICLEN+1];
 	int	users;		/* current membership total */

@@ -1259,7 +1259,7 @@ char	*chname;
 		*t = '\0';
 
 	s++;
-	if (matches(s, ME) || (IsServer(cptr) && matches(s, cptr->name)))
+	if (match(s, ME) || (IsServer(cptr) && match(s, cptr->name)))
 	    {
 		if (MyClient(sptr))
 			sendto_one(sptr, err_str(ERR_BADCHANMASK, sptr->name),
@@ -2253,7 +2253,7 @@ aClient	*cptr, *user;
 			continue;
 #endif
 		if ((mask = index(chptr->chname, ':')))
-			if (matches(++mask, cptr->name))
+			if (match(++mask, cptr->name))
 				continue;
 		clen = strlen(chptr->chname);
 		if (clen > (size_t) BUFSIZE - 7 - len)

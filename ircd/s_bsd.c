@@ -156,8 +156,8 @@ int	size;
 	    {
 		if (!(ircd_res.options & RES_INIT))
 		    {
-			Debug((DEBUG_DNS,"res_init()"));
-			res_init();
+			Debug((DEBUG_DNS,"ircd_res_init()"));
+			ircd_res_init();
 		    }
 		if (ircd_res.defdname[0])
 		    {
@@ -2766,7 +2766,7 @@ int	len;
 	for (aconf = conf; aconf; aconf = aconf->next)
 		if (pi.pi_cp == aconf && (cp = aconf->ping))
 			break;
-	if (!aconf || matches(aconf->name, buf + sizeof(pi)))
+	if (!aconf || match(aconf->name, buf + sizeof(pi)))
 		return -1;
 
 	cp->recv++;

@@ -74,13 +74,13 @@ int	_SERVERSIZE = 0;
  * or division or modulus in the inner loop.  subtraction and other bit
  * operations allowed.
  */
-int	hash_nick_name(nname, store)
+static	u_int	hash_nick_name(nname, store)
 char	*nname;
 int	*store;
 {
 	Reg	u_char	*name = (u_char *)nname;
 	Reg	u_char	ch;
-	Reg	int	hash = 1;
+	Reg	u_int	hash = 1;
 
 	for (; (ch = *name); name++)
 	{
@@ -102,23 +102,21 @@ int	*store;
  * is little or no point hashing on a full channel name which maybe 255 chars
  * long.
  */
-int	hash_channel_name(hname, store)
+static	u_int	hash_channel_name(hname, store)
 char	*hname;
 int	*store;
 {
 	Reg	u_char	*name = (u_char *)hname;
 	Reg	u_char	ch;
 	Reg	int	i = 30;
-	Reg	int	hash = 5;
+	Reg	u_int	hash = 5;
 
 	for (; (ch = *name) && --i; name++)
 	{
 		hash <<= 1;
-		hash += hashtab[(int)ch] + (i << 1);
+		hash += hashtab[(u_int)ch] + (i << 1);
 	}
 	*store = hash;
-	if (hash < 0)
-		hash = -hash;
 	hash %= _CHANNELHASHSIZE;
 	return (hash);
 }
@@ -217,7 +215,7 @@ void	inithashtables()
 	 * a pre-generated lookup table. Should save some CPU usage
 	 * even on machines with a fast mathprocessor.  -- Core
 	 */
-	hashtab = (unsigned int *) MyMalloc(256 * sizeof(unsigned int));
+	hashtab = (u_int *) MyMalloc(256 * sizeof(u_int));
 	for (i = 0; i < 256; i++)
 		hashtab[i] = tolower((char)i) * 109;
 }
@@ -305,7 +303,7 @@ int	add_to_client_hash_table(name, cptr)
 char	*name;
 aClient	*cptr;
 {
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	hashv = hash_nick_name(name, &cptr->hashv);
 	cptr->hnext = (aClient *)clientTable[hashv].list;
@@ -325,7 +323,7 @@ int	add_to_channel_hash_table(name, chptr)
 char	*name;
 aChannel	*chptr;
 {
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	hashv = hash_channel_name(name, &chptr->hashv);
 	chptr->hnextch = (aChannel *)channelTable[hashv].list;
@@ -345,7 +343,7 @@ int	add_to_server_hash_table(sptr, cptr)
 aServer	*sptr;
 aClient	*cptr;
 {
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	Debug((DEBUG_DEBUG, "Add %s token %d/%d/%s cptr %#x to server table",
 		sptr->bcptr->name, sptr->stok, sptr->ltok, sptr->tok, cptr));
@@ -369,11 +367,9 @@ char	*name;
 aClient	*cptr;
 {
 	Reg	aClient	*tmp, *prev = NULL;
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	hashv = cptr->hashv;
-	if (hashv < 0)
-		hashv = -hashv;
 	hashv %= _HASHSIZE;
 	for (tmp = (aClient *)clientTable[hashv].list; tmp; tmp = tmp->hnext)
 	    {
@@ -415,11 +411,9 @@ char	*name;
 aChannel	*chptr;
 {
 	Reg	aChannel	*tmp, *prev = NULL;
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	hashv = chptr->hashv;
-	if (hashv < 0)
-		hashv = -hashv;
 	hashv %= _CHANNELHASHSIZE;
 	for (tmp = (aChannel *)channelTable[hashv].list; tmp;
 	     tmp = tmp->hnextch)
@@ -457,11 +451,9 @@ aServer	*sptr;
 aClient	*cptr;
 {
 	Reg	aServer	*tmp, *prev = NULL;
-	Reg	int	hashv;
+	Reg	u_int	hashv;
 
 	hashv = sptr->stok * 15053;
-	if (hashv < 0)
-		hashv = -hashv;
 	hashv %= _SERVERSIZE;
 	for (tmp = (aServer *)serverTable[hashv].list; tmp; tmp = tmp->shnext)
 	    {
@@ -500,7 +492,7 @@ aClient	*cptr;
 	Reg	aClient	*tmp;
 	Reg	aClient	*prv = NULL;
 	Reg	aHashEntry	*tmp3;
-	int	hashv, hv;
+	u_int	hashv, hv;
 
 	hashv = hash_nick_name(name, &hv);
 	tmp3 = &clientTable[hashv];
@@ -570,7 +562,7 @@ aClient *cptr;
 	Reg	char	*t;
 	Reg	char	ch;
 	aHashEntry	*tmp3;
-	int	hashv, hv;
+	u_int	hashv, hv;
 
 	hashv = hash_nick_name(server, &hv);
 	tmp3 = &clientTable[hashv];
@@ -599,7 +591,7 @@ aClient *cptr;
 	 * Whats happening in this next loop ? Well, it takes a name like
 	 * foo.bar.edu and proceeds to earch for *.edu and then *.bar.edu.
 	 * This is for checking full server names against masks although
-	 * it isnt often done this way in lieu of using matches().
+	 * it isnt often done this way in lieu of using match().
 	 */
 	for (;;)
 	    {
@@ -635,7 +627,7 @@ aChannel *chptr;
 {
 	Reg	aChannel	*tmp, *prv = NULL;
 	Reg	aHashEntry	*tmp3;
-	int	hashv, hv;
+	u_int	hashv, hv;
 
 	hashv = hash_channel_name(name, &hv);
 	tmp3 = &channelTable[hashv];
@@ -669,7 +661,7 @@ void	*dummy;
 {
 	Reg	aServer	*tmp, *prv = NULL;
 	Reg	aHashEntry	*tmp3;
-	int	hashv, hv;
+	u_int	hashv, hv;
 
 	hv = hashv = tok * 15053;
 	hashv %= _SERVERSIZE;

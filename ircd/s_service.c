@@ -127,7 +127,7 @@ void	*p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		** wanted AND if it comes from a server matching the dist
 		*/
 		if ((acptr->service->wants & action)
-		    && (!server || !matches(acptr->service->dist, server)))
+		    && (!server || !match(acptr->service->dist, server)))
 			sendto_one(acptr, fmt, p1, p2, p3, p4, p5, p6, p7, p8);
 	    }
 	return;
@@ -166,11 +166,11 @@ int	type;
 			for (s = hp->h_name, i = 0; s; s = hp->h_aliases[i++])
 			    {
 				SPRINTF(uhost, "%s@%s", cptr->username, s);
-				if (matches(tmp->host, uhost) == 0)
+				if (match(tmp->host, uhost) == 0)
 					return tmp;
 			    }
 		SPRINTF(uhost, "%s@%s", cptr->username, cptr->sockhost);
-		if (matches(tmp->host, uhost) == 0)
+		if (match(tmp->host, uhost) == 0)
 			return tmp;
 	    }
 	return aconf;
@@ -333,7 +333,7 @@ char	*parv[];
 		if (!(acptr = local[fdas.fd[i]]) || !IsServer(acptr) ||
 		    acptr == cptr)
 			continue;
-		if (matches(dist, acptr->name))
+		if (match(dist, acptr->name))
 			continue;
 		if (acptr->serv->version == SV_OLD)
 			continue;
@@ -363,7 +363,7 @@ char	*parv[];
 		type = BadPtr(parv[2]) ? 0 : atoi(parv[2]);
 	for (sp = svctop; sp; sp = sp->nexts)
 		if  ((acptr = sp->bcptr) && (!type || type == sp->type) &&
-		     (matches(mask, acptr->name) == 0))
+		     (match(mask, acptr->name) == 0))
 			sendto_one(sptr, rpl_str(RPL_SERVLIST, parv[0]),
 				   acptr->name, sp->server, sp->dist,
 				   sp->type, acptr->hopcount, acptr->info);

@@ -507,7 +507,7 @@ char	*parv[];
 				return exit_client(cptr, cptr, &me,
 						   "Lost N line");
 			    }
-			if (matches(my_name_for_link(ME, aconf->port),
+			if (match(my_name_for_link(ME, aconf->port),
 				    acptr->name) == 0)
 				continue;
 			stok = (bcptr->serv->version != SV_OLD) 
@@ -684,7 +684,7 @@ Reg	aClient	*cptr;
 		*s = '\0'; /* should never be NULL */
 		Debug((DEBUG_INFO, "Check Usernames [%s]vs[%s]",
 			aconf->host, cptr->username));
-		if (matches(aconf->host, cptr->username))
+		if (match(aconf->host, cptr->username))
 		    {
 			*s = '@';
 			ircstp->is_ref++;
@@ -769,7 +769,7 @@ Reg	aClient	*cptr;
 		    acptr == cptr || IsMe(acptr))		    
 			continue;
 		if ((aconf = acptr->serv->nline) &&
-		    !matches(my_name_for_link(ME, aconf->port), cptr->name))
+		    !match(my_name_for_link(ME, aconf->port), cptr->name))
 			continue;
 		stok = (acptr->serv->version != SV_OLD) ? cptr->serv->tok : "";
 		if (split)
@@ -806,7 +806,7 @@ Reg	aClient	*cptr;
 		/* acptr->from == acptr for acptr == cptr */
 		if ((acptr->from == cptr) || !IsServer(acptr))
 			continue;
-		if (*mlname == '*' && matches(mlname, acptr->name) == 0)
+		if (*mlname == '*' && match(mlname, acptr->name) == 0)
 			continue;
 		split = (MyConnect(acptr) &&
 			 mycmp(acptr->name, acptr->sockhost));
@@ -837,7 +837,7 @@ Reg	aClient	*cptr;
 			if (i != SV_OLD)
 			    {
 				if (*mlname == '*' &&
-				    matches(mlname, acptr->user->server) == 0)
+				    match(mlname, acptr->user->server) == 0)
 					stok = me.serv->tok;
 				else
 					stok = acptr->user->servp->tok;
@@ -861,7 +861,7 @@ Reg	aClient	*cptr;
 			send_user_joins(cptr, acptr);
 		    }
 		else if (IsService(acptr) &&
-			 (matches(acptr->service->dist, acptr->name) == 0
+			 (match(acptr->service->dist, acptr->name) == 0
 			  && cptr->serv->version != SV_OLD))
 		    {
 			stok = i ? acptr->service->servp->tok :
@@ -1257,7 +1257,7 @@ char	*parv[];
 		name = parv[2];
 		if (!mycmp(name, ME))
 			doall = 2;
-		else if (matches(name, ME) == 0)
+		else if (match(name, ME) == 0)
 			doall = 1;
 		if (index(name, '*') || index(name, '?'))
 			wilds = 1;
@@ -1295,11 +1295,11 @@ char	*parv[];
 			    !(MyConnect(sptr) && IsAnOper(sptr)) &&
 			    acptr != sptr)
 				continue;
-			if (!doall && wilds && matches(name, acptr->name))
+			if (!doall && wilds && match(name, acptr->name))
 				continue;
 			if (!(doall || wilds) &&
 			    ((!cm && mycmp(name, acptr->name)) ||
-			     (cm && matches(cm, acptr->name))))
+			     (cm && match(cm, acptr->name))))
 				continue;
 			sendto_one(cptr, Lformat, ME,
 				   RPL_STATSLINKINFO, parv[0],
@@ -1666,15 +1666,15 @@ char	*parv[];
 
 	for (aconf = conf; aconf; aconf = aconf->next)
 		if (aconf->status == CONF_CONNECT_SERVER &&
-		    matches(parv[1], aconf->name) == 0)
+		    match(parv[1], aconf->name) == 0)
 		  break;
 	/* Checked first servernames, then try hostnames. */
 	if (!aconf)
 		for (aconf = conf; aconf; aconf = aconf->next)
 			if ((aconf->status == CONF_CONNECT_SERVER ||
 			     aconf->status == CONF_ZCONNECT_SERVER) &&
-			    (matches(parv[1], aconf->host) == 0 ||
-			     matches(parv[1], index(aconf->host, '@')+1) == 0))
+			    (match(parv[1], aconf->host) == 0 ||
+			     match(parv[1], index(aconf->host, '@')+1) == 0))
 		  		break;
 
 	if (!aconf)
@@ -1905,7 +1905,8 @@ char	*parv[];
 		sendto_one(sptr, rpl_str(RPL_TRACELINK, parv[0]),
 			   version, debugmode, tname, ac2ptr->from->name,
 			   ac2ptr->from->serv->version,
-			   (ac2ptr->from->flags & FLAGS_ZIP) ? "z" : "");
+			   (ac2ptr->from->flags & FLAGS_ZIP) ? "z" : "",
+			   timeofday - ac2ptr->from->firsttime);
 		return 3;
 	    }
 	case HUNTED_ISME:
@@ -1914,7 +1915,7 @@ char	*parv[];
 		return 1;
 	}
 
-	doall = (parv[1] && (parc > 1)) ? !matches(tname, ME): TRUE;
+	doall = (parv[1] && (parc > 1)) ? !match(tname, ME): TRUE;
 	wilds = !parv[1] || index(tname, '*') || index(tname, '?');
 	dow = wilds || doall;
 
@@ -1947,7 +1948,7 @@ char	*parv[];
 		    !(MyConnect(sptr) && IsAnOper(sptr)) &&
 		    !IsAnOper(acptr) && (acptr != sptr))
 			continue;
-		if (!doall && wilds && matches(tname, acptr->name))
+		if (!doall && wilds && match(tname, acptr->name))
 			continue;
 		if (!dow && mycmp(tname, acptr->name))
 			continue;

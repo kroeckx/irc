@@ -97,8 +97,8 @@ anIgnore *para;
 {
   anIgnore *iptr;
   for (iptr = ignore; iptr; iptr=iptr->next)
-    if ((matches(iptr->user, user) == 0) &&
-	(matches(iptr->from, fromhost)==0))
+    if ((match(iptr->user, user) == 0) &&
+	(match(iptr->from, fromhost)==0))
       break;
 
   return iptr ? iptr : para;

@@ -53,9 +53,8 @@ char	*malloc(), *calloc();
 #endif
 #endif
 
-extern	char	*collapse __P((char *));
-extern	int	matches __P((char *, char *));
 extern	int	match __P((char *, char *));
+extern	char	*collapse __P((char *));
 extern	int	mycmp __P((char *, char *));
 extern	int	myncmp __P((char *, char *, int));
 #ifdef NEED_STRTOK

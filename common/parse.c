@@ -144,7 +144,7 @@ int	*count;
 		    {
 			if (!MyClient(c2ptr)) /* implies mine and a user */
 				continue;
-			if ((!host || !matches(host, c2ptr->user->host)) &&
+			if ((!host || !match(host, c2ptr->user->host)) &&
 			     mycmp(user, c2ptr->user->username) == 0)
 			    {
 				(*count)++;
@@ -248,10 +248,10 @@ aClient *cptr;
 		** A server present in the list necessarily has a non NULL
 		** bcptr pointer.
 		*/
-		if (matches(name, sp->bcptr->name) == 0)
+		if (match(name, sp->bcptr->name) == 0)
 			break;
 		if (index(sp->bcptr->name, '*'))
-			if (matches(sp->bcptr->name, name) == 0)
+			if (match(sp->bcptr->name, name) == 0)
 					break;
 	    }
 	return (sp ? sp->bcptr : cptr);
@@ -270,8 +270,8 @@ aClient	*cptr;
 	    {
 		if (!IsServer(c2ptr) && !IsMe(c2ptr))
 			continue;
-		if (matches(c2ptr->name, name) == 0 ||
-		    matches(name, c2ptr->name) == 0)
+		if (match(c2ptr->name, name) == 0 ||
+		    match(name, c2ptr->name) == 0)
 			break;
 	    }
 	return (c2ptr ? c2ptr : cptr);
@@ -360,7 +360,7 @@ char	*buffer, *bufend;
 		if (*sender && IsServer(cptr))
 		    {
  			from = find_client(sender, (aClient *) NULL);
-			if (!from || matches(from->name, sender))
+			if (!from || match(from->name, sender))
 				from = find_server(sender, (aClient *)NULL);
 #ifndef	CLIENT_COMPILE
 			/* Is there svc@server prefix ever? -Vesa */

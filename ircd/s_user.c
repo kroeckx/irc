@@ -125,7 +125,7 @@ Reg	char	*ch;	/* search string (may include wilds) */
 	    {
 		if (IsService(next))
 			continue;
-		if (!matches(ch,next->name) || !matches(next->name,ch))
+		if (!match(ch,next->name) || !match(next->name,ch))
 			break;
 	    }
 	return next;
@@ -163,8 +163,8 @@ int	server, parc;
 	** Assume it's me, if no server
 	*/
 	if (parc <= server || BadPtr(parv[server]) ||
-	    matches(ME, parv[server]) == 0 ||
-	    matches(parv[server], ME) == 0)
+	    match(ME, parv[server]) == 0 ||
+	    match(parv[server], ME) == 0)
 		return (HUNTED_ISME);
 	/*
 	** These are to pickup matches that would cause the following
@@ -201,7 +201,7 @@ int	server, parc;
 	    {
 		if (IsMe(acptr) || MyClient(acptr))
 			return HUNTED_ISME;
-		if (matches(acptr->name, parv[server]))
+		if (match(acptr->name, parv[server]))
 			parv[server] = acptr->name;
 		/*
 	        ** Stop services to talk to 'OLD' servers and
@@ -210,7 +210,7 @@ int	server, parc;
 		if (IsService(sptr)
 		    && (IsServer(acptr->from)
 			&& (acptr->from->serv->version == SV_OLD
-			    || matches(sptr->service->dist,acptr->name) != 0)))
+			    || match(sptr->service->dist,acptr->name) != 0)))
 		    {
 			sendto_one(sptr, err_str(ERR_NOSUCHSERVER, parv[0]), 
 				   parv[server]);
@@ -533,7 +533,7 @@ char	*nick, *username;
 			continue;
 		if (acptr->serv->version != SV_OLD)
 			if ((aconf = acptr->serv->nline) &&
-			    !matches(my_name_for_link(ME, aconf->port),
+			    !match(my_name_for_link(ME, aconf->port),
 				     user->server))
 				sendto_one(acptr, "NICK %s %d %s %s %s %s :%s",
 					   nick, sptr->hopcount+1, 
@@ -1035,9 +1035,9 @@ int	notice;
 					   parv[0]), nick);
 				continue;
 			    }
-			if (matches(nick + 1, sptr->user->server) &&
+			if (match(nick + 1, sptr->user->server) &&
 			    (*nick == '$' ||
-			     matches(nick + 1, sptr->user->host)))
+			     match(nick + 1, sptr->user->host)))
 			    {
 				sendto_one(sptr, err_str(ERR_BADMASK,
 					   parv[0]), nick);
@@ -2126,7 +2126,7 @@ char	*parv[];
 #ifdef	OPER_REMOTE
 		if (aconf->status == CONF_LOCOP)
 #else
-		if ((matches(s,me.sockhost) && !IsLocal(sptr)) ||
+		if ((match(s,me.sockhost) && !IsLocal(sptr)) ||
 		    aconf->status == CONF_LOCOP)
 #endif
 			SetLocOp(sptr);
