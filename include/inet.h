@@ -55,7 +55,7 @@
 
 /*
  *	@(#)inet.h	8.1 (Berkeley) 6/2/93
- *	$Id: inet.h,v 1.1 1997/04/14 13:25:03 kalt Exp $
+ *	$Id: inet.h,v 1.1.1.1 1997/04/14 13:25:03 kalt Exp $
  */
 
 #ifndef _INET_H_

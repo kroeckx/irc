@@ -55,7 +55,7 @@
 
 /*
  *	@(#)cdefs.h	8.1 (Berkeley) 6/2/93
- *	$Id: cdefs.h,v 1.1 1997/04/14 13:25:03 kalt Exp $
+ *	$Id: cdefs.h,v 1.1.1.1 1997/04/14 13:25:03 kalt Exp $
  */
 
 #if !defined(_CDEFS_H_) && !defined(_SYS_CDEFS_H_)
