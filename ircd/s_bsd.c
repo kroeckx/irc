@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.21 2003/10/10 22:44:53 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.22 2003/10/11 10:14:41 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -108,7 +108,9 @@ int	size;
 			Debug((DEBUG_DNS,"ircd_res_init()"));
 			ircd_res_init();
 		    }
-		if (ircd_res.defdname[0])
+		if (ircd_res.defdname[0] &&
+			sizeof(hname) - 2 /* dot and ending \0 */ >= 
+			strlen(ircd_res.defdname) + strlen(hname))
 		    {
 			(void)strncat(hname, ".", size-1);
 			(void)strncat(hname, ircd_res.defdname, size-2);
