@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.15.2.1 1998/04/05 02:40:30 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.15.2.2 1998/04/22 16:57:07 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -190,8 +190,6 @@ aClient	*sptr;
 **	to modify what it points!!!
 */
 
-char mydummy[256];
-
 char	*get_client_name(sptr, showip)
 aClient *sptr;
 int	showip;
@@ -219,7 +217,7 @@ int	showip;
 #ifdef INET6 
 					      inet_ntop(AF_INET6,
 							(char *)&sptr->ip,
-							mydummy, 16));
+							mydummy, MYDUMMY_SIZE));
 #else
 					      inetntoa((char *)&sptr->ip));
 #endif

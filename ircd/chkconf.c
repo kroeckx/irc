@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.5 1997/11/13 02:02:07 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.5.2.1 1998/04/22 16:57:04 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -211,10 +211,14 @@ int	opt;
 		    *line == ' ' || *line == '\t')
 			continue;
 
-		if (line[1] != ':')
+		if (line[1] != IRCDCONF_DELIMITER)
 		    {
                         (void)fprintf(stderr, "ERROR: Bad config line (%s)\n",
 				line);
+			if (IRCDCONF_DELIMITER != ':')
+				(void)fprintf(stderr,
+				      "\tWrong delimiter? (should be %c)\n",
+					      IRCDCONF_DELIMITER);
                         continue;
                     }
 
@@ -531,7 +535,7 @@ char	*irc_newline;
 		return(NULL);
 
 	field = line;
-	if ((end = (char *)index(line,':')) == NULL)
+	if ((end = (char *)index(line, IRCDCONF_DELIMITER)) == NULL)
 	    {
 		line = NULL;
 		if ((end = (char *)index(field,'\n')) == NULL)

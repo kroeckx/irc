@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.27.2.2 1998/04/13 02:13:08 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.27.2.3 1998/04/22 16:57:06 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -861,7 +861,7 @@ int	opt;
 		    line[0] == ' ' || line[0] == '\t')
 			continue;
 		/* Could we test if it's conf line at all?	-Vesa */
-		if (line[1] != ':')
+		if (line[1] != IRCDCONF_DELIMITER)
 		    {
                         Debug((DEBUG_ERROR, "Bad config line: %s", line));
                         continue;
@@ -1196,7 +1196,7 @@ Reg	aConfItem	*aconf;
 	if (isdigit(*s))
 #ifdef INET6
 		if(!inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
-			bcopy(minus_one,aconf->ipnum.s6_addr,16);
+			bcopy(minus_one, aconf->ipnum.s6_addr, IN6ADDRSZ);
 #else
 		aconf->ipnum.s_addr = inetaddr(s);
 #endif

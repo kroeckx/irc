@@ -23,14 +23,8 @@
 #include "s_externs.h"
 #undef RES_C
 
-#ifdef	INET6
-# define WHOSTENTP(x) ((x)[0]|(x)[1]|(x)[2]|(x)[3]|(x)[4]|(x)[5]|(x)[6]|(x)[7]|(x)[8]|(x)[9]|(x)[10]|(x)[11]|(x)[12]|(x)[13]|(x)[14]|(x)[15])
-#else
-# define WHOSTENTP(x) (x)
-#endif
-
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.3 1998/04/13 12:37:42 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.4 1998/04/22 16:57:04 kalt Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -60,9 +54,6 @@ static	int	hash_number __P((unsigned char *));
 static	void	update_list __P((ResRQ *, aCache *));
 static	int	hash_name __P((char *));
 static	int	bad_hostname __P((char *, int));
-
-char  mydummy[256];
-char  mydummy2[256];
 
 static	struct cacheinfo {
 	int	ca_adds;
@@ -110,7 +101,7 @@ int	op;
 			/* still IPv4 */
 			ircd_res.nsaddr_list[0].sin_addr.s_addr =
 			  inet_pton(AF_INET, "127.0.0.1",
-				    ircd_res.nsaddr_list[0].sin_addr.s_addr);
+				    &ircd_res.nsaddr_list[0].sin_addr.s_addr);
 #else
 			ircd_res.nsaddr_list[0].sin_addr.s_addr =
 				inetaddr("127.0.0.1");
@@ -333,12 +324,16 @@ int	len, rcount;
 #else
 		ircd_res.nsaddr_list[i].sin_family = AF_INET;
 #endif
-		if (sendto(resfd, msg, len, 0, (SAP)&(ircd_res.nsaddr_list[i]),
 #ifdef INET6
+		if (sendto(resfd, msg, len, 0,
+			   (struct sockaddr *)&(ircd_res.nsaddr_list[i]),
 			   sizeof(struct sockaddr)) == len)
 #else
+		if (sendto(resfd, msg, len, 0,
+			   (struct sockaddr *)&(ircd_res.nsaddr_list[i]),
 			   sizeof(struct sockaddr)) == len)
 #endif
+
 		    {
 			reinfo.re_sent++;
 			sent++;
@@ -429,6 +424,7 @@ Reg	ResRQ	*rptr;
 		rptr->name = (char *)MyMalloc(strlen(name) + 1);
 		(void)strcpy(rptr->name, name);
 	    }
+	Debug((DEBUG_DNS,"do_query_name(): %s ", hname));
 #ifdef INET6
 	return (query_name(hname, C_IN, T_AAAA, rptr));
 #else
@@ -489,7 +485,7 @@ Reg	ResRQ	*rptr;
 		rptr = make_request(lp);
 		rptr->type = T_PTR;
 #ifdef INET6
-		bcopy(numb->s6_addr,rptr->addr.s6_addr,16);
+		bcopy(numb->s6_addr, rptr->addr.s6_addr, IN6ADDRSZ);
 		bcopy((char *)numb->s6_addr,
 			(char *)&rptr->he.h_addr, sizeof(struct in6_addr));
 #else
@@ -665,15 +661,27 @@ HEADER	*hptr;
 			if (ans == 1)
 				hp->h_addrtype =  (class == C_IN) ?
 							AFINET : AF_UNSPEC;
+#ifdef INET6
+/*
+			if ((ans == 1) && (class == C_IN)
+				if (IN6_IS_ADDR_V4MAPPED(cp))
+					{
+					hp->h_addrtype=AF_INET;
+					}
+				else
+					hp->h_addrtype=AF_INET6;
+*/
+#endif
 			bcopy(cp, (char *)&dr, dlen);
 #ifdef INET6
-			bcopy(dr.s6_addr, adr->s6_addr, 16);
+			bcopy(dr.s6_addr, adr->s6_addr, IN6ADDRSZ);
 #else
 			adr->s_addr = dr.s_addr;
 #endif
 			Debug((DEBUG_INFO,"got ip # %s for %s",
 #ifdef INET6
-			       inet_ntop(AF_INET6, (char *)adr, mydummy, 16),
+			       inet_ntop(AF_INET6, (char *)adr, mydummy
+					 MYDUMMY_SIZE),
 #else
 			       inetntoa((char *)adr),
 #endif
@@ -763,7 +771,12 @@ char	*lp;
 	SOCK_LEN_TYPE len = sizeof(sin);
 
 	(void)alarm((unsigned)4);
-	rc = recvfrom(resfd, buf, sizeof(buf), 0, (SAP)&sin, &len);
+#ifdef INET6
+	rc = recvfrom(resfd, buf, sizeof(buf), 0, (struct sockaddr *)&sin, &len);
+#else
+	rc = recvfrom(resfd, buf, sizeof(buf), 0, (struct sockaddr *)&sin, &len);
+#endif
+
 	(void)alarm((unsigned)0);
 	if (rc <= sizeof(HEADER))
 		goto getres_err;
@@ -852,16 +865,19 @@ char	*lp;
 	if (a == -1) {
 		sendto_flag(SCH_ERROR, "Bad hostname returned from %s for %s",
 #ifdef INET6
-			    inet_ntop(AF_INET, sin.sin_addr, mydummy2, 16),
-			    inet_ntop(AF_INET6, rptr->he.h_addr, mydummy, 16));
+			    inet_ntop(AF_INET, &sin.sin_addr, mydummy2,
+				      MYDUMMY_SIZE),
+			    inet_ntop(AF_INET6, rptr->he.h_addr.s6_addr,
+				      mydummy, MYDUMMY_SIZE));
 #else
 			    inetntoa((char *)&sin.sin_addr),
 			    inetntoa((char *)&rptr->he.h_addr));
 #endif
 #ifdef INET6
 		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
-		       inet_ntop(AF_INET, sin.sin_addr, mydummy2, 16),
-		       inet_ntop(AF_INET6, rptr->he.h_addr, mydummy, 16)));
+		       inet_ntop(AF_INET, &sin.sin_addr,mydummy2,MYDUMMY_SIZE),
+		       inet_ntop(AF_INET6, rptr->he.h_addr.s6_addr, mydummy,
+				 MYDUMMY_SIZE)));
 #else
 		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
 		       inetntoa((char *)&sin.sin_addr),
@@ -882,7 +898,7 @@ char	*lp;
 		Debug((DEBUG_DNS, "relookup %s <-> %s",
 			rptr->he.h_name, inet_ntop(AF_INET6,
 						   (char *)&rptr->he.h_addr,
-						   mydummy, 16)));
+						   mydummy, MYDUMMY_SIZE)));
 #else
 		Debug((DEBUG_DNS, "relookup %s <-> %s",
 			rptr->he.h_name, inetntoa((char *)&rptr->he.h_addr)));
@@ -1245,7 +1261,7 @@ char	*numb;
 #ifdef INET6
 	Debug((DEBUG_DNS,
 	       "find_cache_number:find %s[%08x%08x%08x%08x]: hashv = %d",
-	       inet_ntop(AF_INET6, numb, mydummy, 16), ip->s6_laddr[0],
+	       inet_ntop(AF_INET6, numb,mydummy,MYDUMMY_SIZE), ip->s6_laddr[0],
 	       ip->s6_laddr[1], ip->s6_laddr[2], ip->s6_laddr[3], hashv));
 #else
 	Debug((DEBUG_DNS,"find_cache_number:find %s[%08x]: hashv = %d",
@@ -1470,7 +1486,7 @@ aCache	*ocp;
 #ifdef	DEBUG
 	Debug((DEBUG_DEBUG,"rem_cache: h_addr %s hashv %d next %#x first %#x",
 # ifdef INET6
-	       inet_ntop(AF_INET6, hp->h_addr, mydummy, 16),
+	       inet_ntop(AF_INET6, hp->h_addr, mydummy, MYDUMMY_SIZE),
 # else
 	       inetntoa(hp->h_addr),
 # endif
@@ -1566,7 +1582,8 @@ char	*parv[];
 #ifdef INET6
 				   cp->he.h_name, inet_ntop(AF_INET6,
 							    cp->he.h_addr,
-							    mydummy, 16));
+							    mydummy,
+							    MYDUMMY_SIZE));
 #else
 				   cp->he.h_name, inetntoa(cp->he.h_addr));
 #endif
@@ -1584,7 +1601,7 @@ char	*parv[];
 #ifdef INET6
 					   inet_ntop(AF_INET6, 
 						     cp->he.h_addr_list[i],
-						     mydummy, 16));
+						     mydummy, MYDUMMY_SIZE));
 #else
 					   inetntoa(cp->he.h_addr_list[i]));
 #endif

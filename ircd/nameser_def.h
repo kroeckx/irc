@@ -77,7 +77,7 @@
 
 /*
  *      @(#)nameser.h	8.1 (Berkeley) 6/2/93
- *	$Id: nameser_def.h,v 1.1.2.1 1998/04/05 02:40:22 kalt Exp $
+ *	$Id: nameser_def.h,v 1.1.2.2 1998/04/22 16:57:04 kalt Exp $
  */
 
 /*
@@ -88,8 +88,7 @@
  * is new enough to contain a certain feature.
  */
 
-#ifndef	INET6
-/* let's assume for now that IPv6 system don't need ours -kalt */
+#ifndef	OSF
 
 #define __BIND		19960801	/* interface version stamp */
 

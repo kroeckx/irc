@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.2 1998/04/13 02:13:07 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.3 1998/04/22 16:57:06 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -47,8 +47,6 @@ static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.2 1998/04/13 02:13:07 kalt Exp
 #ifndef IN_LOOPBACKNET
 #define IN_LOOPBACKNET	0x7f
 #endif
-
-char mydummy[256];
 
 aClient	*local[MAXCONNECTIONS];
 FdAry	fdas, fdaa, fdall;
@@ -235,7 +233,8 @@ int	port;
 			server.sin6_addr = in6addr_any;
 		else
 			if(!inet_pton(AF_INET6, ip, server.sin6_addr.s6_addr))
-				bcopy(minus_one, server.sin6_addr.s6_addr, 16);
+				bcopy(minus_one, server.sin6_addr.s6_addr,
+				      IN6ADDRSZ);
 #else
 			server.sin_addr.s_addr = INADDR_ANY;
 		else
@@ -277,7 +276,7 @@ int	port;
 	if (cptr->fd > highest_fd)
 		highest_fd = cptr->fd;
 #ifdef INET6
-	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, 16);
+	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, IN6ADDRSZ);
 #else
 	cptr->ip.s_addr = server.sin_addr.s_addr; /* broken on linux at least*/
 #endif
@@ -594,11 +593,17 @@ Reg	char	*sockn;
 		return -1;
 	    }
 #ifdef INET6
-	inet_ntop(AF_INET6, (char *)&sk.sin6_addr, sockn, 16);
+	inet_ntop(AF_INET6, (char *)&sk.sin6_addr, sockn, MYDUMMY_SIZE);
+	Debug((DEBUG_DNS,"sockn %x",sockn));
+	Debug((DEBUG_DNS,"sockn %s",sockn));
 #else
 	(void)strcpy(sockn, (char *)inetntoa((char *)&sk.sin_addr));
 #endif
+#ifdef INET6
+	if (IN6_IS_ADDR_LOOPBACK(&sk.SIN_ADDR))
+#else
 	if (inetnetof(sk.SIN_ADDR) == IN_LOOPBACKNET)
+#endif
 	    {
 		cptr->hostp = NULL;
 		strncpyzt(sockn, me.sockhost, HOSTLEN);
@@ -626,7 +631,8 @@ Reg	aClient	*cptr;
 	ClearAccess(cptr);
 #ifdef INET6
 	Debug((DEBUG_DNS, "ch_cl: check access for %s[%s]",
-		cptr->name, inet_ntop(AF_INET6,(char *)&cptr->ip,mydummy,16)));
+		cptr->name, inet_ntop(AF_INET6, (char *)&cptr->ip, mydummy,
+				      MYDUMMY_SIZE)));
 #else
 	Debug((DEBUG_DNS, "ch_cl: check access for %s[%s]",
 		cptr->name, inetntoa((char *)&cptr->ip)));
@@ -653,7 +659,7 @@ Reg	aClient	*cptr;
 			sendto_flag(SCH_ERROR,
 				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
 				    inet_ntop(AF_INET6, (char *)&cptr->ip,
-					      mydummy, 16), hp->h_name,
+					      mydummy,MYDUMMY_SIZE),hp->h_name,
 				    ((unsigned long *)hp->h_addr)[0],
 				    ((unsigned long *)hp->h_addr)[1],
 				    ((unsigned long *)hp->h_addr)[2],
@@ -677,8 +683,15 @@ Reg	aClient	*cptr;
 	Debug((DEBUG_DNS, "ch_cl: access ok: %s[%s]",
 		cptr->name, sockname));
 
-	if (inetnetof(cptr->ip) == IN_LOOPBACKNET || IsUnixSocket(cptr) ||
-	    inetnetof(cptr->ip) == inetnetof(mysk.SIN_ADDR))
+#ifdef INET6
+	if (IN6_IS_ADDR_LOOPBACK(&cptr->ip) || IsUnixSocket(cptr)/* ||
+	    IN6_ARE_ADDR_SAMEPREFIX(&cptr->ip, &mysk.SIN_ADDR))
+ about the same, I think              NOT */
+                                                              )
+#else
+        if (inetnetof(cptr->ip) == IN_LOOPBACKNET || IsUnixSocket(cptr) ||
+            inetnetof(cptr->ip) == inetnetof(mysk.SIN_ADDR))
+#endif
 	    {
 
 		ircstp->is_loc++;
@@ -809,7 +822,7 @@ check_serverback:
 			sendto_flag(SCH_ERROR,
 				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
 				    inet_ntop(AF_INET6, (char *)&cptr->ip,
-					      mydummy, 16), hp->h_name,
+					      mydummy,MYDUMMY_SIZE),hp->h_name,
 				    ((unsigned long *)hp->h_addr)[0],
 				    ((unsigned long *)hp->h_addr)[1],
 				    ((unsigned long *)hp->h_addr)[2],
@@ -1438,7 +1451,10 @@ add_con_refuse:
 		 * have something valid to put into error messages...
 		 */
 #ifdef INET6
-		inet_ntop(AF_INET6, (char *)&addr.sin6_addr, mydummy, 16);
+		Debug((DEBUG_DNS, "looks %x %x", addr.sin6_addr.s6_addr[14],
+		       addr.sin6_addr.s6_addr[15]));
+		inet_ntop(AF_INET6, (char *)&addr.sin6_addr, mydummy,
+			  MYDUMMY_SIZE);
 		get_sockhost(acptr, (char *)mydummy);
 #else
 		get_sockhost(acptr, (char *)inetntoa((char *)&addr.sin_addr));
@@ -1452,7 +1468,7 @@ add_con_refuse:
 #ifdef INET6
 		Debug((DEBUG_DNS, "lookup %s",
 		       inet_ntop(AF_INET6, (char *)&addr.sin6_addr,
-				 mydummy, 16)));
+				 mydummy, MYDUMMY_SIZE)));
 #else
 		Debug((DEBUG_DNS, "lookup %s",
 		       inetntoa((char *)&addr.sin_addr)));
@@ -2124,7 +2140,8 @@ struct	hostent	*hp;
 #ifdef INET6
 	Debug((DEBUG_NOTICE,"Connect to %s[%s] @%s",
 	       aconf->name, aconf->host,
-	       inet_ntop(AF_INET6, (char *)&aconf->ipnum, mydummy, 16)));
+	       inet_ntop(AF_INET6, (char *)&aconf->ipnum, mydummy,
+			 MYDUMMY_SIZE)));
 #else
 	Debug((DEBUG_NOTICE,"Connect to %s[%s] @%s",
 	       aconf->name, aconf->host,
@@ -2163,7 +2180,7 @@ struct	hostent	*hp;
 #endif
 		    {
 #ifdef INET6
-			bzero(aconf->ipnum.s6_addr, 16);
+			bzero(aconf->ipnum.s6_addr, IN6ADDRSZ);
 #else
 			aconf->ipnum.s_addr = 0;
 #endif
@@ -2293,7 +2310,7 @@ int	*lenp;
 	 * Might as well get sockhost from here, the connection is attempted
 	 * with it so if it fails its useless.
 	 */
-	cptr->fd = socket(AF_INET, SOCK_STREAM, 0);
+	cptr->fd = socket(AFINET, SOCK_STREAM, 0);
 	if (cptr->fd >= MAXCLIENTS)
 	    {
 		sendto_flag(SCH_NOTICE,
@@ -2329,7 +2346,7 @@ int	*lenp;
 #ifdef INET6
 	if (isdigit(*aconf->host) && (AND16(aconf->ipnum.s6_addr) == 255))
 		if (!inet_pton(AF_INET6, aconf->host,aconf->ipnum.s6_addr))
-			bcopy(minus_one, aconf->ipnum.s6_addr, 16);
+			bcopy(minus_one, aconf->ipnum.s6_addr, IN6ADDRSZ);
 	if (AND16(aconf->ipnum.s6_addr) == 255)
 #else
 	if (isdigit(*aconf->host) && (aconf->ipnum.s_addr == -1))
@@ -2581,7 +2598,7 @@ int	len;
 	if ((aconf = find_me())->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
 		if(!inet_pton(AF_INET6, aconf->passwd, mysk.sin6_addr.s6_addr))
-			bcopy(minus_one,mysk.sin6_addr.s6_addr,16);
+			bcopy(minus_one, mysk.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 		mysk.sin_addr.s_addr = inetaddr(aconf->passwd);
 #endif
@@ -2648,7 +2665,7 @@ aConfItem	*aconf;
 	if (aconf->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
 	  if(!inet_pton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr))
-		bcopy(minus_one, from.sin6_addr.s6_addr, 16);
+		bcopy(minus_one, from.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 	  from.sin_addr.s_addr = inetaddr(aconf->passwd);
 #endif
@@ -2737,7 +2754,7 @@ aConfItem *aconf;
 
 	bzero((char *)&sin, sizeof(sin));
 #ifdef INET6
-	bcopy(aconf->ipnum.s6_addr,sin.SIN_ADDR,16);
+	bcopy(aconf->ipnum.s6_addr, sin.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 	sin.sin_addr.s_addr = aconf->ipnum.s_addr;
 #endif
@@ -2746,7 +2763,7 @@ aConfItem *aconf;
 	(void)gettimeofday(&pi.pi_tv, NULL);
 	Debug((DEBUG_SEND,"Send ping to %s,%d fd %d, %d bytes",
 #ifdef INET6
-	       inet_ntop(AF_INET6, (char *)&aconf->ipnum, mydummy, 16),
+	       inet_ntop(AF_INET6, (char *)&aconf->ipnum,mydummy,MYDUMMY_SIZE),
 #else
 	       inetntoa((char *)&aconf->ipnum),
 #endif
@@ -2848,7 +2865,8 @@ static	void	polludp()
 				    "udp packet dropped: %d bytes from %s.%d",
 #ifdef INET6
 					    n, inet_ntop(AF_INET6,
-					 (char *)&from.sin6_addr, mydummy, 16),
+					 (char *)&from.sin6_addr, mydummy,
+							 MYDUMMY_SIZE),
 #else
 					    n,inetntoa((char *)&from.sin_addr),
 #endif
@@ -2864,7 +2882,8 @@ static	void	polludp()
 
 	Debug((DEBUG_NOTICE, "udp (%d) %d bytes from %s,%d", cnt, n,
 #ifdef INET6
-	       inet_ntop(AF_INET6, (char *)&from.sin6_addr, mydummy, 16),
+	       inet_ntop(AF_INET6, (char *)&from.sin6_addr, mydummy,
+			 MYDUMMY_SIZE),
 #else
 	       inetntoa((char *)&from.sin_addr),
 #endif

@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4.2.2 1998/04/13 02:13:06 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4.2.3 1998/04/22 16:57:03 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -57,12 +57,13 @@ aClient	*cptr;
  
 	if (isdigit(*host))
 #ifdef INET6
-		inet_pton(AF_INET6, host, server.sin6_addr.s6_addr);
+		if(!inet_pton(AF_INET6, host, server.sin6_addr.s6_addr))
+			bcopy(minus_one, server.sin6_addr.s6_addr, IN6ADDRSZ);
 #else
 		server.sin_addr.s_addr = inetaddr(host);
 #endif
 	else { 
-#if defined(INET6) && defined(OSF)
+#ifdef INET6
 		res_init();
 		_res.options|=RES_USE_INET6;
 #endif
@@ -82,7 +83,7 @@ aClient	*cptr;
 	cptr->acpt = cptr;
 	cptr->port = server.SIN_PORT;
 #ifdef INET6
-	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, 16);
+	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, IN6ADDRSZ);
 #else
 	cptr->ip.s_addr = server.sin_addr.s_addr;
 #endif
