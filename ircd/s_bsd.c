@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.26 2003/10/11 13:57:53 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.27 2003/10/12 13:27:05 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -199,7 +199,7 @@ int	port;
 	(void)sscanf(ipmask, "%d.%d.%d.%d", &ad[0], &ad[1], &ad[2], &ad[3]);
 	if (ad[0]>>8 || ad[1]>>8 || ad[2]>>8 || ad[3]>>8)
 	{
-		report_error("invalid ipmask %s", ipmask);
+		sendto_flag(SCH_ERROR, "Invalid ipmask %s", ipmask);
 		return -1;
 	}
 	(void)sprintf(ipname, "%d.%d.%d.%d", ad[0], ad[1], ad[2], ad[3]);
