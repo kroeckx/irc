@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: match.c,v 1.5.2.1 2000/01/01 17:57:31 q Exp $";
+static  char rcsid[] = "@(#)$Id: match.c,v 1.5.2.2 2001/07/04 21:44:40 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -110,7 +110,7 @@ unsigned char char_atribs[] = {
 /* 16-23 */	CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL,
 /* 24-31 */	CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL, CNTRL,
 /* space */	PRINT|SPACE,
-/* !""#$%&'( */	PRINT, PRINT, PRINT, PRINT, PRINT, PRINT, PRINT, PRINT,
+/* !"#$%&'( */	PRINT, PRINT, PRINT, PRINT, PRINT, PRINT, PRINT, PRINT,
 /* )*+,-./ */	PRINT, PRINT, PRINT, PRINT, PRINT, PRINT, PRINT,
 /* 0123 */	PRINT|DIGIT, PRINT|DIGIT, PRINT|DIGIT, PRINT|DIGIT,
 /* 4567 */	PRINT|DIGIT, PRINT|DIGIT, PRINT|DIGIT, PRINT|DIGIT,
@@ -127,7 +127,7 @@ unsigned char char_atribs[] = {
 /* VWX */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,
 /* YZ[ */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,
 /* \]^ */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,
-/* _   */	PRINT,
+/* _`  */	PRINT, PRINT,
 /* abc */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,
 /* def */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,
 /* ghi */	PRINT|ALPHA, PRINT|ALPHA, PRINT|ALPHA,

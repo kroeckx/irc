@@ -1,3 +1,8 @@
+2001-07-04  Piotr Kucharski
+
+	* match.c: char_atribs table was missing one element (at least
+	  nine year old bug!)
+
 2001-07-02  Piotr Kucharski
 
 	* channel.c/m_list(),m_names(): forwarding queries using
