@@ -1,3 +1,7 @@
+1999-09-05  Piotr Kucharski
+
+	* whowas.c/m_whowas(): fixed two bad behaviours (reported by viha)
+
 1999-08-30  Christophe Kalt
 
 	* os.h: moved __GNU_SOURCE up (linux).
