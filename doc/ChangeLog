@@ -2,6 +2,8 @@
 
 	* mod_socks.c/socks_write(): don't bother checking socks4 on ipv6
 	  addresses, socks4 doesn't support it anyway.
+	* s_serv.c/m_trace(): don't send info about unknown connections to
+	  clients who are not +w
 
 2001-05-14  Piotr Kucharski
 
