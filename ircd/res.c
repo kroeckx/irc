@@ -24,12 +24,12 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.4 1998/04/22 16:57:04 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.5 1998/05/17 20:29:32 kalt Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
 
-static	char	hostbuf[HOSTLEN+1];
+static	char	hostbuf[HOSTLEN+1+100];
 static	char	dot[] = ".";
 static	int	incache = 0;
 static	CacheTable	hashtable[ARES_CACSIZE];
@@ -640,11 +640,12 @@ HEADER	*hptr;
 		switch(type)
 		{
 #ifdef INET6
-		case T_AAAA:
+		case T_AAAA :
 #endif
 		case T_A :
 #ifdef INET6
-			if (dlen != sizeof(dr))
+			if (dlen != ((type==T_AAAA) ? sizeof(dr) : 
+				     sizeof(struct in_addr)))
 #else
 			if (dlen != sizeof(dr))
 #endif
@@ -660,27 +661,23 @@ HEADER	*hptr;
 			hp->h_length = dlen;
 			if (ans == 1)
 				hp->h_addrtype =  (class == C_IN) ?
-							AFINET : AF_UNSPEC;
+							 AFINET: AF_UNSPEC;
 #ifdef INET6
-/*
-			if ((ans == 1) && (class == C_IN)
-				if (IN6_IS_ADDR_V4MAPPED(cp))
-					{
-					hp->h_addrtype=AF_INET;
-					}
-				else
-					hp->h_addrtype=AF_INET6;
-*/
-#endif
-			bcopy(cp, (char *)&dr, dlen);
-#ifdef INET6
+			if (type == T_AAAA)
+				bcopy(cp, (char *)&dr, dlen);
+			else {
+				dr.s6_laddr[0]=dr.s6_laddr[1]=0;
+				dr.s6_laddr[2]=htonl(0xffff);
+				bcopy(cp, &dr.s6_laddr[3], INADDRSZ);
+			}
 			bcopy(dr.s6_addr, adr->s6_addr, IN6ADDRSZ);
 #else
+			bcopy(cp, (char *)&dr, dlen);
 			adr->s_addr = dr.s_addr;
 #endif
 			Debug((DEBUG_INFO,"got ip # %s for %s",
 #ifdef INET6
-			       inet_ntop(AF_INET6, (char *)adr, mydummy
+			       inet_ntop(AF_INET6, (char *)adr, mydummy,
 					 MYDUMMY_SIZE),
 #else
 			       inetntoa((char *)adr),
@@ -865,9 +862,9 @@ char	*lp;
 	if (a == -1) {
 		sendto_flag(SCH_ERROR, "Bad hostname returned from %s for %s",
 #ifdef INET6
-			    inet_ntop(AF_INET, &sin.sin_addr, mydummy2,
+			    inetntop(AF_INET, &sin.sin_addr, mydummy2,
 				      MYDUMMY_SIZE),
-			    inet_ntop(AF_INET6, rptr->he.h_addr.s6_addr,
+			    inetntop(AF_INET6, rptr->he.h_addr.s6_addr,
 				      mydummy, MYDUMMY_SIZE));
 #else
 			    inetntoa((char *)&sin.sin_addr),
@@ -964,10 +961,24 @@ getres_err:
 				rptr->retries = ircd_res.retry;
 				rptr->sends = 0;
 				rptr->resend = 1;
+#ifdef INET6
+/* Comment out this ifdef to get names like ::ffff:a.b.c.d */
+				if(rptr->type == T_AAAA)
+					query_name(rptr->name, C_IN, T_A, rptr);
+					Debug((DEBUG_DNS,"getres_err: didn't work with T_AAAA, now also trying with T_A for %s",rptr->name));
+#endif
 				resend_query(rptr);
 			    }
 			else
+			    {
+#ifdef INET6
+/* Comment out this ifdef to get names like ::ffff:a.b.c.d */
+				if(rptr->type == T_AAAA)
+					query_name(rptr->name, C_IN, T_A, rptr);
+					Debug((DEBUG_DNS,"getres_err: didn't work with T_AAAA, now also trying with T_A for %s",rptr->name));
+#endif
 				resend_query(rptr);
+			    }
 		    }
 		else if (lp)
 			bcopy((char *)&rptr->cinfo, lp, sizeof(Link));
@@ -1580,7 +1591,7 @@ char	*parv[];
 			sendto_one(sptr, "NOTICE %s :Ex %d ttl %d host %s(%s)",
 				   parv[0], cp->expireat - timeofday, cp->ttl,
 #ifdef INET6
-				   cp->he.h_name, inet_ntop(AF_INET6,
+				   cp->he.h_name, inetntop(AF_INET6,
 							    cp->he.h_addr,
 							    mydummy,
 							    MYDUMMY_SIZE));
@@ -1599,7 +1610,7 @@ char	*parv[];
 				sendto_one(sptr,"NOTICE %s : %s = %s (IP)",
 					   parv[0], cp->he.h_name,
 #ifdef INET6
-					   inet_ntop(AF_INET6, 
+					   inetntop(AF_INET6, 
 						     cp->he.h_addr_list[i],
 						     mydummy, MYDUMMY_SIZE));
 #else

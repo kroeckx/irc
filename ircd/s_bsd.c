@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.3 1998/04/22 16:57:06 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.4 1998/05/17 20:29:32 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -593,7 +593,7 @@ Reg	char	*sockn;
 		return -1;
 	    }
 #ifdef INET6
-	inet_ntop(AF_INET6, (char *)&sk.sin6_addr, sockn, MYDUMMY_SIZE);
+	inetntop(AF_INET6, (char *)&sk.sin6_addr, sockn, MYDUMMY_SIZE);
 	Debug((DEBUG_DNS,"sockn %x",sockn));
 	Debug((DEBUG_DNS,"sockn %s",sockn));
 #else
@@ -658,7 +658,7 @@ Reg	aClient	*cptr;
 #ifdef INET6
 			sendto_flag(SCH_ERROR,
 				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
-				    inet_ntop(AF_INET6, (char *)&cptr->ip,
+				    inetntop(AF_INET6, (char *)&cptr->ip,
 					      mydummy,MYDUMMY_SIZE),hp->h_name,
 				    ((unsigned long *)hp->h_addr)[0],
 				    ((unsigned long *)hp->h_addr)[1],
@@ -684,7 +684,10 @@ Reg	aClient	*cptr;
 		cptr->name, sockname));
 
 #ifdef INET6
-	if (IN6_IS_ADDR_LOOPBACK(&cptr->ip) || IsUnixSocket(cptr)/* ||
+	if (IN6_IS_ADDR_LOOPBACK(&cptr->ip) || IsUnixSocket(cptr) ||
+		(cptr->ip.s6_laddr[0]==mysk.sin6_addr.s6_laddr[0] &&
+		 cptr->ip.s6_laddr[1]==mysk.sin6_addr.s6_laddr[1])
+/* ||
 	    IN6_ARE_ADDR_SAMEPREFIX(&cptr->ip, &mysk.SIN_ADDR))
  about the same, I think              NOT */
                                                               )
@@ -821,7 +824,7 @@ check_serverback:
 #ifdef INET6
 			sendto_flag(SCH_ERROR,
 				    "IP# Mismatch: %s != %s[%08x%08x%08x%08x]",
-				    inet_ntop(AF_INET6, (char *)&cptr->ip,
+				    inetntop(AF_INET6, (char *)&cptr->ip,
 					      mydummy,MYDUMMY_SIZE),hp->h_name,
 				    ((unsigned long *)hp->h_addr)[0],
 				    ((unsigned long *)hp->h_addr)[1],
@@ -1451,9 +1454,7 @@ add_con_refuse:
 		 * have something valid to put into error messages...
 		 */
 #ifdef INET6
-		Debug((DEBUG_DNS, "looks %x %x", addr.sin6_addr.s6_addr[14],
-		       addr.sin6_addr.s6_addr[15]));
-		inet_ntop(AF_INET6, (char *)&addr.sin6_addr, mydummy,
+		inetntop(AF_INET6, (char *)&addr.sin6_addr, mydummy,
 			  MYDUMMY_SIZE);
 		get_sockhost(acptr, (char *)mydummy);
 #else
@@ -2864,7 +2865,7 @@ static	void	polludp()
 				sendto_flag(SCH_NOTICE,
 				    "udp packet dropped: %d bytes from %s.%d",
 #ifdef INET6
-					    n, inet_ntop(AF_INET6,
+					    n, inetntop(AF_INET6,
 					 (char *)&from.sin6_addr, mydummy,
 							 MYDUMMY_SIZE),
 #else

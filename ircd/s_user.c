@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.42 1998/04/03 14:34:47 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.38.2.1 1998/05/17 20:29:34 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -192,8 +192,6 @@ int	server, parc;
 		    }
 	 if (acptr)
 	    {
-		if (!IsRegistered(acptr))
-			return HUNTED_ISME;
 		if (IsMe(acptr) || MyClient(acptr) || MyService(acptr))
 			return HUNTED_ISME;
 		if (match(acptr->name, parv[server]))
@@ -735,9 +733,6 @@ char	*parv[];
 	*/
 	if (!(acptr = find_client(nick, NULL)) &&
 	    (IsServer(cptr) ||
-#ifndef	BIG_NET
-	     !ircstp->is_bignet ||
-#endif
 	     !(delayed = find_history(nick, (long)DELAYCHASETIMELIMIT))))
 		goto nickkilldone;  /* No collisions, all clear... */
 	/*
@@ -1971,7 +1966,6 @@ char	*parv[];
  *	      but perhaps it's worth the load it causes to net.
  *	      This requires flooding of the whole net like NICK,
  *	      USER, MODE, etc messages...  --msa
- *          sounds like nobody likes this thing, let's kill it. --kalt
  ***********************************************************************/
 
 /*
@@ -1987,13 +1981,6 @@ char	*parv[];
 	Reg	char	*away, *awy2 = parv[1];
 	int	len;
 
-	/* This command is officially unsupported since 2.10 */
-	if (IsServer(cptr) || !MyConnect(sptr)) /* let's just be safe */
-		return 0;
-	sendto_one(cptr, ":%s %d %s AWAY :Unknown command", ME,
-		   ERR_UNKNOWNCOMMAND, sptr->name);
-	return 1;
-
 	if (!MyConnect(sptr))	/* Since 2.9 we know only local AWAY */
 		return 0;	/* "WHOIS server nick" still works */
 
@@ -2008,9 +1995,7 @@ char	*parv[];
 			MyFree(away);
 			sptr->user->away = NULL;
 		    }
-		/* sendto_serv_butone(cptr, ":%s AWAY", parv[0]); */
-		if (MyConnect(sptr))
-			sendto_one(sptr, rpl_str(RPL_UNAWAY, parv[0]));
+		sendto_one(sptr, rpl_str(RPL_UNAWAY, parv[0]));
 #ifdef	USE_SERVICES
 		check_services_butone(SERVICE_WANT_AWAY, NULL, sptr,
 				      ":%s AWAY", parv[0]);
@@ -2026,7 +2011,6 @@ char	*parv[];
 		awy2[TOPICLEN] = '\0';
 	    }
 	len++;
-	/* sendto_serv_butone(cptr, ":%s AWAY :%s", parv[0], awy2); */
 #ifdef	USE_SERVICES
 	check_services_butone(SERVICE_WANT_AWAY, NULL, sptr,
 			      ":%s AWAY :%s", parv[0], awy2);
@@ -2047,8 +2031,7 @@ char	*parv[];
 
 	sptr->user->away = away;
 	(void)strcpy(away, awy2);
-	if (MyConnect(sptr))
-		sendto_one(sptr, rpl_str(RPL_NOWAWAY, parv[0]));
+	sendto_one(sptr, rpl_str(RPL_NOWAWAY, parv[0]));
 	return 2;
 }
 
@@ -2186,7 +2169,7 @@ char	*parv[];
 #endif
 		return 1;
 	    }
-	else if (IsAnOper(sptr))
+	else if (IsOper(sptr))
 	    {
 		if (MyConnect(sptr))
 			sendto_one(sptr, rpl_str(RPL_YOUREOPER, parv[0]));
@@ -2195,7 +2178,13 @@ char	*parv[];
 	if (!(aconf = find_conf_exact(name, sptr->username, sptr->sockhost,
 				      CONF_OPS)) &&
 	    !(aconf = find_conf_exact(name, sptr->username,
+#ifdef INET6
+				      (char *)inetntop(AF_INET6,
+						       (char *)&cptr->ip,
+						       mydummy, MYDUMMY_SIZE),
+#else
 				      (char *)inetntoa((char *)&cptr->ip),
+#endif
 				      CONF_OPS)))
 	    {
 		sendto_one(sptr, err_str(ERR_NOOPERHOST, parv[0]));
@@ -2261,7 +2250,11 @@ char	*parv[];
 			name, encr,
 		       parv[0], sptr->user->username, sptr->user->host,
 		       sptr->auth, IsUnixSocket(sptr) ? sptr->sockhost :
+#ifdef INET6
+                       inet_ntop(AF_INET6, (char *)&sptr->ip), mydummy, MYDUMMY_SIZE);
+#else
                        inetntoa((char *)&sptr->ip));
+#endif
 #endif
 #ifdef FNAME_OPERLOG
 	      {
@@ -2284,7 +2277,12 @@ char	*parv[];
 			  myctime(timeofday), name, encr,
 			  parv[0], sptr->user->username, sptr->user->host,
 			  sptr->auth, IsUnixSocket(sptr) ? sptr->sockhost :
+#ifdef INET6
+			  inetntop(AF_INET6, (char *)&sptr->ip, mydummy,
+				   MYDUMMY_SIZE));
+#else
 			  inetntoa((char *)&sptr->ip));
+#endif
 		  (void)alarm(3);
 		  (void)write(logfile, buf, strlen(buf));
 		  (void)alarm(0);

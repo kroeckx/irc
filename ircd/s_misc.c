@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.15.2.2 1998/04/22 16:57:07 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.15.2.3 1998/05/17 20:29:33 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -215,9 +215,9 @@ int	showip;
 					(!(sptr->flags & FLAGS_GOTID)) ? "" :
 					sptr->auth,
 #ifdef INET6 
-					      inet_ntop(AF_INET6,
-							(char *)&sptr->ip,
-							mydummy, MYDUMMY_SIZE));
+					      inetntop(AF_INET6,
+						       (char *)&sptr->ip,
+						       mydummy, MYDUMMY_SIZE));
 #else
 					      inetntoa((char *)&sptr->ip));
 #endif
@@ -275,6 +275,7 @@ Reg	char	*host;
 	else
 		s = host;
 	strncpyzt(cptr->sockhost, s, sizeof(cptr->sockhost));
+	Debug((DEBUG_DNS,"get_sockhost %s",s));
 }
 
 /*

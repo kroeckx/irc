@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.4.2.2 1998/04/22 16:57:05 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.4.2.3 1998/05/17 20:29:32 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -93,9 +93,6 @@ Reg	aClient	*cptr;
 	Debug((DEBUG_NOTICE,"auth(%x) from %s",
 	       cptr, inetntoa((char *)&us.sin_addr)));
 #endif
-/*
-if (IN6_IS_ADDR_V4MAPPED(us.sin6_addr.s6_addr)
-*/
 	if (bind(cptr->authfd, (struct SOCKADDR *)&us, ulen) >= 0)
 	    {
 		(void)getsockname(cptr->fd, (struct SOCKADDR *)&us, &ulen);

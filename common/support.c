@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.12 1998/03/31 21:35:14 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -34,6 +34,10 @@ static  char rcsid[] = "@(#)$Id: support.c,v 1.12 1998/03/31 21:35:14 kalt Exp $
 # include "c_externs.h"
 #endif
 #undef SUPPORT_C
+
+#ifdef _WIN32
+int w32_h_errno = 0;
+#endif
 
 char	*mystrdup(s)
 char	*s;
@@ -54,7 +58,7 @@ char	*s;
 **			of separators
 **			argv 9/90
 **
-**	$Id: support.c,v 1.12 1998/03/31 21:35:14 kalt Exp $
+**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
 */
 
 char *strtoken(save, str, fs)
@@ -108,7 +112,7 @@ char *str, *fs;
 **	strerror - return an appropriate system error string to a given errno
 **
 **		   argv 11/90
-**	$Id: support.c,v 1.12 1998/03/31 21:35:14 kalt Exp $
+**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
 */
 
 char *strerror(err_no)
@@ -129,6 +133,51 @@ int err_no;
 
 #endif /* HAVE_STRERROR */
 
+#ifdef INET6
+/*
+ * inetntop: return the : notation of a given IPv6 internet number.
+ *           make sure the compressed representation (rfc 1884) isn't used.
+ */
+char *inetntop(af, in, out, the_size)
+int af;
+const void *in;
+char *out;
+size_t the_size;
+{
+	static char local_dummy[MYDUMMY_SIZE];
+
+	inet_ntop(af, in, local_dummy, the_size);
+	if (strstr(local_dummy, "::"))
+	    {
+		char cnt = 0, *cp = local_dummy, *op = out;
+
+		while (*cp)
+			if (*cp++ == ':')
+				cnt += 1;
+		cp = local_dummy;
+		while (*cp)
+		    {
+			*op++ = *cp++;
+			if (*(cp-1) == ':' && *cp == ':')
+			    {
+				*op++ = '0';
+				while (cnt++ < 7)
+				    {
+					*op++ = ':';
+					*op++ = '0';
+				    }
+			    }
+		    }
+		*op = '\0';
+		Debug((DEBUG_DNS,"Expanding `%s' -> `%s'", local_dummy,
+		       out));
+	    }
+	else
+		bcopy(local_dummy, out, 64);
+	return out;
+}
+#endif
+
 #if ! HAVE_INET_NTOA
 /*
 **	inetntoa  --	changed name to remove collision possibility and
@@ -138,7 +187,7 @@ int err_no;
 **			internet number (some ULTRIX don't have this)
 **			argv 11/90).
 **	inet_ntoa --	its broken on some Ultrix/Dynix too. -avalon
-**	$Id: support.c,v 1.12 1998/03/31 21:35:14 kalt Exp $
+**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
 */
 
 char	*inetntoa(in)
@@ -711,9 +760,8 @@ char *make_version()
 	char ver[15];
 
 	sscanf(PATCHLEVEL, "%2d%2d%2d%2d%2d", &ve, &re, &mi, &dv, &pl);
-	/* version & revision */
-	sprintf(ver, "%d.%d", ve, (mi == 99) ? re + 1 : re);
-	if (mi && mi != 99)	/* minor revision */
+	sprintf(ver, "%d.%d", ve, re);	/* version & revision */
+	if (mi)	/* minor revision */
 		sprintf(ver + strlen(ver), ".%d", dv ? mi+1 : mi);
 	if (dv)	/* alpha/beta, note how visual patchlevel is raised above */
 		sprintf(ver + strlen(ver), "%c%d", DEVLEVEL, dv);
@@ -730,7 +778,7 @@ char *make_version()
  */
 int truncate(path, length)
 const char *path;
-off_t length;
+size_t length;
 {
 	int fd, res;
 	fd = open(path, O_WRONLY);

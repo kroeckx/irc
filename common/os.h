@@ -217,16 +217,12 @@
 #endif
 
 #if defined(INET6) && defined(CLIENT_COMPILE)
-# if defined(linux) && HAVE_RESOLV_H
+# if (defined(linux) || defined(__NetBSD__)) && HAVE_RESOLV_H
 #  include <resolv.h>
 # endif
 # if HAVE_ARPA_NAMESER_H
 #  include <arpa/nameser.h>
 # endif
-#endif
-
-#if HAVE_ASM_TYPES_H
-# include <asm/types.h>
 #endif
 
 /*  Some special include files for a special OS. :)
@@ -729,13 +725,16 @@ static unsigned char minus_one[]={ 255, 255, 255, 255, 255, 255, 255, 255, 255,
 char mydummy[MYDUMMY_SIZE];
 char mydummy2[MYDUMMY_SIZE];
 
-# if defined(linux)
+# if defined(linux) || defined(__NetBSD__)
 #  ifndef s6_laddr
 #   define s6_laddr        s6_addr32
 #  endif
+# endif
+
+# if defined(linux)
 static const struct in6_addr in6addr_any={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 						0, 0, 0, 0, 0};
-# endif /* linux */
+# endif
 
 # define IRCDCONF_DELIMITER '%'
 

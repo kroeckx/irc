@@ -33,7 +33,7 @@ typedef	struct	Zdata	aZdata;
 typedef struct        MotdItem aMotd;
 #endif
 
-#define	HOSTLEN		163	/* Length of hostname.  Updated to         */
+#define	HOSTLEN		63	/* Length of hostname.  Updated to         */
 				/* comply with RFC1123                     */
 
 #define	NICKLEN		9	/* Necessary to put 9 here instead of 10
