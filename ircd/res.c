@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.2 2000/01/03 18:24:37 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.3 2000/02/03 17:57:00 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -587,12 +587,7 @@ HEADER	*hptr;
 	cp = buf + sizeof(HEADER);
 	hp = (struct hent *)&(rptr->he);
 	adr = &hp->h_addr;
-#ifdef INET6
-	while (adr->s6_laddr[0] | adr->s6_laddr[1] | adr->s6_laddr[2] |
-	       adr->s6_laddr[3])
-#else
-	while (adr->s_addr)
-#endif
+	while (WHOSTENTP(adr->S_ADDR))
 		adr++;
 	alias = hp->h_aliases;
 	while (*alias)
@@ -667,9 +662,10 @@ HEADER	*hptr;
 			if (type == T_AAAA)
 				bcopy(cp, (char *)&dr, dlen);
 			else {
-				dr.s6_laddr[0]=dr.s6_laddr[1]=0;
-				dr.s6_laddr[2]=htonl(0xffff);
-				bcopy(cp, &dr.s6_laddr[3], INADDRSZ);
+				/* ugly hack */
+				memset(dr.s6_addr, 0, 10);
+				dr.s6_addr[10] = dr.s6_addr[11] = 0xff;
+				memcpy(dr.s6_addr+12, cp, 4);
 			}
 			bcopy(dr.s6_addr, adr->s6_addr, IN6ADDRSZ);
 #else
@@ -1051,17 +1047,14 @@ Reg	aCache	*ocp;
 	hashtable[hashv].num_list = ocp;
 
 #ifdef	DEBUG
-#ifdef INET6
-	Debug((DEBUG_INFO,"add_to_cache:added %s[%08x%08x%08x%08x] cache %#x.",
-	       ocp->he.h_name,
-	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[0],
-	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[1],
-	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[2],
-	       ((struct in6_addr *)ocp->he.h_addr_list)->s6_laddr[3], ocp));
-#else
+# ifdef	INET6
+	inetntop(AF_INET6, ocp->he.h_addr_list, mydummy, sizeof(mydummy));
+	Debug((DEBUG_INFO,"add_to_cache:added %s[%s] cache %#x.",
+		ocp->he.h_name, mydummy, ocp));
+# else
 	Debug((DEBUG_INFO, "add_to_cache:added %s[%08x] cache %#x.",
 		ocp->he.h_name, ocp->he.h_addr_list[0], ocp));
-#endif
+# endif
 	Debug((DEBUG_INFO,
 		"add_to_cache:h1 %d h2 %x lnext %#x namnext %#x numnext %#x",
 		hash_name(ocp->he.h_name), hashv, ocp->list_next,
@@ -1261,23 +1254,19 @@ char	*numb;
 {
 	Reg	aCache	*cp;
 	Reg	int	hashv,i;
-#ifdef	DEBUG
-	struct	IN_ADDR	*ip = (struct IN_ADDR *)numb;
-#endif
 
 	hashv = hash_number((u_char *)numb);
 
 	cp = hashtable[hashv].num_list;
-#ifdef DEBUG
-#ifdef INET6
-	Debug((DEBUG_DNS,
-	       "find_cache_number:find %s[%08x%08x%08x%08x]: hashv = %d",
-	       inet_ntop(AF_INET6, numb,mydummy,MYDUMMY_SIZE), ip->s6_laddr[0],
-	       ip->s6_laddr[1], ip->s6_laddr[2], ip->s6_laddr[3], hashv));
-#else
+#ifdef	DEBUG
+# ifdef	INET6
+	Debug((DEBUG_DNS, "find_cache_number:find %s: hashv = %d",
+		inet_ntop(AF_INET6, numb, mydummy, MYDUMMY_SIZE), hashv));
+# else
 	Debug((DEBUG_DNS,"find_cache_number:find %s[%08x]: hashv = %d",
-		inetntoa(numb), ntohl(ip->s_addr), hashv));
-#endif
+		inetntoa(numb),	ntohl(((struct in_addr *)numb)->s_addr), 
+		hashv));
+# endif
 #endif
 	for (; cp; cp = cp->hnum_next) 
 	    {

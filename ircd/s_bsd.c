@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.3 1999/12/21 01:29:37 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.4 2000/02/03 17:57:00 q Exp $";
 #endif
 
 #include "os.h"
@@ -760,8 +760,7 @@ Reg	aClient	*cptr;
 
 #ifdef INET6
 	if (IN6_IS_ADDR_LOOPBACK(&cptr->ip) || IsUnixSocket(cptr) ||
-		(cptr->ip.s6_laddr[0]==mysk.sin6_addr.s6_laddr[0] &&
-		 cptr->ip.s6_laddr[1]==mysk.sin6_addr.s6_laddr[1])
+	    !memcmp(cptr->ip.s6_addr, mysk.sin6_addr.s6_addr, 8) 
 /* ||
 	    IN6_ARE_ADDR_SAMEPREFIX(&cptr->ip, &mysk.SIN_ADDR))
  about the same, I think              NOT */

@@ -735,16 +735,6 @@ static unsigned char minus_one[]={ 255, 255, 255, 255, 255, 255, 255, 255, 255,
 char mydummy[MYDUMMY_SIZE];
 char mydummy2[MYDUMMY_SIZE];
 
-# if defined(linux) || defined(__NetBSD__) || defined(__FreeBSD__) || defined(bsdi)
-#  ifndef s6_laddr
-#   ifdef in6a_words
-#    define	s6_laddr	in6a_words
-#   else
-#    define	s6_laddr	s6_addr32
-#   endif
-#  endif
-# endif
-
 # if defined(linux) \
 	&& (((defined(__GLIBC__) \
 	&& (__GLIBC_MAJOR__ == 2) && (__GLIBC_MINOR__ < 1) \
