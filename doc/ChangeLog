@@ -1,27 +1,6 @@
-1999-09-21  Piotr Kucharski
+1999-09-30  Christophe Kalt
 
-	* channel.c, class.c, parse.c, s_bsd.c, s_conf.c, s_err.c,
-	s_err_ext.h, s_misc.c, s_serv.c, s_service.c, s_user.c,
-	struct_def.h, whowas.c: rewritten to use replies[] table
-	directly, not rpl_str()/err_str().
-
-1999-09-18  Christophe Kalt
-
-	* wrote s_send.c to provide specialized functions equivalent to
-	sendto_*() but dealing with UID issues and hiding them from above
-	layers.
-
-1999-08-31  Kurt Roeckx
-
-	* s_user.c/m_kill: acptr wasn't initialised
-
-1999-06-??  Christophe Kalt
-
-	* hash_ext.h, msg_def.h, numeric_def.h, parse_ext.h, struct_def.h,
-	s_id_ext.h, s_user_ext.h, channel.c, hash.c, ircd.c, list.c,
-	parse.c, send.c, s_err.c, s_id.c, s_misc.c, s_serv.c, s_user.c:
-	basic 2.11 functionnality: added uid hash tables, &SAVE channel,
-	m_unick(), m_save(), save_user(), new numeric 42.
+	* ircd.c, s_bsd.c: wrote watchdog.c, and added calls to its functions.
 
 2.10.3
 
