@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.7 2000/10/22 10:52:49 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.8 2000/10/22 11:01:46 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1191,6 +1191,7 @@ aCache	*cachep;
 			base = (char **)MyRealloc((char *)ab,
 					(addrcount + 1) * sizeof(*ab));
 			cp->he.h_addr_list = base;
+			ab = (struct IN_ADDR **)base;
 #ifdef	DEBUG
 # ifdef	INET6
 			Debug((DEBUG_DNS,"u_l:add IP %s hal %x ac %d",
