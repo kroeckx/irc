@@ -1,3 +1,12 @@
+2001-05-06  Piotr Kucharski
+
+	* list.c/free_client(): we check for local client, since ->auth
+	  is not allocated at all for remotes.
+	* s_bsd.c/add_connection(): initialize lin.next with NULL.
+	* ircd.c/ircd_readtune(): initialize buf with zeroes.
+	* ircd.c/main(),server_reboot(): make syslog stamp ircd messages
+	  only with basename(argv[0]) instead of argv[0].
+
 2001-05-05  Piotr Kucharski
 
 	* a_log.c/init_filelogs(): don't open iauth.log when debug level
