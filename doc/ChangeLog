@@ -1,6 +1,12 @@
 2001-02-10  Kurt Roeckx
 
 	* s_err.c, numeric_def.h: Undo the RPL_BOUNCE change.
+	* s_serv.c/m_restart(): Create the buffer before we remove the
+	  clients.
+	* hash.c/hash_find_server(): Removed unused variable s.
+	* s_bsd.c/close_connection(): Removed unused variable j.
+	* s_mis.c/exit_client(): Removed unused variable asptr.
+	* whowas.c/get_history(): Removed unused variable i.
 
 2001-02-09  Kurt Roeckx
 
