@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.10 2000/10/22 11:32:29 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.11 2001/02/07 13:06:44 q Exp $";
 #endif
 
 #include "os.h"
@@ -694,7 +694,7 @@ char	flag, *chname;
 			send = 1;
 		if (send)
 		    {
-			sendto_one(cptr, ":%s MODE %s %s %s",
+			sendto_one(cptr, ":%s MODE %s %s%s",
 				   ME, chname, modebuf, parabuf);
 			send = 0;
 			*parabuf = '\0';
@@ -745,7 +745,7 @@ uncommented may just lead to desynchs..
 		if (modebuf[1] || *parabuf)
 		    {
 			/* only needed to help compatibility */
-			sendto_one(cptr, ":%s MODE %s %s %s",
+			sendto_one(cptr, ":%s MODE %s %s%s",
 				   ME, chptr->chname, modebuf, parabuf);
 			*parabuf = '\0';
 			*modebuf = '+';
@@ -757,7 +757,7 @@ uncommented may just lead to desynchs..
 			       CHFL_INVITE, 'I');
 	    }
 	if (modebuf[1] || *parabuf)
-		sendto_one(cptr, ":%s MODE %s %s %s",
+		sendto_one(cptr, ":%s MODE %s %s%s",
 			   ME, chptr->chname, modebuf, parabuf);
 }
 
