@@ -3,6 +3,7 @@
 	* send.c/sendto_flog(),logfiles_open(),logfiles_close(),
 	  s_conf.c/rehash(), ircd.c: Stop open-close logfiles ping-pong,
 	  reopen only on HUP signal.
+	* s_user.c/m_whois(): show all parameters in ENDOFWHOIS reply
 
 2001-02-27  Kurt Roeckx
 
