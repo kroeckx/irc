@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.4 2000/12/08 22:15:22 q Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.5 2001/05/15 10:50:53 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -225,6 +225,14 @@ char *strver;
 	    cldata[cl].wfd = 0;
 	    return -1;
 	}
+#ifdef INET6
+	/*
+	 * socks4 does not support ipv6, so we switch to socks5, if
+	 * address is not ipv4 mapped in ipv6
+	 */
+	if (cldata[cl].mod_status == ST_V4 && !IN6_IS_ADDR_V4MAPPED(&addr))
+		cldata[cl].mod_status = ST_V5;
+#endif
     if (cldata[cl].mod_status == ST_V4)
 	{
 	    query[0] = 4; query[1] = 1;
