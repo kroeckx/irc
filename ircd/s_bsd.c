@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.19 2001/06/30 20:18:55 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.20 2003/10/10 22:37:50 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -195,6 +195,11 @@ int	port;
 	 * easy conversion of "*" to 0.0.0.0 or 134.* to 134.0.0.0 :-)
 	 */
 	(void)sscanf(ipmask, "%d.%d.%d.%d", &ad[0], &ad[1], &ad[2], &ad[3]);
+	if (ad[0]>>8 || ad[1]>>8 || ad[2]>>8 || ad[3]>>8)
+	{
+		report_error("invalid ipmask %s", ipmask);
+		return -1;
+	}
 	(void)sprintf(ipname, "%d.%d.%d.%d", ad[0], ad[1], ad[2], ad[3]);
 
 	(void)sprintf(cptr->sockhost, "%-.42s.%u", ip ? ip : ME,
