@@ -1,3 +1,8 @@
+2000-01-01  Piotr Kucharski
+
+	* s_user.c/register_user(): moved some stuff around, so m_lusers
+	show proper number of clients (including just registered user).
+
 1999-11-10  Christophe Kalt
 
 	* struct_def.h, channel.c: added code to reject clients trying to
