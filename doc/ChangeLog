@@ -21,6 +21,11 @@
 	* s_bsd.c/summon(): Made buffer bigger, could be overflowed.
 	* s_conf.c/match_ipmask(): Make a mask of /0 work using ipv4.
 
+2000-08-20  Piotr Kucharski
+
+	* hash.c/bigger_prime(): no need to check even numbers (speed!)
+	* hash.c/clear_*_hash_table(): initialize (ch,cl,sv)size to 0
+
 2000-08-15  Piotr Kucharski
 
 	* s_user.c/m_oper(), s_serv.c/m_server_estab(), mkpasswd.c:
