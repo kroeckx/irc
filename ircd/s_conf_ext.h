@@ -47,6 +47,7 @@ EXTERN aConfItem *attach_confs_host __P((aClient *cptr, char *host,
 					 int statmask));
 EXTERN aConfItem *find_conf_exact __P((char *name, char *user, char *host,
 				       int statmask));
+EXTERN aConfItem *find_Oline __P((char *name, aClient *cptr));
 EXTERN aConfItem *find_conf_name __P((char *name, int statmask));
 EXTERN aConfItem *find_conf __P((Link *lp, char *name, int statmask));
 EXTERN aConfItem *find_conf_host __P((Reg Link *lp, char *host,

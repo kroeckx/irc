@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.11 2001/02/08 15:31:31 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.12 2001/02/09 11:35:34 q Exp $";
 #endif
 
 #include "os.h"
@@ -2303,17 +2303,7 @@ char	*parv[];
 			sendto_one(sptr, rpl_str(RPL_YOUREOPER, parv[0]));
 		return 1;
 	    }
-	if (!(aconf = find_conf_exact(name, sptr->username, sptr->sockhost,
-				      CONF_OPS)) &&
-	    !(aconf = find_conf_exact(name, sptr->username,
-#ifdef INET6
-				      (char *)inetntop(AF_INET6,
-						       (char *)&cptr->ip,
-						       mydummy, MYDUMMY_SIZE),
-#else
-				      (char *)inetntoa((char *)&cptr->ip),
-#endif
-				      CONF_OPS)))
+	if (!(aconf = find_Oline(name, sptr)))
 	    {
 		sendto_one(sptr, err_str(ERR_NOOPERHOST, parv[0]));
 		return 1;

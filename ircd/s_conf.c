@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.9 2001/02/07 21:58:39 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.10 2001/02/09 11:35:34 q Exp $";
 #endif
 
 #include "os.h"
@@ -548,6 +548,48 @@ int	statmask;
 	    }
 	return NULL;
 }
+
+/*
+ * find an O-line which matches the hostname and has the same "name".
+ */
+aConfItem *find_Oline(name, cptr)
+char	*name;
+aClient	*cptr;
+{
+	Reg	aConfItem *tmp;
+	char	userhost[USERLEN+HOSTLEN+3];
+	char	userip[USERLEN+HOSTLEN+3];
+
+	SPRINTF(userhost, "%s@%s", cptr->username, cptr->sockhost);
+	SPRINTF(userip, "%s@%s", cptr->username, 
+#ifdef INET6
+		(char *)inetntop(AF_INET6, (char *)&cptr->ip, mydummy,
+			MYDUMMY_SIZE)
+#else
+		(char *)inetntoa((char *)&cptr->ip)
+#endif
+	);
+
+
+	for (tmp = conf; tmp; tmp = tmp->next)
+	    {
+		if (!(tmp->status & (CONF_OPS)) || !tmp->name || !tmp->host ||
+			mycmp(tmp->name, name))
+			continue;
+		/*
+		** Accept if the *real* hostname matches the host field or
+		** the ip does.
+		*/
+		if (match(tmp->host, userhost) && match(tmp->host, userip) &&
+			(!strchr(tmp->host, '/') 
+			|| match_ipmask(tmp->host, cptr)))
+			continue;
+		if (tmp->clients < MaxLinks(Class(tmp)))
+			return tmp;
+	    }
+	return NULL;
+}
+
 
 aConfItem *find_conf_name(name, statmask)
 char	*name;
