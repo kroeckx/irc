@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.1 2000/09/28 21:17:39 q Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.2 2001/02/08 12:41:49 q Exp $";
 #endif
 
 #include "os.h"
@@ -985,7 +985,7 @@ void	sendto_channel_butserv(aChannel *chptr, aClient *from, char *pattern, ...)
 		lfrm = &anon;
 	    }
 
-	for (lp = chptr->members; lp; lp = lp->next)
+	for (lp = chptr->clist; lp; lp = lp->next)
 		if (MyClient(acptr = lp->value.cptr) && acptr != from)
 		    {
 			if (!len)
