@@ -6,6 +6,7 @@
 	  sendq, say so, instead of "Dead Socket" (from jv).
 	* s_service.c/check_services_butone(),check_services_num(): don't
 	  loop over all fds when we have services linked list (from jv).
+	* chkconf.c: it was not working properly if .conf was not using ':'.
 
 2001-05-06  Piotr Kucharski
 
