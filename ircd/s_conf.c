@@ -598,7 +598,7 @@ int	sig;
 	if (sig == 1)
 	    {
 		sendto_flag(SCH_NOTICE,
-			    "Got signal SIGHUP, reloading ircd conf. file");
+			    "Got signal SIGHUP, reloading ircd.conf file");
 #ifdef	ULTRIX
 		if (fork() > 0)
 			exit(0);
@@ -891,10 +891,15 @@ int	opt;
 			case 's': /* CONF_OPERATOR                */
 				aconf->status = CONF_SERVICE;
 				break;
+#if 0
 			case 'U': /* Uphost, ie. host where client reading */
 			case 'u': /* this should connect.                  */
 			/* This is for client only, I must ignore this */
 			/* ...U-line should be removed... --msa */
+				break;
+#endif
+			case 'V': /* Server link version requirements */
+				aconf->status = CONF_VER;
 				break;
 			case 'Y':
 			case 'y':
@@ -1155,7 +1160,44 @@ int	doall;
 			   "You are not welcome to this server" : tmp->passwd);
 
  	return (tmp ? -1 : 0);
- }
+}
+
+/*
+ * For type stat, check if both name and host masks match.
+ * Return -1 for match, 0 for no-match.
+ */
+int	find_two_masks(name, host, stat)
+char	*name, *host;
+int	stat;
+{
+	aConfItem *tmp;
+
+	for (tmp = conf; tmp; tmp = tmp->next)
+ 		if ((tmp->status == stat) && tmp->host && tmp->name &&
+		    (match(tmp->host, host) == 0) &&
+ 		    (match(tmp->name, name) == 0))
+			break;
+ 	return (tmp ? -1 : 0);
+}
+
+/*
+ * For type stat, check if name matches and any char from key matches
+ * to chars in passwd field.
+ * Return -1 for match, 0 for no-match.
+ */
+int	find_conf_flags(name, key, stat)
+char	*name, *key;
+int	stat;
+{
+	aConfItem *tmp;
+
+	for (tmp = conf; tmp; tmp = tmp->next)
+ 		if ((tmp->status == stat) && tmp->passwd && tmp->name &&
+ 		    (match(tmp->name, name) == 0) &&
+		    strpbrk(key, tmp->passwd))
+			break;
+ 	return (tmp ? -1 : 0);
+}
 
 #ifdef R_LINES
 /* find_restrict works against host/name and calls an outside program 

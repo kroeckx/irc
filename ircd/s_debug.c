@@ -369,9 +369,9 @@ char	*nick;
 	sendto_one(cptr, ":%s %d %s :H:%d N:%d U:%d R:%d T:%d C:%d P:%d K:%d",
 		   ME, RPL_STATSDEFINE, nick, HOSTLEN, NICKLEN, USERLEN,
 		   REALLEN, TOPICLEN, CHANNELLEN, PASSWDLEN, KEYLEN);
-	sendto_one(cptr, ":%s %d %s :BS:%d MXR:%d MXB:%d MXBL:%d",
+	sendto_one(cptr, ":%s %d %s :BS:%d MXR:%d MXB:%d MXBL:%d PY:%d",
 		   ME, RPL_STATSDEFINE, nick, BUFSIZE, MAXRECIPIENTS, MAXBANS,
-		   MAXBANLENGTH);
+		   MAXBANLENGTH, MAXPENALTY);
 	sendto_one(cptr, ":%s %d %s :ZL:%d CM:%d CP:%d",
 		   ME, RPL_STATSDEFINE, nick,
 #ifdef	ZIP_LINKS

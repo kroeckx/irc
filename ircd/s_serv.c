@@ -118,7 +118,7 @@ char	*parv[];
 			   version, debugmode, ME, serveropts);
 		return 1;
 	    }
-	return 1;
+	return 2;
 }
 
 /*
@@ -248,25 +248,49 @@ char	*parv[];
     }
 
 /*
-** check_version (Vesa)
-**      ver = new server version string
+** check_version
+**      The PASS command delivers additional information about incoming
+**	connection. The data is temporarily stored to info/name/username
+**	in m_pass() and processed here before the fields are natively used.
+** Return: < 1: exit/error, > 0: no error
 */
 int	check_version(cptr)
 aClient	*cptr;
 {
-	int	version = SV_OLD;
+	Debug((DEBUG_INFO,"check_version: %s, %s, %s", cptr->info,
+	       cptr->info+12, cptr->info+44));
 
-	Debug((DEBUG_INFO,"check_version: %s", cptr->info));
-	if (!strncmp(cptr->info, "0209", 4))
-		version = SV_29;	/* We have something special here! */
-	else if (!strncmp(cptr->info, "021", 3))
-		version = SV_29;	/* for future versions */
+	/* hop = 1 really for local client, return it in m_server_estab() */
+	if (!strncmp(cptr->info, "0209", 4) || !strncmp(cptr->info, "021", 3))
+		cptr->hopcount = SV_29;	/* 2.9+ protocol */
+	else
+		cptr->hopcount = SV_OLD;
+
+	if (*cptr->info) {	/* Check version number/mask from conf */
+		if (find_two_masks(cptr->name, cptr->info, CONF_VER)) {
+			sendto_flag(SCH_ERROR, "Bad version %s from %s",
+				    cptr->info, get_client_name(cptr, TRUE));
+			return exit_client(cptr, cptr, &me, "Bad version");
+		}
+	} else
+		return 1;	/* No version checked */
+
+	strncpyzt(buf, cptr->info+12, 30);
+	if (*buf) {	/* Check version flags from conf */
+		if (find_conf_flags(cptr->name, buf, CONF_VER)) {
+			sendto_flag(SCH_ERROR, "Bad flags %s from %s",
+				    buf, get_client_name(cptr, TRUE));
+			return exit_client(cptr, cptr, &me, "Bad flags");
+		}
+	} else
+		return 2;	/* No flags checked */
 
 	/* right now, I can't code anything good for this */
-	if (cptr->info[strlen(cptr->info)-1] == 'Z')
+	/* Stop whining, and do it! ;) */
+	if (strchr(cptr->info+44, 'Z'))	/* Compression requested */
                 cptr->flags |= FLAGS_ZIPRQ;
 
-	return version;
+	return 3;
 }
 
 /*
@@ -287,7 +311,7 @@ char	*parv[];
 	char	info[REALLEN+1], *inpath, *host, *stok;
 	aClient *acptr, *bcptr;
 	aConfItem *aconf;
-	int	hop, token = 0;
+	int	hop = 0, token = 0;
 
 	info[0] = info[REALLEN] = '\0';	/* strncpy() doesn't guarantee NULL */
 	inpath = get_client_name(cptr, FALSE);
@@ -296,7 +320,6 @@ char	*parv[];
 			sendto_one(cptr,"ERROR :No servername");
 			return 2;
 	    }
-	hop = 0;
 	host = parv[1];
 	if (parc > 3 && (hop = atoi(parv[2])))
 	    {
@@ -510,9 +533,11 @@ char	*parv[];
 	** to be a SERVER. Check if this is allowed and change
 	** status accordingly...
 	*/
-	/* hop = 1 really for local client, return it in m_server_estab() */
-	cptr->hopcount = check_version(cptr);
 	strncpyzt(cptr->name, host, sizeof(cptr->name));
+	/* cptr->name has to exist before check_version(), and cptr->info
+	 * may not be filled before check_version(). */
+	if ((hop = check_version(cptr)) < 1)
+		return hop;	/* from exit_client() */
 	strncpyzt(cptr->info, info[0] ? info:ME, sizeof(cptr->info));
 
 	switch (check_server_init(cptr))
@@ -1098,7 +1123,7 @@ char	*parv[];
 #endif /* ENABLE_SUMMON */
 	    }
 	else
-		return 2;
+		return 3;
 	return 1;
 }
 
@@ -1125,7 +1150,7 @@ char	*parv[];
 **	      it--not reversed as in ircd.conf!
 */
 
-static int report_array[13][3] = {
+static int report_array[14][3] = {
 		{ CONF_ZCONNECT_SERVER,	  RPL_STATSCLINE, 'c'},
 		{ CONF_CONNECT_SERVER,	  RPL_STATSCLINE, 'C'},
 		{ CONF_NOCONNECT_SERVER,  RPL_STATSNLINE, 'N'},
@@ -1138,6 +1163,7 @@ static int report_array[13][3] = {
 		{ CONF_HUB,		  RPL_STATSHLINE, 'H'},
 		{ CONF_LOCOP,		  RPL_STATSOLINE, 'o'},
 		{ CONF_SERVICE,		  RPL_STATSSLINE, 'S'},
+		{ CONF_VER,		  RPL_STATSSLINE, 'V'},
 		{ 0, 0, 0}
 	};
 
@@ -1165,10 +1191,10 @@ int	mask;
 			name = BadPtr(tmp->name) ? null : tmp->name;
 			port = (int)tmp->port;
 			/*
-			 * On K line the passwd contents can be
+			 * On K/V lines the passwd contents can be
 			 * displayed on STATS reply. 	-Vesa
 			 */
-			if (tmp->status == CONF_KILL)
+			if (tmp->status == CONF_KILL || tmp->status == CONF_VER)
 				sendto_one(sptr, rpl_str(p[1], to),c,host,pass,
 					   name, port, get_conf_class(tmp));
 			else
@@ -1338,6 +1364,9 @@ char	*parv[];
 			   now/86400, (now/3600)%24, (now/60)%60, now%60);
 		break;
 	    }
+	case 'V' : case 'v' : /* V conf lines */
+		report_configured_links(cptr, parv[0], CONF_VER);
+		break;
 	case 'X' : case 'x' : /* lists */
 #ifdef	DEBUGMODE
 		send_listinfo(cptr, parv[0]);
@@ -1406,7 +1435,7 @@ char	*parv[];
 #endif
 	    }
 	else
-		return 2;
+		return 3;
 	return 1;
 }
 
@@ -1487,7 +1516,7 @@ char	*parv[];
 	if (parc > 2)
 		if(hunt_server(cptr, sptr, ":%s LUSERS %s :%s", 2, parc, parv)
 				!= HUNTED_ISME)
-			return 2;
+			return 3;
 
 	if (parc == 1)
 	    {
@@ -1617,7 +1646,7 @@ char	*parv[];
 
 	if (hunt_server(cptr,sptr,":%s CONNECT %s %s :%s",
 		       3,parc,parv) != HUNTED_ISME)
-		return 0;
+		return 1;
 
 	if (parc < 3 || *parv[1] == '\0')
 	    {
@@ -1774,7 +1803,7 @@ char	*parv[];
 		sendto_one(sptr, rpl_str(RPL_TIME, parv[0]), ME, date((long)0));
 		return 1;
 	    }
-	return 1;
+	return 2;
     }
 
 
@@ -1792,7 +1821,7 @@ char	*parv[];
 
 	if (IsRegistered(cptr) &&	/* only local query for unregistered */
 	    hunt_server(cptr,sptr,":%s ADMIN :%s",1,parc,parv) != HUNTED_ISME)
-		return 2;
+		return 3;
 	if ((aconf = find_admin()))
 	    {
 		sendto_one(sptr, rpl_str(RPL_ADMINME, parv[0]), ME);
@@ -1877,7 +1906,7 @@ char	*parv[];
 			   version, debugmode, tname, ac2ptr->from->name,
 			   ac2ptr->from->serv->version,
 			   (ac2ptr->from->flags & FLAGS_ZIP) ? "z" : "");
-		return 2;
+		return 3;
 	    }
 	case HUNTED_ISME:
 		break;
@@ -2022,7 +2051,7 @@ char	*parv[];
 				   Class(cltmp), Links(cltmp));
 	sendto_one(sptr, rpl_str(RPL_TRACEEND, parv[0]), tname, version,
 		   debugmode);
-	return 1;
+	return 2;
     }
 
 /*
@@ -2042,7 +2071,7 @@ char	*parv[];
 	struct	tm	*tm;
 
 	if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
-		return 1;
+		return 3;
 	/*
 	 * stop NFS hangs...most systems should be able to open a file in
 	 * 3 seconds. -avalon (curtesy of wumpus)
@@ -2073,7 +2102,7 @@ char	*parv[];
 	(void)dgets(-1, NULL, 0); /* make sure buffer is at empty pos */
 	sendto_one(sptr, rpl_str(RPL_ENDOFMOTD, parv[0]));
 	(void)close(fd);
-	return 1;
+	return 2;
     }
 
 /*
@@ -2101,7 +2130,7 @@ char	*parv[];
 		closed++;
 	    }
 	sendto_one(sptr, rpl_str(RPL_CLOSEEND, parv[0]), closed);
-	return 0;
+	return 1;
 }
 
 #if defined(OPER_DIE) || defined(LOCOP_DIE)

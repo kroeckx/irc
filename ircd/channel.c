@@ -845,7 +845,7 @@ char	*parv[], *mbuf, *pbuf;
 					   whatt == MODE_ADD ? '+' : '-',
 					   *curr, who->name);
 			count++;
-			*penalty += 1;
+			*penalty += 2;
 			break;
 		case 'k':
 			*penalty += 1;
@@ -900,7 +900,7 @@ char	*parv[], *mbuf, *pbuf;
 				    }
 			    }
 			count++;
-			*penalty += 1;
+			*penalty += 2;
 			break;
 		case 'b':
 			*penalty += 1;
@@ -937,7 +937,7 @@ char	*parv[], *mbuf, *pbuf;
 				lp->flags = MODE_DEL|MODE_BAN;
 			    }
 			count++;
-			*penalty += 1;
+			*penalty += 2;
 			break;
 		case 'l':
 			*penalty += 1;
@@ -974,12 +974,11 @@ char	*parv[], *mbuf, *pbuf;
 				lp->flags = MODE_ADD|MODE_LIMIT;
 				limitset = 1;
 				count++;
-				*penalty += 1;
+				*penalty += 2;
 				break;
 			    }
 			sendto_one(cptr, err_str(ERR_NEEDMOREPARAMS,
 				   cptr->name), "MODE +l");
-			*penalty += 1;
 			break;
 		case 'i' : /* falls through for default case */
 			if (whatt == MODE_DEL)
@@ -1006,7 +1005,7 @@ char	*parv[], *mbuf, *pbuf;
 				else
 					new &= ~*ip;
 				count++;
-				*penalty += 1;
+				*penalty += 2;
 			    }
 			else if (!IsServer(cptr))
 				sendto_one(cptr, err_str(ERR_UNKNOWNMODE,
@@ -1615,7 +1614,7 @@ char	*parv[];
 		    }
 #endif
 	    }
-	return 1;
+	return 2;
 }
 
 /*
@@ -1689,7 +1688,7 @@ char	*parv[];
 	    }
 	if (*buf)
 		sendto_serv_butone(cptr, PartFmt, parv[0], buf, comment);
-	return 1;
+	return 2;
     }
 
 /*
@@ -1706,7 +1705,7 @@ char	*parv[];
 {
 	aClient *who;
 	aChannel *chptr;
-	int	chasing = 0, penalty = 0, count = 0;
+	int	chasing = 0, penalty = 0;
 	char	*comment, *name, *p = NULL, *user, *p2 = NULL;
 	int	mlen, len = 0, nlen;
 
@@ -1727,6 +1726,7 @@ char	*parv[];
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
+		penalty++;
 		chptr = get_channel(sptr, name, !CREATE);
 		if (!chptr)
 		    {
@@ -1757,6 +1757,7 @@ char	*parv[];
 
 		for (; (user = strtoken(&p2, parv[2], ",")); parv[2] = NULL)
 		    {
+			penalty++;
 			if (!(who = find_chasing(sptr, user, &chasing)))
 				continue; /* No such user left! */
 			if (nlen + mlen + strlen(who->name) >
@@ -1780,7 +1781,7 @@ char	*parv[];
 						   who->name, comment);
 				remove_user_from_channel(who,chptr);
 				penalty += 2;
-				if (++count >= MAXMODEPARAMS)
+				if (penalty > MAXPENALTY)
 					break;
 			    }
 			else
@@ -1827,7 +1828,7 @@ char	*parv[];
     {
 	aChannel *chptr = NullChn;
 	char	*topic = NULL, *name, *p = NULL;
-	int	penalty = 0;
+	int	penalty = 1;
 	
 	if (parc < 2)
 	    {
@@ -1862,7 +1863,7 @@ char	*parv[];
 		if (!chptr)
 		    {
 			sendto_one(sptr, rpl_str(RPL_NOTOPIC, parv[0]), name);
-			return 1;
+			return penalty;
 		    }
 
 		if (check_channelmask(sptr, cptr, name))
@@ -1930,7 +1931,7 @@ char	*parv[];
 
 		sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",
 				  parv[0], parv[1], parv[2]);
-		return 1;
+		return 3;
 	    }
 
 	if (chptr && !IsMember(sptr, chptr))
@@ -1976,7 +1977,7 @@ char	*parv[];
 			add_invite(acptr, chptr);
 	sendto_prefix_one(acptr, sptr, ":%s INVITE %s :%s",parv[0],
 			  acptr->name, ((chptr) ? (chptr->chname) : parv[2]));
-	return 1;
+	return 2;
     }
 
 
@@ -1996,7 +1997,7 @@ char	*parv[];
 
 	if (parc > 1 &&
 	    hunt_server(cptr, sptr, ":%s LIST %s %s", 2, parc, parv))
-		return 2;
+		return 3;
 #ifdef MIRC_KLUDGE
         sendto_one(sptr, rpl_str(RPL_LISTSTART, parv[0]));
 #endif
@@ -2033,7 +2034,7 @@ char	*parv[];
 		sendto_one(sptr, err_str(ERR_TOOMANYMATCHES, parv[0]),
 			   !BadPtr(parv[1]) ? parv[1] : "*");
 	sendto_one(sptr, rpl_str(RPL_LISTEND, parv[0]));
-	return 1;
+	return 2;
     }
 
 
@@ -2060,7 +2061,7 @@ char	*parv[];
 
 	if (parc > 1 &&
 	    hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
-		return 2;
+		return 3;
 
 	mlen = strlen(ME) + 10;
 	if (!BadPtr(para))

@@ -1,11 +1,48 @@
+Sun Jan 26 20:02:34 EET 1997  Vesa Ruokonen  (ruokonen@aapo.it.lut.fi)
+
+	* 2.9.3b8
+
+	* support.c, h.h, list.c: gcc -Wall cleanups.
+	* h.h, struct.h, chkconf.c, s_conf.c, s_serv.c:
+		created V:lines for checking connecting client parameters.
+		passed as PASS command parameters. A matching V:line.
+		refuces the connection (version number & compile flags).
+	* struct.h, channel.c, s_debug.c:
+		penalty threshold used for limiting KICK params.
+	* struct.h: initial QUEUELEN calculation tuned. (->BUFFERPOOL).
+	* c_msg.c: more verbose m_pong().
+	* channel.c, s_serv.c, s_user.c, whowas.c:
+		penalties tuned for commands generating global bcast.
+	* hash.c: converted multiplication to hashtable lookup to speed.
+		up function calls. (from Core)
+	* ircd.c, s_bsd.c: added truncation for non-appended writes. (_root_)
+	* s_user.c: prefix for voice capability in channel list of WHOIS reply
+		changed from '+' to '!'.
+	* s_user.c: drop PONGs with bad origin.
+		store connection parameters from PASS temporarily to info
+		field in contstant locations.
+	* s_user.c: m_umode() fixed (from Core).
+
 Wed Jan 15 14:42:43 1997  Christophe Kalt
 
 	* s_bsd.c:
 
 		* mysk was initialized by empty password in M line.
 
-(Vesa's Changes....)
-	
+Tue Jan 14 24:62:34 EET 1997  Vesa Ruokonen  (ruokonen@aapo.it.lut.fi)
+
+	* parse.c, channel.c, s_user.c: cleanup of find_functions(),
+		_nickserv replaced by _service.
+	* h.h, : setup_ping() takes aConfItem pointer as parameter now.
+	* sys.h: #elif expanded to #else #if for compability
+	* s_bsd.c: inetport(P:line) changed to support VIFs better.
+		More info about listening ports into /stats l.
+		UDP ping is initialized from M:line, not anymore from P:line.
+	* s_numeric.c: cleanups in numeric processing.
+	* Makefile.in, Makefile.irc, Makefile.ircd: makedepend fix
+	* configure.in: zlib check moved to end, as it can interfere
+		other checks when libs aren't in default paths.
+
 Mon Jan 13 09:11:04 1997  Christophe Kalt
 
 	* ircd.c:

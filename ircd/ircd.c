@@ -1042,6 +1042,7 @@ char *filename;
 	int fd;
 	char buf[100];
 
+	(void)truncate(filename, 0);
 	if ((fd = open(filename, O_CREAT|O_WRONLY, 0600)) >= 0)
 	    {
 		(void)sprintf(buf, "%d\n%d\n%d\n%d\n%d\n%d\n", ww_size,

@@ -74,12 +74,15 @@ extern	aConfItem *find_conf_host __P((Link *, char *, int));
 extern	aConfItem *find_conf_ip __P((Link *, char *, char *, int));
 extern	aConfItem *find_conf_name __P((char *, int));
 extern	int	find_kill __P((aClient *, int));
+extern	int	find_two_masks __P((char *, char *, int));
+extern	int	find_conf_flags __P((char *, char *, int));
 extern	int	find_restrict __P((aClient *));
 extern	int	rehash __P((aClient *, aClient *, int));
 extern	int	initconf __P((int));
 extern	int	rehashed;
 
 extern	char	*MyMalloc __P((size_t)), *MyRealloc __P((char *, size_t));
+extern	void	MyFree __P((char *));
 extern	char	*debugmode, *configfile, *sbrk0;
 extern	char	*getfield __P((char *));
 extern	void	get_sockhost __P((aClient *, char *));

@@ -678,7 +678,7 @@ char	*parv[];
 				return exit_client(cptr,sptr,&me,"BadNick");
 			    }
 		    }
-		return 1;
+		return 2;
 	    }
 
 	/*
@@ -694,7 +694,7 @@ char	*parv[];
 		    {
 			sendto_one(sptr, err_str(ERR_NICKNAMEINUSE, parv[0]),
 				   nick);
-			return 1; /* NICK message ignored */
+			return 2; /* NICK message ignored */
 		    }
 	/*
 	** acptr already has result from previous find_server()
@@ -755,7 +755,7 @@ char	*parv[];
 			** especially since servers prior to this
 			** version would treat it as nick collision.
 			*/
-			return 1; /* NICK Message ignored */
+			return 2; /* NICK Message ignored */
 	/*
 	** Note: From this point forward it can be assumed that
 	** acptr != sptr (point to different client structures).
@@ -783,7 +783,7 @@ char	*parv[];
 		sendto_one(sptr, err_str((delayed) ? ERR_UNAVAILRESOURCE
 						   : ERR_NICKNAMEINUSE,
 					 parv[0]), nick);
-		return 1; /* NICK message ignored */
+		return 2; /* NICK message ignored */
 	    }
 	/*
 	** NICK was coming from a server connection. Means that the same
@@ -885,12 +885,12 @@ nickkilldone:
 		if (MyConnect(sptr))
 		{
 			if (!IsPerson(sptr))    /* Unregistered client */
-				return 1;       /* Ignore new NICKs */
+				return 2;       /* Ignore new NICKs */
 			if (IsRestricted(sptr))
 			    {
 				sendto_one(sptr,
 					   err_str(ERR_RESTRICTED, nick));
-				return 1;
+				return 2;
 			    }
 		}
 		/*
@@ -937,7 +937,7 @@ nickkilldone:
 	**  Finally set new nick name.
 	*/
 	(void)add_to_client_hash_table(nick, sptr);
-	return 2;
+	return 3;
 }
 
 /*
@@ -1369,7 +1369,7 @@ char	*parv[];
 	    {
 		if (hunt_server(cptr,sptr,":%s WHOIS %s :%s", 1,parc,parv) !=
 		    HUNTED_ISME)
-			return 2;
+			return 3;
 		parv[1] = parv[2];
 	    }
 
@@ -1464,7 +1464,7 @@ char	*parv[];
 					if (is_chan_op(acptr, chptr))
 						*(buf + len++) = '@';
 					else if (has_voice(acptr, chptr))
-						*(buf + len++) = '+';
+						*(buf + len++) = '!';
 					if (len)
 						*(buf + len) = '\0';
 					(void)strcpy(buf + len, chptr->chname);
@@ -1749,7 +1749,7 @@ char	*parv[];
 			    sptr->name, acptr->name, parv[0], parv[1], parv[2]);
 		sendto_one(sptr, err_str(ERR_CANTKILLSERVER, parv[0]),
 			   acptr->name);
-		return 0;
+		return 1;
 	    }
 
 #ifdef	LOCAL_KILL_ONLY
@@ -1940,7 +1940,7 @@ char	*parv[];
 	sptr->user->away = away;
 	(void)strcpy(away, awy2);
 	sendto_one(sptr, rpl_str(RPL_NOWAWAY, parv[0]));
-	return 1;
+	return 2;
 }
 
 /*
@@ -2016,15 +2016,18 @@ char	*parv[];
 	if (!BadPtr(destination) && mycmp(destination, ME) != 0)
 	    {
 		if ((acptr = find_client(destination, NULL)) ||
-		    (acptr = find_server(destination, NULL)))
-			sendto_one(acptr,":%s PONG %s %s",
-				   parv[0], origin, destination);
-		else
-		    {
+		    (acptr = find_server(destination, NULL))) {
+			if (MyClient(sptr) && !mycmp(origin, sptr->name))
+				sendto_flag(SCH_ERROR, "PONG origin %s by %s",
+					    origin,
+					    get_client_name(sptr, TRUE));
+			else
+				sendto_one(acptr,":%s PONG %s %s",
+					   parv[0], origin, destination);
+		} else
 			sendto_one(sptr, err_str(ERR_NOSUCHSERVER, parv[0]),
 				   destination);
-			return 1;
-		    }
+		return 2;
 	    }
 #ifdef	DEBUGMODE
 	else
@@ -2190,7 +2193,7 @@ char	*parv[];
 		(void)detach_conf(sptr, aconf);
 		sendto_one(sptr,err_str(ERR_PASSWDMISMATCH, parv[0]));
 	    }
-	return 1;
+	return 3;
     }
 
 /***************************************************************************
@@ -2217,22 +2220,20 @@ char	*parv[];
 		sendto_one(cptr, err_str(ERR_NEEDMOREPARAMS, parv[0]), "PASS");
 		return 1;
 	    }
-       if (parc > 2 && parv[2])
-	   {
-               strncpyzt(cptr->info, parv[2], 15);                
-               if (parc > 3 && parv[3])
-		   {
-                       strcat(cptr->info, " ");                          
-                       strncat(cptr->info, parv[3], 20); /* hmm */   
-                       if (parc > 4 && parv[4])
-			   {                   
-                               strcat(cptr->info, " ");              
-                               strncat(cptr->info, parv[4], 5); /* hmm */
-			   }
-		   }
-	   }
+	/* Temporarily store PASS pwd *parameters* into info field */
+	if (parc > 2 && parv[2]) {
+		strncpyzt(cptr->info, parv[2], 11); 
+		if (parc > 3 && parv[3]) {
+			strncpy(cptr->info+12, parv[3], 30);
+			cptr->info[42] = '\0';
+			if (parc > 4 && parv[4]) {
+				strncpy(cptr->info+44, parv[4], 5);
+				cptr->info[49] = '\0';
+			}
+		}
+	}
 	strncpyzt(cptr->passwd, password, sizeof(cptr->passwd));
-	return 0;
+	return 1;
     }
 
 /*
@@ -2486,6 +2487,7 @@ char	*parv[];
 						sptr->user->flags |= flag;
 					else
 						sptr->user->flags &= ~flag;	
+					penalty += 1;
 					break;
 				    }
 				if (flag == 0 && MyConnect(sptr))
@@ -2506,12 +2508,11 @@ char	*parv[];
 		    !IsServer(cptr))
 			sptr->user->flags &= ~FLAGS_LOCOP;
 		if ((setflags & FLAGS_RESTRICTED) &&
-		    !(sptr->user->flags & FLAGS_RESTRICTED) &&
-		    (what == MODE_DEL))
+		    !(sptr->user->flags & FLAGS_RESTRICTED))
 		    {
 			sendto_one(sptr, err_str(ERR_RESTRICTED, parv[0]));
 			SetRestricted(sptr);
-			return 1;
+			/* Can't return; here since it could mess counters */
 		    }
 		if ((setflags & (FLAGS_OPER|FLAGS_LOCOP)) && !IsAnOper(sptr) &&
 		    MyConnect(sptr))
@@ -2525,13 +2526,11 @@ char	*parv[];
 		    {
 			istat.is_user[1]--;
 			istat.is_user[0]++;
-			penalty += 1;
 		    }
 		if (IsInvisible(sptr) && !(setflags & FLAGS_INVISIBLE))
 		    {
 			istat.is_user[1]++;
 			istat.is_user[0]--;
-			penalty += 1;
 		    }
 		send_umode_out(cptr, sptr, setflags);
 	    }

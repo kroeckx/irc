@@ -31,6 +31,7 @@ static char sccsid[] = "@(#)hash.c	1.1 1/21/95 (C) 1991 Darren Reed";
 static	aHashEntry	*clientTable = NULL;
 static	aHashEntry	*channelTable = NULL;
 static	aHashEntry	*serverTable = NULL;
+static	unsigned int	*hashtab = NULL;
 static	int	clhits = 0, clmiss = 0, clsize = 0;
 static	int	chhits = 0, chmiss = 0, chsize = 0;
 static	int	svsize = 0;
@@ -84,7 +85,7 @@ int	*store;
 	for (; (ch = *name); name++)
 	{
 		hash <<= 1;
-		hash += tolower(ch) * 109;
+		hash += hashtab[(int)ch];
 	}
 	*store = hash;
 	if (hash < 0)
@@ -113,7 +114,7 @@ int	*store;
 	for (; (ch = *name) && --i; name++)
 	{
 		hash <<= 1;
-		hash += tolower(ch) * 109 + (i << 1);
+		hash += hashtab[(int)ch] + (i << 1);
 	}
 	*store = hash;
 	if (hash < 0)
@@ -204,10 +205,21 @@ int	size;
 
 void	inithashtables()
 {
+	Reg int i;
+
 	clear_client_hash_table((_HASHSIZE) ? _HASHSIZE : HASHSIZE);
 	clear_channel_hash_table((_CHANNELHASHSIZE) ? _CHANNELHASHSIZE
                                  : CHANNELHASHSIZE);
 	clear_server_hash_table((_SERVERSIZE) ? _SERVERSIZE : SERVERSIZE);
+
+	/*
+	 * Moved multiplication out from the hashfunctions and into
+	 * a pre-generated lookup table. Should save some CPU usage
+	 * even on machines with a fast mathprocessor.  -- Core
+	 */
+	hashtab = (unsigned int *) MyMalloc(256 * sizeof(unsigned int));
+	for (i = 0; i < 256; i++)
+		hashtab[i] = tolower((char)i) * 109;
 }
 
 static	void	bigger_hash_table(size, table, new)

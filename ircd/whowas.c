@@ -351,7 +351,7 @@ char	*parv[];
 		max = atoi(parv[2]);
 	if (parc > 3)
 		if (hunt_server(cptr,sptr,":%s WHOWAS %s %s :%s", 3,parc,parv))
-			return 2;
+			return 3;
 
 	parv[1] = canonize(parv[1]);
 	if (!MyConnect(sptr))

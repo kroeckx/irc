@@ -91,16 +91,19 @@ typedef	struct	Zdata	aZdata;
 #define	MAXBANS		20
 #define	MAXBANLENGTH	1024
 #define	BANLEN		(USERLEN + NICKLEN + HOSTLEN + 3)
+#define MAXPENALTY	10
 
 #define	READBUF_SIZE	16384	/* used in s_bsd.c *AND* s_zip.c ! */
  
 /*
  * Make up some numbers which should reflect average leaf server connect
  * queue max size.
+ * queue=(<# of channels> * <channel size> + <user size> * <# of users>) * 2
+ * pool=<queue per client> * <avg. # of clients having data in queue>
  */
-#define	QUEUELEN	(((MAXCONNECTIONS / 16) * (CHANNELLEN + BANLEN + 16) +\
+#define	QUEUELEN	(((MAXCONNECTIONS / 10) * (CHANNELLEN + BANLEN + 16) +\
 			  (HOSTLEN * 4 + REALLEN + NICKLEN + USERLEN + 24) *\
-			  (MAXCONNECTIONS / 16)) * 2)
+			  (MAXCONNECTIONS / 2)) * 2)
 
 #define	BUFFERPOOL	(QUEUELEN * MAXCONNECTIONS / 16)
 
@@ -317,6 +320,7 @@ struct	ConfItem	{
 #define	CONF_LEAF		0x04000
 #define	CONF_LISTEN_PORT	0x08000
 #define	CONF_HUB		0x10000
+#define	CONF_VER		0x20000
 
 #define	CONF_OPS		(CONF_OPERATOR | CONF_LOCOP)
 #define	CONF_SERVER_MASK	(CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER |\

@@ -189,6 +189,7 @@ Overview of this document:
   11.  Service connections      (S)
   12.  Port connections		(P)
   13.  Hub connections		(H)
+  14.  Version limitations	(V)
 
 
    1. SERVER CONNECTIONS:  How to connect to other servers
@@ -332,13 +333,13 @@ Field: 1        2              3                4               5          6
    and you want to place password authorization authorization on garfield.
    The "N" entry would be:
    
-          N:garfield.mit.edu:golden:garfield.mit.edu
+          N:garfield.mit.edu:golden:garfield.mit.edu::
   
    This line says: expect a connection from host "garfield.mit.edu",
    and expect a login password of "golden" 
    and expect the host to identify itself as "garfield.mit.edu".
      
-	  N:18.72.0.252::garfield.mit.edu
+	  N:18.72.0.252::garfield.mit.edu::
 
    This line says: expect a Connection from host "18.72.0.252", and 
    don't expect login password.  The connecting host should identify itself
@@ -406,16 +407,18 @@ Field: 1        2              3                4               5          6
    IRC needs to know a few things about your UNIX site, and the "M" command
    specifies this information for IRC.  The fomat of this command is:
 
-           M:<YOUR Host NAME>:<YOUR Internet IP#>:<Geographic Location>:<Port>
-   Field:  1         2                3                     4              5
+           M:<Server NAME>:<YOUR Internet IP#>:<Geographic Location>:<Port>
+   Field:  1      2                3                     4              5
 
    Explanation:
 
       Field 1: "M" specifies a Machine description line
 
-      Field 2: The name of YOUR host adding any Internet DOMAINNAME that 
-               might also be present.  If this hostname can be resolved,
+      Field 2: The name of YOUR server adding any Internet DOMAINNAME that 
+               might also be present. If this hostname can be resolved,
                the IP# found will be used to for outgoing connections.
+               Otherwise the default interface address of the host is used.
+               The server name may not be FQDN of another host.
                (This means all outgoing connections will be done from the
                same IP#, even if your host has several IP#).
 
@@ -437,12 +440,12 @@ Field: 1        2              3                4               5          6
                description in connect lines).
  
       Example:
-                M:tolsun.oulu.fi::Oulu, Finland:6667
+                M:tolsun.oulu.fi::Oulu, Finland:6667:
 
                 This line reads: My Host's name is "tolsun.oulu.fi" and
                 my site is located in "Oulu, Finland".
 
-                M:orion.cair.du.edu::Denver Colorado, USA:6667
+                M:orion.cair.du.edu::Denver Colorado, USA:6667:
 
                 This line reads: My Hosts name is "orion.cair.du.edu"
                 and my site is located in "Denver Colorado, USA".
@@ -473,7 +476,7 @@ Field: 1        2              3                4               5          6
       tolsun and you wanted to let your own clients to connect to your
       server, you would add this entry to the file:
 
-      I:128.214.5.6::tolsun.oulu.fi::1
+      I:x::tolsun.oulu.fi::1
 
       If you wanted to let remote clients connect, you could add the
       following lines:
@@ -485,8 +488,8 @@ Field: 1        2              3                4               5          6
 
       I:128.214.6.100::nic.funet.fi::1
 
-      Allow clients from a machine with that IP number and the name 
-      nic.funet.fi to connect.
+      Allow clients from a machine with that IP number to connect.
+      Numeric match is enough, name is not required anymore.
 
       I:x:secret:*.tut.fi::1
 
@@ -530,7 +533,7 @@ Field: 1        2              3                4               5          6
       Such users will have their username prefixed by +, = or - depending
       on the ident reply.
 
-   4. DEFAULT HOSTS (for local clients)
+   4. DEFAULT HOSTS (for local clients) *obsoleted*
 
       This defines the default connection for the irc client.  If you are
       running an ircd server on the same machine, you will want to define
@@ -596,7 +599,7 @@ Field: 1        2              3                4               5          6
 	      O-line allowable through the max. links field in the Y-line.
 
   Example:
-              O:orion.cair.du.edu:pyunxc:Jeff
+              O:orion.cair.du.edu:pyunxc:Jeff::1
 
               There is an OPERATOR at "orion.cair.du.edu" that can get
               Operator priviliges if he specifies a password of "pyunxc"
@@ -611,7 +614,7 @@ Field: 1        2              3                4               5          6
   here in case problems arise.
 
   
-            A:<Your Name/Location>:<Your Electronic Mailing Addr>:<other> 
+            A:<Your Name/Location>:<Your Electronic Mailing Addr>:<other>::
   Field:    1        2                    3                         4
 
   Explanation:
@@ -641,7 +644,7 @@ Field: 1        2              3                4               5          6
             is cut into two lines to make it clearer to read):
 
 A:Jeff Trim -  Denver Colorado, USA:INET jtrim@orion.cair.du.edu UUCP {hao,
-isis}!udenva!jtrim:Terve! Heippa!  Have you said hello in Finnish today?;)
+isis}!udenva!jtrim:Terve! Heippa!  Have you said hello in Finnish today?;)::
 
   Would look like this when printed out with the /admin command:
 
@@ -666,7 +669,7 @@ isis}!udenva!jtrim:Terve! Heippa!  Have you said hello in Finnish today?;)
 
   The format of this command is:
 
-         K:<Host Name>:<time interval(s)|comment>:<User>:<port>
+         K:<Host Name>:<time interval(s)|comment>:<User>:<port>:
   Field: 1     2                     3               4      5
 
   Explanation:
@@ -697,23 +700,23 @@ isis}!udenva!jtrim:Terve! Heippa!  Have you said hello in Finnish today?;)
 
    
    Some Examples:
-                   K:orion.cair.du.edu::jtrim:0
+                   K:orion.cair.du.edu::jtrim:0:
  
                If user 'jtrim' connects to IRC from host "orion.cair.du.edu"
                then IMMEDIATELY REMOVE HIM from my IRCD.
 
-                   K:*.cair.du.edu::root:0
+                   K:*.cair.du.edu::root:0:
 
                If user 'root' connects to IRC from any host that has the 
                suffix "cair.du.edu" - then IMMEDIATELY REMOVE THEM from
                my IRCD.
 
-                   K:*::vijay:0
+                   K:*::vijay:0:
 
                This line reads "I don't care WHAT HOST user 'vijay' is on,
                I will NEVER allow username 'vijay' to login to my IRCD.
 
-	           K:*.oulu.fi:0800-1200,1400-1900:*:0
+	           K:*.oulu.fi:0800-1200,1400-1900:*:0:
 
 	       This disallows all users from hosts with enddomain 'oulu.fi'
 	       access to your server between 8 and 12am, 2 and 7pm.
@@ -736,7 +739,7 @@ isis}!udenva!jtrim:Terve! Heippa!  Have you said hello in Finnish today?;)
    same Q-line in their ircd configuration files as well.
 
    Example:
-                Q::of the security holes:foo.bar.baz
+                Q::of the security holes:foo.bar.baz::
 
    This command excludes a server named "foo.bar.baz", the reason
    is given to be security holes (you should give a reason, it is
@@ -802,7 +805,7 @@ Field: 1    2           3                  4                 5         6
 
    Example:
 
-   Y:23:120:300:5
+   Y:23:120:300:5:
 
    define class 23 to allow 5 auto-connections, which are checked every
    300 seconds.  The connection is allowed to remain silent for 120
@@ -834,7 +837,7 @@ Field: 1    2           3                  4                 5         6
    have an L-line for it, the one which does will drop the connection, once
    again making the server a leaf.
 
-       L:<SERVER MASK>:*:<SERVER NAME>:<MAX DEPTH>
+       L:<SERVER MASK>:*:<SERVER NAME>:<MAX DEPTH>:
 Field: 1       2       3       4            5
 
    Field 2: mask of which servers the leaf-like attributes are used on
@@ -915,34 +918,37 @@ Field: 1       2       3       4            5
    to setup both Unix Domain ports for the server to accept connections
    on as well as extra internet ports.
 
-       P:<Internet IP# Mask>:<*>:<Internet IP#>:<PORT>
-Field: 1        2             3         4          5
+       P:<Internet IP#>:<*>:<Internet IP Mask>:<PORT>:
+Field: 1        2        3         4             5
 
 or
 
-       P:<Directory>:<*>:<*>:<PORT>
-Field: 1        2             3   4     5
+       P:<Directory>:<*>:<*>:<PORT>:
+Field: 1        2     3   4     5
 
   Explanation
    Internet Ports
-    Field 1
+     Field 2
+	If the host on which the server runs has several IP addresses, you can
+	define for which IP address connections will be accepted. If no
+	is defined here, server will bind to all interfaces (INADDR_ANY).
+	See also MACHINE CONFIGURATION section to properly configure outgoing
+	connections.
+
+		P:192.168.1.194:::6664:
+
+     Field 4
 	The internet IP# mask defines where connections may come from and
 	be accepted. The IP mask uses either *'s or 0's as wildcards. The
 	following two lines are the same:
 
-		P:128.2.*:::6664
-		P:128.2.0.0:::6664
+		P:::128.2.*:6664:
+		P:::128.2.0.0:6664:
 
-	The incoming isnt matched against the mask, rather the ip# string
+	The incoming isn't matched against the mask, rather the ip# string
 	is decoded and compared segment by segment. Thus
-		P:128.2*.1.2:::6664
+		P:128.2*.1.2:::6664:
 	will not match 128.20.1.2.
-
-     Field 4
-	If the host on which the server runs has several IP addresses, you can
-	define for which IP address connections will be accepted.  See also
-	MACHINE CONFIGURATION section to properly configure outgoing
-	connections.
 
      Field 5
 	The port number field tells the server which port number it should
@@ -959,7 +965,7 @@ Field: 1        2             3   4     5
 	is the filename created in the directory set in Field 1.
 
      Example:
-		P:/tmp/.ircd:::6667
+		P:/tmp/.ircd:::6667:
 
 	Creates a unix socket in the /tmp/.ircd directory called "6667".
 	The unix socket (file) must be a numerical.
@@ -974,7 +980,7 @@ Field: 1        2             3   4     5
    leaf) then no H-line is required for, else a H-line must be added as
    follows:
 
-       H:<SERVER MASK>:*:<SERVER NAME>
+       H:<SERVER MASK>:*:<SERVER NAME>::
 Field: 1       2       3       4
 
    Explanation:
@@ -988,25 +994,25 @@ Field: 1       2       3       4
 
    Examples:
 
-		H:*.edu:*:*.bu.edu
+		H:*.edu::*.bu.edu::
 
 	Allows a server named "*.bu.edu" to introduce only servers that
  	match the "*.edu" name mask.
 
-		H:*:*:eff.org
+		H:*::eff.org::
 
 	Allow "eff.org" to introduce (and act as a hub for) any server.
 
    Note:  It is possible to have and use multiple H-lines (or L-lines) for
 	  the one server.  eg:
 
-		H:*.edu:*:*.bu.edu
-		H:*.au:*:*.bu.edu
+		H:*.edu:*:*.bu.edu::
+		H:*.au:*:*.bu.edu::
 
 	   is allowed as is
 
-		L:*.edu:*:*.au
-		L:*.com:*:*.au
+		L:*.edu:*:*.au::
+		L:*.com:*:*.au::
 
 
 Appendix A: Difference between IP addresses and hostnames

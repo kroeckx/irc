@@ -105,8 +105,8 @@ aClient *sptr, *cptr;
 int parc;
 char *parv[];
 {
-  sprintf(mybuf, "*** Received PONG message: %s %s",
-	  parv[1], (parv[2]) ? parv[2] : "");
+  sprintf(mybuf, "*** Received PONG message: %s %s from %s",
+	  parv[1], (parv[2]) ? parv[2] : "", parv[0]);
   putline(mybuf);
   return 0;
 }

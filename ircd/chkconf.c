@@ -316,6 +316,9 @@ int	opt;
 			/* This is for client only, I must ignore this */
 			/* ...U-line should be removed... --msa */
 				break;
+			case 'V':
+				aconf->status = CONF_VER;
+				break;
 			case 'Y':
 			case 'y':
 			        aconf->status = CONF_CLASS;
@@ -721,7 +724,7 @@ aConfItem *top;
 static	char	confchar(status)
 u_int	status;
 {
-	static	char	letrs[] = "QIiCNoOMKARYSLPH";
+	static	char	letrs[] = "QIiCcNoOMKARYSLPHV";
 	char	*s = letrs;
 
 	status &= ~(CONF_MATCH|CONF_ILLEGAL);

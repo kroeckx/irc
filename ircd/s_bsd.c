@@ -582,6 +582,7 @@ void	write_pidfile()
 #ifdef IRCD_PIDFILE
 	int fd;
 	char buff[20];
+	(void)truncate(IRCD_PIDFILE, 0);
 	if ((fd = open(IRCD_PIDFILE, O_CREAT|O_WRONLY, 0600))>=0)
 	    {
 		bzero(buff, sizeof(buff));
@@ -1554,7 +1555,7 @@ Reg	aClient *cptr;
 
 	while (DBufLength(&cptr->recvQ) && !NoNewLine(cptr) &&
 	       ((cptr->status < STAT_UNKNOWN) ||
-		(cptr->since - timeofday < 10)))
+		(cptr->since - timeofday < MAXPENALTY)))
 	    {
 		/*
 		** If it has become registered as a Service or Server

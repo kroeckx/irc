@@ -314,8 +314,6 @@ void	free_server(serv, cptr)
 aServer	*serv;
 aClient	*cptr;
 {
-	anUser *user;
-
 	if (--serv->refcnt <= 0)
 	    {
 		if (serv->refcnt < 0 ||	serv->prevs || serv->nexts ||
