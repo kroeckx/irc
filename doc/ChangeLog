@@ -1,3 +1,7 @@
+2001-03-06  Piotr Kucharski
+
+	* tkserv.c: potential buffer overflow fixes
+
 2001-03-05  Piotr Kucharski
 
 	* ircd.c/send_pings(): with getting rid of timed klines, we got rid
