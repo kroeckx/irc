@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.5 2001/05/05 23:05:10 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.6 2001/05/06 00:16:56 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1558,7 +1558,7 @@ char	*msg, *username, *hostname;
 		cptr->receiveM, cptr->receiveK);
 
 #if defined(USE_SYSLOG) && (defined(SYSLOG_USERS) || defined(SYSLOG_CONN))
-	syslog(LOG_NOTICE, linebuf2);
+	syslog(LOG_NOTICE, linebuf);
 #endif
 
 #ifdef	USE_SERVICES
