@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.10 2001/02/09 11:35:34 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.11 2001/02/28 19:25:07 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -751,6 +751,8 @@ int	sig;
 	    {
 		sendto_flag(SCH_NOTICE,
 			    "Got signal SIGHUP, reloading ircd.conf file");
+		logfiles_close();
+		logfiles_open();
 #ifdef	ULTRIX
 		if (fork() > 0)
 			exit(0);
