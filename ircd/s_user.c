@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.3 2000/02/10 19:06:02 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.4 2000/04/09 15:06:32 q Exp $";
 #endif
 
 #include "os.h"
@@ -602,12 +602,9 @@ char	*nick, *username;
 		user->tok[1] = '\0';*/
 		sp = user->servp;
 	    }
-	else if (user->username != username)
-	    {
-		sendto_flag(SCH_DEBUG, 
-			"remote user with username != user->username");
+	else
 		strncpyzt(user->username, username, USERLEN+1);
-	    }
+
 	SetClient(sptr);
 	if (!MyConnect(sptr))
 /* && IsServer(cptr)) -- obsolete, old 2.8 protocol;
