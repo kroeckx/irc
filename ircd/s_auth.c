@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.2 2000/05/05 23:23:47 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.3 2000/05/05 23:27:31 q Exp $";
 #endif
 
 #include "os.h"
@@ -180,6 +180,7 @@ read_iauth()
 			    sendto_flag(SCH_AUTH, "Aiiie! lost slave authentication process (errno = %d)", errno);
 			    close(adfd);
 			    adfd = -1;
+			    olen = 0;
 			    start_iauth(0);
 			}
 		    break;
