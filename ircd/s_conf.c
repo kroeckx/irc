@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.8 2001/02/07 12:15:39 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.9 2001/02/07 21:58:39 q Exp $";
 #endif
 
 #include "os.h"
@@ -112,7 +112,10 @@ aClient *cptr;
 		goto badmask;
 	*p = '\0';
 	
-	m = atoi(p + 1);
+	if (sscanf(p + 1, "%d", &m) != 1)
+	{
+		goto badmask;
+	}
 #ifndef	INET6
 	if (m < 0 || m > 32)
 		goto badmask;
