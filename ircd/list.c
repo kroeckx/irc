@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.3 2001/05/06 21:36:55 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.4 2004/05/09 19:30:27 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -323,7 +323,9 @@ void	remove_client_from_list(cptr)
 Reg	aClient	*cptr;
 {
 	checklist();
-	if (cptr->hopcount == 0) /* is there another way, at this point? */
+	/* is there another way, at this point? */
+	if (cptr->hopcount == 0 || 
+		cptr->hopcount == 1 && IsServer(cptr))
 		istat.is_localc--;
 	else
 		istat.is_remc--;
