@@ -553,3 +553,12 @@ error ZIP_MINIMUM needs redefining.
 error FD_SETSIZE must be bigger than MAXCONNECTIONS
 # endif
 #endif
+
+/*
+** buffer used for iauth-ircd communication
+** very big servers might consider increasing it
+*/
+#ifdef USE_IAUTH
+# define       IAUTH_BUFFER    65535
+#endif
+
