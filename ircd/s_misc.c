@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.6 2004/05/09 19:34:50 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.7 2004/05/09 19:51:29 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -943,7 +943,7 @@ struct tm	motd_tm;
 void read_motd(filename)
 char *filename;
 {
-	int fd;
+	int fd, len;
 	register aMotd *temp, *last;
 	struct stat Sb;
 	char line[80];
@@ -965,12 +965,14 @@ char *filename;
 	motd_tm = *localtime(&Sb.st_mtime);
 	(void)dgets(-1, NULL, 0); /* make sure buffer is at empty pos */
 	last = NULL;
-	while (dgets(fd, line, sizeof(line)-1) > 0)
+	while ((len=dgets(fd, line, sizeof(line)-1)) > 0)
 	    {
 		if ((tmp = strchr(line, '\n')) != NULL)
 			*tmp = (char) 0;
-		if ((tmp = strchr(line, '\r')) != NULL)
+		else if ((tmp = strchr(line, '\r')) != NULL)
 			*tmp = (char) 0;
+		else
+			line[len] = '\0';
 		temp = (aMotd *)MyMalloc(sizeof(aMotd));
 		if (!temp)
 			outofmemory();
