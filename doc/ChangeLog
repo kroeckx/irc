@@ -1,3 +1,7 @@
+2001-02-10  Kurt Roeckx
+
+	* s_err.c, numeric_def.h: Undo the RPL_BOUNCE change.
+
 2001-02-09  Kurt Roeckx
 
 	* s_user.c, s_conf.c, s_conf_ext.h: Make O-lines work with CIDR masks.
