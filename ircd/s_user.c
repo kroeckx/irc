@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.2 2000/01/03 18:36:18 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.3 2000/02/10 19:06:02 q Exp $";
 #endif
 
 #include "os.h"
@@ -1007,9 +1007,10 @@ nickkilldone:
 					   err_str(ERR_RESTRICTED, nick));
 				return 2;
 			    }
-			/* is the user banned on any channel ? */
+			/* Can the user speak on all channels? */
 			for (lp = sptr->user->channel; lp; lp = lp->next)
-				if (can_send(sptr, lp->value.chptr) ==MODE_BAN)
+				if (can_send(sptr, lp->value.chptr) &&
+				    !IsQuiet(lp->value.chptr))
 					break;
 		}
 		/*
