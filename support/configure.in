@@ -739,75 +739,37 @@ if test "x$enable_ip6" != x; then
   dnl be smart about it
   AC_MSG_CHECKING([IPv6 system type])
   AC_CACHE_VAL(irc_cv_v6type, [
-    if test -d /usr/inet6; then
-	AC_EGREP_CPP(yes, [dnl
-#include </usr/inet6/include/netinet/in.h>
+    AC_TRY_COMPILE([
+#include <unistd.h>
+#include <netinet/in.h>], [struct in6_addr addr],
+        irc_cv_v6type=native)
+
+    if test "x$irc_cv_v6type" = x; then
+      if test -d /usr/inet6; then
+        AC_EGREP_CPP(yes, [dnl
+#include "/usr/inet6/include/netinet/in.h"
 #ifdef _INET6APPS_NETINET_IN_H
 yes
 #endif], irc_cv_v6type=linux)
-    else
-      AC_EGREP_CPP(yes, [dnl
-#include <netinet/in.h>
-#ifdef IPV6_INRIA_VERSION
-yes
-#endif], irc_cv_v6type=inria,
-        AC_EGREP_CPP(yes, [dnl
-#include <netinet/in.h>
-#ifdef __KAME__
-yes
-#endif], irc_cv_v6type=kame,
-          AC_EGREP_CPP(yes, [dnl
-#include <sys/param.h>
-#ifdef _TOSHIBA_INET6
-yes
-#endif], irc_cv_v6type=toshiba,
-            AC_EGREP_CPP(yes, [dnl
-#include </usr/local/v6/include/sys/types.h>
-#ifdef __V6D__
-yes
-#endif], irc_cv_v6type=v6d,
-              AC_EGREP_CPP(yes, [dnl
-#include <sys/param.h>
-#ifdef _ZETA_MINAMI_INET6
-yes
-#endif], irc_cv_v6type=zeta)))))
+      fi
     fi
 
-  if test "x$irc_cv_v6type" = x; then
-     AC_TRY_COMPILE([#include <netinet/in.h>], [struct in6_addr addr], 
-	irc_cv_v6type=native, irc_cv_v6type=unknown)
-  fi
-
-dnl end of AC_CACHE_VAL
+    if test "x$irc_cv_v6type" = x; then
+	irc_cv_v6type=unknown
+    fi
   ])	
 
   AC_MSG_RESULT($irc_cv_v6type)
 
-  if test $irc_cv_v6type = unknown; then
+  if test "x$irc_cv_v6type" = x; then
      AC_MSG_WARN([You have an unknown IPv6 system. You will probably need to change the Makefile manually, or #undef INET6 in setup.h])
   fi
 
   dnl eventually update LIBS
   case $irc_cv_v6type in
-	kame)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
 	linux)
 		LIBS="-L/usr/inet6/lib -linet6 $LIBS"
 		CFLAGS="$CFLAGS -I/usr/inet6/include"
-		;;
-	toshiba)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
-	v6d)
-		LIBS="-L/usr/local/v6/lib -lv6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
-	zeta)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
 		;;
 	esac
 
@@ -1454,7 +1416,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.2.4 2000/01/01 17:55:04 q Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.5 2000/02/10 19:14:10 q Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)

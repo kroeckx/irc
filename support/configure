@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in Id: configure.in,v 1.46.2.3 1999/11/03 21:51:54 kalt Exp 
+# From configure.in Id: configure.in,v 1.46.2.4 2000/01/01 17:55:04 q Exp 
 
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.13 
@@ -4014,12 +4014,32 @@ echo "configure:4013: checking IPv6 system type" >&5
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   
-    if test -d /usr/inet6; then
-	cat > conftest.$ac_ext <<EOF
-#line 4020 "configure"
+    cat > conftest.$ac_ext <<EOF
+#line 4019 "configure"
+#include "confdefs.h"
+
+#include <unistd.h>
+#include <netinet/in.h>
+int main() {
+struct in6_addr addr
+; return 0; }
+EOF
+if { (eval echo configure:4028: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
+  rm -rf conftest*
+  irc_cv_v6type=native
+else
+  echo "configure: failed program was:" >&5
+  cat conftest.$ac_ext >&5
+fi
+rm -f conftest*
+
+    if test "x$irc_cv_v6type" = x; then
+      if test -d /usr/inet6; then
+        cat > conftest.$ac_ext <<EOF
+#line 4040 "configure"
 #include "confdefs.h"
 dnl
-#include </usr/inet6/include/netinet/in.h>
+#include "/usr/inet6/include/netinet/in.h"
 #ifdef _INET6APPS_NETINET_IN_H
 yes
 #endif
@@ -4031,156 +4051,38 @@ if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
 fi
 rm -f conftest*
 
-    else
-      cat > conftest.$ac_ext <<EOF
-#line 4037 "configure"
-#include "confdefs.h"
-dnl
-#include <netinet/in.h>
-#ifdef IPV6_INRIA_VERSION
-yes
-#endif
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  irc_cv_v6type=inria
-else
-  rm -rf conftest*
-  cat > conftest.$ac_ext <<EOF
-#line 4052 "configure"
-#include "confdefs.h"
-#include <netinet/in.h>
-#ifdef __KAME__
-yes
-#endif
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  irc_cv_v6type=kame
-else
-  rm -rf conftest*
-  cat > conftest.$ac_ext <<EOF
-#line 4066 "configure"
-#include "confdefs.h"
-#include <sys/param.h>
-#ifdef _TOSHIBA_INET6
-yes
-#endif
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  irc_cv_v6type=toshiba
-else
-  rm -rf conftest*
-  cat > conftest.$ac_ext <<EOF
-#line 4080 "configure"
-#include "confdefs.h"
-#include </usr/local/v6/include/sys/types.h>
-#ifdef __V6D__
-yes
-#endif
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  irc_cv_v6type=v6d
-else
-  rm -rf conftest*
-  cat > conftest.$ac_ext <<EOF
-#line 4094 "configure"
-#include "confdefs.h"
-#include <sys/param.h>
-#ifdef _ZETA_MINAMI_INET6
-yes
-#endif
-EOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  egrep "yes" >/dev/null 2>&1; then
-  rm -rf conftest*
-  irc_cv_v6type=zeta
-fi
-rm -f conftest*
-
-fi
-rm -f conftest*
-
-fi
-rm -f conftest*
-
-fi
-rm -f conftest*
-
-fi
-rm -f conftest*
-
+      fi
     fi
 
-  if test "x$irc_cv_v6type" = x; then
-     cat > conftest.$ac_ext <<EOF
-#line 4124 "configure"
-#include "confdefs.h"
-#include <netinet/in.h>
-int main() {
-struct in6_addr addr
-; return 0; }
-EOF
-if { (eval echo configure:4131: \"$ac_compile\") 1>&5; (eval $ac_compile) 2>&5; }; then
-  rm -rf conftest*
-  irc_cv_v6type=native
-else
-  echo "configure: failed program was:" >&5
-  cat conftest.$ac_ext >&5
-  rm -rf conftest*
-  irc_cv_v6type=unknown
-fi
-rm -f conftest*
-  fi
-
+    if test "x$irc_cv_v6type" = x; then
+	irc_cv_v6type=unknown
+    fi
   
 fi
 	
 
   echo "$ac_t""$irc_cv_v6type" 1>&6
 
-  if test $irc_cv_v6type = unknown; then
+  if test "x$irc_cv_v6type" = x; then
      echo "configure: warning: You have an unknown IPv6 system. You will probably need to change the Makefile manually, or #undef INET6 in setup.h" 1>&2
   fi
 
     case $irc_cv_v6type in
-	kame)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
 	linux)
 		LIBS="-L/usr/inet6/lib -linet6 $LIBS"
 		CFLAGS="$CFLAGS -I/usr/inet6/include"
-		;;
-	toshiba)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
-	v6d)
-		LIBS="-L/usr/local/v6/lib -lv6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
-		;;
-	zeta)
-		LIBS="-L/usr/local/v6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/local/v6/include"
 		;;
 	esac
 
     for ac_func in getipnodebyname
 do
 echo $ac_n "checking for $ac_func""... $ac_c" 1>&6
-echo "configure:4179: checking for $ac_func" >&5
+echo "configure:4081: checking for $ac_func" >&5
 if eval "test \"`echo '$''{'ac_cv_func_$ac_func'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4184 "configure"
+#line 4086 "configure"
 #include "confdefs.h"
 /* System header to define __stub macros and hopefully few prototypes,
     which can conflict with char $ac_func(); below.  */
@@ -4203,7 +4105,7 @@ $ac_func();
 
 ; return 0; }
 EOF
-if { (eval echo configure:4207: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4109: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_func_$ac_func=yes"
 else
@@ -4229,7 +4131,7 @@ done
 
 
     echo $ac_n "checking for IPv6 name server addresses in resolv.conf ($irc_cv_path_resconf)""... $ac_c" 1>&6
-echo "configure:4233: checking for IPv6 name server addresses in resolv.conf ($irc_cv_path_resconf)" >&5
+echo "configure:4135: checking for IPv6 name server addresses in resolv.conf ($irc_cv_path_resconf)" >&5
   if grep nameserver $irc_cv_path_resconf | grep ':' >/dev/null 2>&1; then
     echo "$ac_t""yes" 1>&6
     echo "configure: warning: $irc_cv_path_resconf is not setup correctly." 1>&2
@@ -4253,17 +4155,17 @@ EOF
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4257: checking for $ac_hdr" >&5
+echo "configure:4159: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4262 "configure"
+#line 4164 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4267: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4169: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4290,7 +4192,7 @@ fi
 done
 
   echo $ac_n "checking for dlclose in -ldl""... $ac_c" 1>&6
-echo "configure:4294: checking for dlclose in -ldl" >&5
+echo "configure:4196: checking for dlclose in -ldl" >&5
 ac_lib_var=`echo dl'_'dlclose | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4298,7 +4200,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4302 "configure"
+#line 4204 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4309,7 +4211,7 @@ int main() {
 dlclose()
 ; return 0; }
 EOF
-if { (eval echo configure:4313: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4215: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4333,12 +4235,12 @@ fi
 fi
 
 echo $ac_n "checking whether this is an alpha/beta release""... $ac_c" 1>&6
-echo "configure:4337: checking whether this is an alpha/beta release" >&5
+echo "configure:4239: checking whether this is an alpha/beta release" >&5
 if eval "test \"`echo '$''{'irc_cv_alpha_beta'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4342 "configure"
+#line 4244 "configure"
 #include "confdefs.h"
 #include "../common/patchlevel.h"
 #ifdef PATCHLEVEL
