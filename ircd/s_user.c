@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.8 2000/08/15 14:42:45 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.9 2000/12/01 22:31:12 q Exp $";
 #endif
 
 #include "os.h"
@@ -2561,7 +2561,7 @@ char	*parv[];
 {
 	Reg	aClient *acptr;
 	Reg	char	*s, **pav = parv;
-	Reg	int	len = 0;
+	Reg	int	len = 0, i;
 	char	*p = NULL;
 
 	if (parc < 2)
@@ -2576,8 +2576,14 @@ char	*parv[];
 	for (s = strtoken(&p, *++pav, " "); s; s = strtoken(&p, NULL, " "))
 		if ((acptr = find_person(s, NULL)))
 		    {
+			i = strlen(acptr->name);
+			if (len + i > sizeof(buf) - 4)	
+			{
+				/* leave room for " \r\n\0" */
+				break;
+			}
 			(void) strcpy(buf + len, acptr->name);
-			len += strlen(acptr->name);
+			len += i;
 			(void) strcpy(buf + len++, " ");
 		    }
 	sendto_one(sptr, "%s", buf);
