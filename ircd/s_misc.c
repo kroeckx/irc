@@ -223,8 +223,8 @@ int	showip;
 		else
 		    {
 			if (showip)
-				(void)sprintf(nbuf, "%s[%s@%s]",
-					sptr->name,
+				(void)sprintf(nbuf, "%s[%.*s@%s]",
+					sptr->name, USERLEN,
 					(!(sptr->flags & FLAGS_GOTID)) ? "" :
 					sptr->auth,
 					      inetntoa((char *)&sptr->ip));
@@ -234,7 +234,8 @@ int	showip;
 					/* Show username for clients and
 					 * ident for others.
 					 */
-					SPRINTF(nbuf, "%s[%s@%s]", sptr->name,
+					SPRINTF(nbuf, "%s[%.*s@%s]",
+						sptr->name, USERLEN,
 						IsPerson(sptr) ?
 							sptr->user->username :
 							sptr->auth,
@@ -456,10 +457,12 @@ char	*comment;	/* Reason for the exit */
 			sendto_one(sptr, "ERROR :Closing Link: %s (%s)",
 				   get_client_name(sptr,FALSE), comment);
 
-		      if (cptr->auth != cptr->username)
+		      if (sptr->auth != sptr->username)
 			  {
-			      MyFree(cptr->auth);
-			      cptr->auth = cptr->username;
+			    istat.is_authmem -= sizeof(sptr->auth);
+			    istat.is_auth -= 1;
+			    MyFree(sptr->auth);
+			    sptr->auth = sptr->username;
 			  }
 		    }
 		/*

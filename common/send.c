@@ -985,7 +985,7 @@ void	sendto_flog(ftime, msg, duration, username, hostname, ident, exitc)
 char	*ftime, *msg, *username, *hostname, *ident, *exitc;
 time_t	duration;
 {
-	char	linebuf[160];
+	char	linebuf[1024]; /* auth reply might be long.. */
 	int	logfile;
 
 	/*

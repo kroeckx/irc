@@ -31,6 +31,9 @@ char	serveropts[] = {
 #ifdef	SENDQ_ALWAYS
 'A',
 #endif
+#ifndef	NO_IDENT
+'a',
+#endif
 #ifdef	CHROOTDIR
 'c',
 #endif
@@ -48,6 +51,12 @@ char	serveropts[] = {
 #endif
 #ifdef	OPER_REHASH
 'E',
+#endif
+#ifdef	SLOW_ACCEPT
+'f',
+#endif
+#ifdef	CLONE_CHECK
+'F',
 #endif
 #ifdef	SUN_GSO_BUG
 'g',
@@ -106,6 +115,9 @@ char	serveropts[] = {
 #endif
 #ifdef	OPER_REMOTE
 't',
+#endif
+#ifndef	NO_PREFIX
+'u',
 #endif
 #ifdef	ENABLE_USERS
 'U',
@@ -359,6 +371,19 @@ char	*nick;
 	sendto_one(cptr, ":%s %d %s :BS:%d MXR:%d MXB:%d MXBL:%d",
 		   ME, RPL_STATSDEFINE, nick, BUFSIZE, MAXRECIPIENTS, MAXBANS,
 		   MAXBANLENGTH);
+	sendto_one(cptr, ":%s %d %s :ZL:%d CM:%d CP:%d",
+		   ME, RPL_STATSDEFINE, nick,
+#ifdef	ZIP_LINKS
+		   ZIP_LEVEL,
+#else
+		   -1,
+#endif
+#ifdef	CLONE_CHECK
+		   CLONE_MAX, CLONE_PERIOD
+#else
+		   -1, -1
+#endif
+		   );
 }
 
 void	count_memory(cptr, nick, debug)
@@ -530,8 +555,10 @@ int	debug;
 		sendto_one(cptr, ":%s %d %s :Request processed in %u seconds",
 			   me.name, RPL_STATSDEBUG, nick, time(NULL) - start);
 
-	sendto_one(cptr, ":%s %d %s :Client Local %d(%d) Remote %d(%d)",
-		   me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm);
+	sendto_one(cptr,
+		   ":%s %d %s :Client Local %d(%d) Remote %d(%d) Auth%d(%d)",
+		   me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm,
+		   istat.is_auth, istat.is_authmem);
 	if (debug
 	    && (lc != d_lc || lcm != d_lcm || rc != d_rc || rcm != d_rcm))
 		sendto_one(cptr,

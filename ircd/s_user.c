@@ -392,6 +392,7 @@ char	*nick, *username;
 		else
 			strncpyzt(user->host, sptr->sockhost, HOSTLEN+1);
 
+#ifndef	NO_PREFIX
 		/*
 		** ident is fun.. ahem
 		** prefixes used:
@@ -425,6 +426,7 @@ char	*nick, *username;
 			strncpyzt(buf2, sptr->username, USERLEN+1);
 		else /* No ident, or unusable ident string */
 		     /* because username may point to user->username */
+#endif
 			strncpyzt(buf2, username, USERLEN+1);
 
 		if (prefix)

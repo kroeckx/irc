@@ -130,7 +130,24 @@ Overview of this document:
       available in other formats from
       ftp://ftp.uu.net/graphics/png/documents/zlib/zdoc-index.html
 
-   i) The rest of the user changable #define's should be pretty much self
+   i) SLOW_ACCEPT
+
+	This option is defined by default and is needed on some OSes.  It
+      creates an artificial delay in processing incoming connections.  On a
+      given port, no more than 1 connection per 2 seconds will be processed.
+
+	Undefining this will let the server process connections as fast as
+      it can which can cause problems on some OSes (such as SunOS) and be
+      abused (fast massive join of clonebots..),  for these reasons, if you
+      decide to undefine SLOW_ACCEPT you MUST define CLONE_CHECK.
+
+   j) CLONE_CHECK
+
+	This option acts as a wrapper, by checking incoming connections
+      early before starting ident query.  By default, the server will not
+      accept more than 2 connections from the same host within 10 seconds.
+
+   k) The rest of the user changable #define's should be pretty much self
       explanatory in the config.h file.  It is *NOT* recommended that any
       of the file undef the line with "STOP STOP" in it be changed.
 

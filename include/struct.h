@@ -698,6 +698,8 @@ typedef	struct	{
 	u_long	is_users;	/* user structs */
 	u_long	is_useri;	/* user invites */
 	u_long	is_userc;	/* user links to channels */
+	u_long	is_auth;	/* OTHER ident reply block */
+	u_long	is_authmem;
 } istat_t;
 
 /* String manipulation macros */
