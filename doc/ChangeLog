@@ -1,3 +1,8 @@
+2003-10-20  Piotr Kucharski
+
+	* res.c/bad_hostname(): isalnum() macro allowed too many chars,
+	  restricting to exact subset of RFC1034: a-zA-Z0-9.
+
 2.10.3p5
 
 2003-10-13  Piotr Kucharski
