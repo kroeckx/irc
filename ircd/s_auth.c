@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.4 2001/04/07 00:12:44 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.5 2001/05/04 19:34:52 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -81,7 +81,7 @@ aClient *cptr;
 	if (!strcmp(cptr->username, cptr->auth))
 	    {
 		MyFree(cptr->auth);
-		cptr->auth = mystrdup(cptr->username);
+		cptr->auth = cptr->username;
 	    }
 	else
 	    {
