@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.12 2004/03/01 16:57:22 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.13 2004/03/01 18:00:33 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -124,6 +124,7 @@ char	*parv[];
 	char	*server;
 	Reg	aClient	*acptr;
 	char	*comment = (parc > 2 && parv[2]) ? parv[2] : "no reason";
+	static char	comment2[TOPICLEN+1];
 
 	if (parc > 1)
 	    {
