@@ -245,7 +245,7 @@ else
 fi
 ])
 irc_cv_solaris_2=no
-if test "$irc_sun" = no; then
+if test "$irc_cv_sun" = no; then
   AC_MSG_RESULT(no)
 else
   if uname -r 2>/dev/null | grep "^5" >/dev/null; then
@@ -1432,7 +1432,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.2.9 2001/02/10 01:32:10 q Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.10 2004/02/26 13:22:18 chopin Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
