@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.24 2003/10/11 01:00:26 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.25 2003/10/11 14:20:00 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2477,7 +2477,7 @@ char	*parv[];
 #ifdef	USE_SERVICES
 		check_services_butone(SERVICE_WANT_OPER, sptr->user->server, 
 				      sptr, ":%s MODE %s :+%c", parv[0],
-				      parv[0], IsOper(sptr) ? 'O' : 'o');
+				      parv[0], IsOper(sptr) ? 'o' : 'O');
 #endif
 		if (IsAnOper(sptr))
 			istat.is_oper++;
