@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.2 2001/02/07 21:53:09 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.3 2001/02/08 01:37:35 q Exp $";
 #endif
 
 #include "os.h"
@@ -354,8 +354,8 @@ char	*to;
 	num -= numeric_errors[0].num_val;
 	if (num < 0 || num > ERR_USERSDONTMATCH)
 		SPRINTF(numbuff,
-			":%%s %d %%s :INTERNAL ERROR: BAD NUMERIC! %d",
-			numeric, num);
+			":%s %d %s :INTERNAL ERROR: BAD NUMERIC! %d",
+			ME, numeric, to, num);
 	else
 	    {
 		nptr = &numeric_errors[num];
@@ -364,8 +364,8 @@ char	*to;
 			numeric, num, nptr, nptr->num_val, nptr->num_form));
 		if (!nptr->num_form || !nptr->num_val)
 			SPRINTF(numbuff,
-				":%%s %d %%s :NO ERROR FOR NUMERIC ERROR %d",
-				numeric, num);
+				":%s %d %s :NO ERROR FOR NUMERIC ERROR %d",
+				ME, numeric, to, num);
 		else
 			(void)prepbuf(numbuff, ME, to, nptr->num_val,
 				      nptr->num_form);
@@ -381,7 +381,7 @@ char	*to;
 	Reg	Numeric	*nptr;
 	Reg	int	num = numeric;
 
-	if (num > 5)
+	if (num > 100)
 		num -= (num > 300) ? 300 : 100;
 
 	if (BadPtr(to))		/* for unregistered clients */
@@ -389,8 +389,8 @@ char	*to;
 
 	if (num < 0 || num > 200)
 		SPRINTF(numbuff,
-			":%%s %d %%s :INTERNAL REPLY ERROR: BAD NUMERIC! %d",
-			numeric, num);
+			":%s %d %s :INTERNAL REPLY ERROR: BAD NUMERIC! %d",
+			ME, numeric, to, num);
 	else
 	    {
 		if (numeric > 99)
@@ -402,8 +402,8 @@ char	*to;
 			numeric, num, nptr, nptr->num_val, nptr->num_form));
 		if (!nptr->num_form || !nptr->num_val)
 			SPRINTF(numbuff,
-				":%%s %d %%s :NO REPLY FOR NUMERIC ERROR %d",
-				numeric, num);
+				":%s %d %s :NO REPLY FOR NUMERIC ERROR %d",
+				ME, numeric, to, num);
 		else
 			(void)prepbuf(numbuff, ME, to, nptr->num_val,
 				      nptr->num_form);
