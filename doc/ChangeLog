@@ -1,3 +1,15 @@
+1999-10-04  Kurt Roeckx
+
+	* channel.c/reop_channel(): removed a '(' that was there too much
+	* configure.in: only detect ipv6 as linux, if the header files
+	  are there, and detect if the system has native ipv6 support
+	* os.h: readded define for POLLRDNORM
+	* os.h: only define in6addr_any under linux if glibc version is < 2.1
+	* os.h: removed defenition for uint32_t, which isn't use anywhere.
+	  you should use u_int32_t instead.
+	* os.h: define s6_laddr as in6a_words, if found, else as s6_addr32
+	* configure.in, setup.h.in, os.h: check for ncurses/ncurses.h
+
 1999-10-03  Christophe Kalt
 
 	* a_conf.c: OpenBSD doesn't have RTLD_NOW, only RTLD_LAZY (as
