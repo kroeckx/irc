@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.6 2001/02/10 23:50:29 q Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.7 2001/04/06 23:17:32 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -417,10 +417,6 @@ char	*parv[];
 				sendto_one(sptr, rpl_str(RPL_WHOISSERVER,
 					   parv[0]), wp->ww_nick, up->server,
 					   myctime(wp->ww_logout));
-				if (up->away)
-					sendto_one(sptr, rpl_str(RPL_AWAY,
-						   parv[0]),
-						   wp->ww_nick, up->away);
 				j++;
 			    }
 			if (max > 0 && j >= max)
