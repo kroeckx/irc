@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_debug.c,v 1.28.2.2 2001/02/07 11:50:28 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_debug.c,v 1.28.2.3 2001/06/29 19:00:25 q Exp $";
 #endif
 
 #include "os.h"
@@ -335,7 +335,7 @@ char	*nick;
 		   ME, RPL_STATSDEFINE, nick, LISTENQUEUE, MAXCONNECTIONS,
 		   TIMESEC, HANGONRETRYDELAY, HANGONGOODLINK, WRITEWAITDELAY,
 		   ACCEPTTIMEOUT);
-    	sendto_one(cptr, ":%s %d %s :KCTL:%d DCTL:%d LDCTL: %d CF:%d MCPU:%d",
+    	sendto_one(cptr, ":%s %d %s :KCTL:%d DCTL:%d LDCTL:%d CF:%d MCPU:%d",
 		   ME, RPL_STATSDEFINE, nick, KILLCHASETIMELIMIT,
 		   DELAYCHASETIMELIMIT, LDELAYCHASETIMELIMIT,
 		   CLIENT_FLOOD, MAXCHANNELSPERUSER);
