@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.11 2001/02/07 13:06:44 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.12 2001/02/07 13:16:18 q Exp $";
 #endif
 
 #include "os.h"
@@ -690,7 +690,7 @@ char	flag, *chname;
 		    }
 		else if (*parabuf)
 			send = 1;
-		if (count == 3)
+		if (count == MAXMODEPARAMS)
 			send = 1;
 		if (send)
 		    {
@@ -700,7 +700,7 @@ char	flag, *chname;
 			*parabuf = '\0';
 			cp = modebuf;
 			*cp++ = '+';
-			if (count != 3)
+			if (count != MAXMODEPARAMS)
 			    {
 				(void)strcpy(parabuf, name);
 				*cp++ = flag;
@@ -2297,7 +2297,7 @@ Reg	aClient *cptr, *sptr;
 int	parc;
 char	*parv[];
 {
-	char nbuf[BUFSIZE], *q, *name, *target, *p, mbuf[4];
+	char nbuf[BUFSIZE], *q, *name, *target, *p, mbuf[MAXMODEPARAMS + 1];
 	int chop, cnt = 0, nj = 0;
 	aChannel *chptr = NULL;
 	aClient *acptr;
@@ -2451,7 +2451,7 @@ char	*parv[];
 					cnt = 0;
 				break;
 			    }
-			if (cnt == 3)
+			if (cnt == MAXMODEPARAMS)
 			    {
 				sendto_channel_butserv(chptr, &me,
 						       ":%s MODE %s +%s %s",
@@ -3205,7 +3205,7 @@ aChannel *chptr;
     if (chptr->users <= 5 && (now - chptr->history > DELAYCHASETIMELIMIT))
 	{
 	    /* few users, no recent split: this is really a small channel */
-	    char mbuf[4], nbuf[3*(NICKLEN+1)+1];
+	    char mbuf[MAXMODEPARAMS + 1], nbuf[3*(NICKLEN+1)+1];
 	    int cnt;
 	    
 	    lp = chptr->members;
@@ -3232,10 +3232,10 @@ aChannel *chptr;
 				   ME, chptr->chname, now - chptr->reop);
 	    op.flags = MODE_ADD|MODE_CHANOP;
 	    lp = chptr->members;
-	    cnt = 3;
+	    cnt = 0;
 	    while (lp)
 		{
-		    if (cnt == 3)
+		    if (cnt == MAXMODEPARAMS)
 			{
 			    mbuf[cnt] = '\0';
 			    if (lp != chptr->members)
