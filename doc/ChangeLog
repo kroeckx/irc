@@ -1,3 +1,30 @@
+2.10.3p4
+
+2003-10-10  Piotr Kucharski
+
+	* channel.c/m_join(): buffer overflow (reported by Florian Weimer).
+	* s_user.c/m_nick(): check proper param count from server (backport).
+	* send.c/sendto_flog(): log SYSLOG_CONN/SYSLOG_USERS properly
+	  (reported by Francesco).
+	* s_err.c: list bug (backport).
+	* hash.c: %Full typo.
+	* s_bsd.c/match_ipmask(): check if mask contains numbers (backport).
+	* s_bsd.c: check for class being legal (backport).
+	* s_serv.c/m_stats(): stats l remoteclient bug (backport).
+	* res.c/do_query_name(), s_bsd.c/add_local_domain(): possible buffer
+	  overflow with non-fqdn host and local domain (backport).
+	* res.c: overwriting type
+	* res.c: answer type not matching request (backport).
+	* res.c, config.dist: RESTRICT_HOSTNAMES (backport).
+	* config.h.dist: make CLONE_CHECK default, not SLOW_ACCEPT.
+	* buildm4: i:line typo, P:line enhancement (backport).
+	* s_conf.c: delist config problem (backport).
+	* s_conf.c: some CONF_RCLIENT missing (backport).
+	* s_conf.c/find_kill(): match restricted users (backport).
+	* s_bsd.c: some CYGWIN defines (backport).
+	* s_bsd.c: use IsServer() in c/n lookup for reconnect (backport).
+	* s_bsd.c/polludp(): sometimes garbage IP was shown (backport).
+	
 2.10.3p3
 
 2001-01-19  Piotr Kucharski
