@@ -1,6 +1,18 @@
-# @(#)$Id: RELEASE_NOTES,v 1.34.2.1 2001/07/12 21:09:45 chopin Exp $
+# @(#)$Id: RELEASE_NOTES,v 1.34.2.2 2003/10/11 19:50:31 chopin Exp $
 
 This is version 2.10.3 of the IRC software.
+===============================================================================
+
+Important changes in 2.10.3p4 (since 2.10.3p2):
+	* ip6.arpa is now default, with defining SIXBONE_HACK we
+	  also recognize ip6.int
+	* RESTRICT_HOSTNAMES is default on, allowing client hosts in
+	  conformance with RFC 1034, 1035, and 1123 (no '&', '*', '\' or
+	  other "strange" characters)
+	* CLONE_CHECK default on, not SLOW_ACCEPT
+	* find_kill() is aware of '+' prefix, so no need to add another
+	  K:line for it (or using *username)
+
 ===============================================================================
 
 Important changes in 2.10.3p2 (since 2.10.3):
