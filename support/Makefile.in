@@ -16,7 +16,7 @@
 #*   along with this program; if not, write to the Free Software
 #*   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
-#*   $Id: Makefile.in,v 1.45.2.1 2000/02/03 17:09:34 q Exp $
+#*   $Id: Makefile.in,v 1.45.2.2 2001/02/09 13:47:07 q Exp $
 #*
 #*/
 
@@ -42,7 +42,7 @@ O_CFLAGS = @CFLAGS@ -I. -I../common -DCONTRIB_COMPILE
 LDFLAGS = @LDFLAGS@
 # required libraries, except zlib and curses/termcap
 LIBS = @LIBS@
-MATHLIBS = -lm
+MATHLIBS = @MATHLIBS@
 # zlib, eventually
 ZLIBS = @IRC_ZLIB_LIBRARY@
 # for DSM support (dlopen(), dlsym(), dlclose())

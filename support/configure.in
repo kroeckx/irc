@@ -6,6 +6,20 @@ dnl ---------
 dnl new tests
 dnl ---------
 
+AC_DEFUN(IRC_MATHLIB, [
+	AC_MSG_CHECKING(library containing pow)
+	irc_cv_mathlib="none required"
+	AC_TRY_LINK(,pow(1.0, 1.0), MATHLIBS=, 
+		irc_save_LIBS="$LIBS"
+		irc_cv_mathlib="-lm"
+		LIBS="-lm $LIBS"
+		AC_TRY_LINK(, pow(1.0, 1.0), MATHLIBS=-lm)
+		LIBS=irc_save_LIBS
+	)
+	AC_SUBST(MATHLIBS)
+	AC_MSG_RESULT($irc_cv_mathlib)
+])
+
 AC_DEFUN(IRC_PATH_ZLIB,
 [AC_MSG_CHECKING(for zlib package)
 AC_ARG_WITH(zlib, [  --with-zlib             checks for zlib; if found, enables compressed links])
@@ -1415,7 +1429,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.2.7 2001/02/07 11:36:43 q Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.8 2001/02/09 13:47:06 q Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
@@ -1471,6 +1485,7 @@ AC_C_CONST
 AC_CHECK_LIB(crypt, crypt)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, socket)
+IRC_MATHLIB
 
 IRC_PATH_ZLIB
 IRC_CURSES_TERMCAP
