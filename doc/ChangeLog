@@ -1,3 +1,8 @@
+2001-03-02	Piotr Kucharski
+
+	* channel.c/m_kick(): 'KICK #chan1,#chan2 nick1,nick2' was not
+	  working properly
+
 2001-02-28	Piotr Kucharski
 
 	* send.c/sendto_flog(),logfiles_open(),logfiles_close(),
