@@ -1,3 +1,9 @@
+2004-03-01  Piotr Kucharski
+
+	* s_serv.c/m_squit(): "by whom" to squit comment was buggy.
+
+2.10.3p6
+
 2004-02-25  Piotr Kucharski
 
 	All backported from 2.11 tree:
