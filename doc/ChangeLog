@@ -1,3 +1,7 @@
+2004-05-09  Piotr Kucharski
+
+	* config.h.dist: check for empty TIMEDKLINES define.
+
 2004-03-01  Piotr Kucharski
 
 	* s_serv.c/m_squit(): "by whom" to squit comment was buggy.

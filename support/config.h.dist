@@ -593,6 +593,12 @@ error FD_SETSIZE must be bigger than MAXCONNECTIONS
 error TIMEDKLINES must be defined for R_LINES_OFTEN to work (are you sure you need them?)
 #endif
 
+#if defined(TIMEDKLINES)
+# if (TIMEDKLINES + 0 < 60)
+#  error TIMEDKLINES must be bigger than 60 seconds
+# endif
+#endif
+
 /*
 ** You should not want to change this. ;)
 */
