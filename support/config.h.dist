@@ -188,6 +188,15 @@
 # define	MAXSERVERS 1
 #endif
 
+/*
+ * If you want to use timed klines, set it to frequence in seconds,
+ * how often to check if client is to be removed; usually 60 seconds
+ * (smallest granularity you can get in K:line anyway).
+ *
+ * Advised not to use it ;-) --Beeth
+ */
+#undef TIMEDKLINES
+
 /* R_LINES:  The conf file now allows the existence of R lines, or
  * restrict lines.  These allow more freedom in the ability to restrict
  * who is to sign on and when.  What the R line does is call an outside
@@ -570,3 +579,10 @@ error FD_SETSIZE must be bigger than MAXCONNECTIONS
 #undef	ZIP_LINKS
 #endif
 
+/*
+** Make sure TIMEDKLINES is defined along with R_LINES_OFTEN
+**
+*/
+#if defined(R_LINES_OFTEN) && !defined(TIMEDKLINES)
+error TIMEDKLINES must be defined for R_LINES_OFTEN to work (are you sure you need them?)
+#endif

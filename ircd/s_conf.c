@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.11 2001/02/28 19:25:07 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.12 2001/02/28 21:04:02 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -770,7 +770,7 @@ int	sig;
 			 * this....-avalon
 			 */
 			acptr->hostp = NULL;
-#if defined(R_LINES_REHASH) && !defined(R_LINES_OFTEN)
+#if defined(R_LINES) && ( defined(R_LINES_REHASH) && !defined(R_LINES_OFTEN) )
 			if (find_restrict(acptr))
 			    {
 				sendto_flag(SCH_NOTICE,
