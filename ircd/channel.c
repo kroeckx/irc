@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.14 2001/04/01 23:30:56 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.15 2001/05/03 19:41:19 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2575,11 +2575,12 @@ char	*parv[];
 	if (strlen(comment) > (size_t) TOPICLEN)
 		comment[TOPICLEN] = '\0';
 
-	*nickbuf = *buf = '\0';
+    /* strlen(":parv[0] KICK ") */
 	mlen = 7 + strlen(parv[0]);
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
+		*nickbuf = '\0';
 		if (penalty++ >= MAXPENALTY && MyPerson(sptr))
 			break;
 		chptr = get_channel(sptr, name, !CREATE);
@@ -2609,17 +2610,8 @@ char	*parv[];
 					    parv[0]), chptr->chname);
 			continue;
 		    }
-		if (len + mlen + strlen(name) < (size_t) BUFSIZE / 2)
-		    {
-			if (*buf)
-				(void)strcat(buf, ",");
-			(void)strcat(buf, name);
-			len += strlen(name) + 1;
-		    }
-		else
-			continue;
-		nlen = 0;
 
+		nlen = 0;
 		tmp = mystrdup(parv[2]);
 		for (tmp2 = tmp; (user = strtoken(&p2, tmp2, ",")); tmp2 = NULL)
 		    {
@@ -2634,14 +2626,21 @@ char	*parv[];
 				sendto_channel_butserv(chptr, sptr,
 						":%s KICK %s %s :%s", parv[0],
 						name, who->name, comment);
-				/* Don't send &local &kicks out */
+				/* Don't send &local kicks out */
+				/* Send !channels and #chan:*.els kicks only
+				   to servers that understand those channels.
+				   I think it would be better to use different buffers
+				   for each type and do them in one sweep at the end.
+				   Given MAXPENALTY, however, it wouldn't be used.
+				   sendto_match_servs() is used, since it does no action
+				   upon chptr being &channel --Beeth */
 				if (*chptr->chname != '&' &&
 				    *chptr->chname != '!' &&
 				    index(chptr->chname, ':') == NULL) {
 					if (*nickbuf)
 						(void)strcat(nickbuf, ",");
 					(void)strcat(nickbuf, who->name);
-					nlen += strlen(who->name);
+					nlen += strlen(who->name) + 1; /* 1 for comma --B. */
 				    }
 				else
 					sendto_match_servs(chptr, cptr,
@@ -2650,7 +2649,7 @@ char	*parv[];
 						   who->name, comment);
 				remove_user_from_channel(who,chptr);
 				penalty += 2;
-				if (penalty > MAXPENALTY && MyPerson(sptr))
+				if (penalty >= MAXPENALTY && MyPerson(sptr))
 					break;
 			    }
 			else
@@ -2659,11 +2658,11 @@ char	*parv[];
 					   parv[0]), user, name);
 		    } /* loop on parv[2] */
 		MyFree(tmp);
+		if (*nickbuf)
+			sendto_serv_butone(cptr, ":%s KICK %s %s :%s",
+					   parv[0], name, nickbuf, comment);
 	    } /* loop on parv[1] */
 
-	if (*buf && *nickbuf)
-		sendto_serv_butone(cptr, ":%s KICK %s %s :%s",
-				   parv[0], buf, nickbuf, comment);
 	return penalty;
 }
 
