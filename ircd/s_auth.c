@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.3 2000/05/05 23:27:31 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.4 2001/04/07 00:12:44 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -81,11 +81,11 @@ aClient *cptr;
 	if (!strcmp(cptr->username, cptr->auth))
 	    {
 		MyFree(cptr->auth);
-		cptr->auth = cptr->username;
+		cptr->auth = mystrdup(cptr->username);
 	    }
 	else
 	    {
-		istat.is_authmem += sizeof(cptr->auth);
+		istat.is_authmem += strlen(cptr->auth) + 1;
 		istat.is_auth += 1;
 	    }
 }
@@ -367,7 +367,7 @@ read_iauth()
 				}
 			    if (cptr->auth != cptr->username)
 				{   
-				    istat.is_authmem -= sizeof(cptr->auth);
+				    istat.is_authmem -= strlen(cptr->auth) + 1;
 				    istat.is_auth -= 1;
 				    MyFree(cptr->auth);
 				}
@@ -388,7 +388,7 @@ read_iauth()
 				}
 			    if (cptr->auth != cptr->username)
 				{
-				    istat.is_authmem -= sizeof(cptr->auth);
+				    istat.is_authmem -= strlen(cptr->auth) + 1;
 				    istat.is_auth -= 1;
 				    MyFree(cptr->auth);
 				}
@@ -791,7 +791,7 @@ Reg	aClient	*cptr;
 	ircstp->is_asuc++;
 	if (cptr->auth != cptr->username)/*impossible, but...*/
 	    {
-		istat.is_authmem -= sizeof(cptr->auth);
+		istat.is_authmem -= strlen(cptr->auth) + 1;
 		istat.is_auth -= 1;
 		MyFree(cptr->auth);
 	    }
