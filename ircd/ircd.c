@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.2 2000/12/08 21:09:05 q Exp $";
+static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.3 2001/02/26 18:58:04 q Exp $";
 #endif
 
 #include "os.h"
@@ -887,7 +887,7 @@ char	*argv[];
 			acptr = NULL;
 		    }
 		/* exit if there is nothing to listen to */
-		if (acptr == NULL)
+		if (acptr == NULL && !(bootopt & BOOT_INETD))
 			exit(-1);
 		/* Is there an M-line? */
 		if (!find_me())
