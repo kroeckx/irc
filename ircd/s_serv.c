@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.2 2000/08/15 16:07:23 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.3 2001/02/09 16:58:19 q Exp $";
 #endif
 
 #include "os.h"
@@ -1834,7 +1834,7 @@ char	*parv[];
 	if (!aconf)
 	    {
 	      sendto_one(sptr,
-			 "NOTICE %s :Connect: Host %s not listed in irc.conf",
+			 "NOTICE %s :Connect: Host %s not listed in ircd.conf",
 			 parv[0], parv[1]);
 	      return 0;
 	    }
