@@ -4,6 +4,8 @@
 	  size in stats (from jv).
 	* s_bsd.c/read_message(), packet.c/dopacket(): if client exceeded
 	  sendq, say so, instead of "Dead Socket" (from jv).
+	* s_service.c/check_services_butone(),check_services_num(): don't
+	  loop over all fds when we have services linked list (from jv).
 
 2001-05-06  Piotr Kucharski
 
