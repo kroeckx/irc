@@ -1,7 +1,7 @@
 2000-08-15  Piotr Kucharski
 
-	* s_user.c/m_oper(): sometimes crypt() returns NULL, crashing
-	  ircd little further (as seen on ircd.stealth.net)
+	* s_user.c/m_oper(), s_serv.c/m_server_estab(), mkpasswd.c:
+	  sometimes crypt() returns NULL, crashing ircd little further
 
 2000-08-13  Piotr Kucharski
 
