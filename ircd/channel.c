@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.23 2003/10/11 09:34:26 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.24 2003/10/11 11:03:23 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2154,8 +2154,9 @@ char	*parv[];
 		if (i + tmplen + 2 /* comma and \0 */
 			>= sizeof(jbuf) )
 		{
-			/* We would overwrite the jbuf with comma
-			** and channel name (possibly shortened). --B. */
+			/* We would overwrite the jbuf with comma and
+			** channel name (possibly shortened), so we just
+			** silently ignore it and the rest of JOIN --B. */
 			break;
 		}
 		if (*jbuf)
