@@ -743,7 +743,11 @@ char mydummy2[MYDUMMY_SIZE];
 #  endif
 # endif
 
-# if defined(linux)
+# if defined(linux) \
+	&& (((defined(__GLIBC__) \
+	&& (__GLIBC_MAJOR__ == 2) && (__GLIBC_MINOR__ < 1) \
+	|| __GLIBC_MAJOR__ < 2)) \
+	|| !defined(__GLIBC__))
 static const struct in6_addr in6addr_any={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
 						0, 0, 0, 0, 0};
 # endif
