@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.7 2000/05/09 12:13:48 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.8 2000/05/29 19:28:20 q Exp $";
 #endif
 
 #include "os.h"
@@ -2934,7 +2934,7 @@ aConfItem	*aconf;
 	if (aconf->passwd && isdigit(*aconf->passwd))
 #ifdef INET6
 	    {
-		if (!inet_pton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr);
+		if (!inet_pton(AF_INET6, aconf->passwd,from.sin6_addr.s6_addr))
 			bcopy(minus_one, from.sin6_addr.s6_addr, IN6ADDRSZ);
 	    }
 #else
