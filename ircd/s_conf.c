@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.3 2000/02/10 18:59:20 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.4 2000/05/29 19:38:25 q Exp $";
 #endif
 
 #include "os.h"
@@ -1720,9 +1720,9 @@ int	class, fd;
 					aconf->name, aconf->port);
 				strcat(rpl, "\r\n");
 #ifdef INET6
-				sendto(class, rpl, strlen(rpl), 0, 0, 0);
+				sendto(fd, rpl, strlen(rpl), 0, 0, 0);
 #else
-				send(class, rpl, strlen(rpl), 0);
+				send(fd, rpl, strlen(rpl), 0);
 #endif
 				return;
 			    }
