@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.4 2000/02/10 18:48:29 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.5 2000/04/09 15:14:28 q Exp $";
 #endif
 
 #include "os.h"
@@ -1994,6 +1994,10 @@ char	*parv[];
 		    {
 			(void)strcpy(jbuf, "0");
 			continue;
+		    }
+		if (MyClient(sptr))
+		    {
+			clean_channelname(name);
 		    }
 		if (*name == '!')
 		    {
