@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.14 2001/06/29 18:57:41 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.15 2001/07/05 22:08:58 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1207,32 +1207,24 @@ int	opt;
                 ** for it and make the conf_line illegal and delete it.
                 */
 		if (aconf->status & CONF_CLASS)
-		    {
+		{
 			if (atoi(aconf->host) >= 0)
 				add_class(atoi(aconf->host),
 					  atoi(aconf->passwd),
 					  atoi(aconf->name), aconf->port,
 					  tmp ? atoi(tmp) : 0,
-/*					  tmp3 ? atoi(tmp3) : 0,
-**					  tmp3 && index(tmp3, '.') ?
-**					  atoi(index(tmp3, '.') + 1) : 0,
-** the next 3 lines should be replaced by the previous sometime in the
-** future.  It is only kept for "backward" compatibility and not needed,
-** but I'm in good mood today -krys
-*/
-					  tmp3 ? atoi(tmp3) : (atoi(aconf->name) > 0) ? atoi(aconf->name) : 0,
-					  tmp3 && index(tmp3, '.') ?
-					  atoi(index(tmp3, '.') + 1) : (atoi(aconf->name) < 0) ? -1 * atoi(aconf->name) : 0,
-/* end of backward compatibility insanity */
- 					  tmp4 ? atoi(tmp4) : 0,
-					  tmp4 && index(tmp4, '.') ?
-					  atoi(index(tmp4, '.') + 1) : 0);
+					  tmp3 ? atoi(tmp3) : 1,
+					  (tmp3 && index(tmp3, '.')) ?
+					  atoi(index(tmp3, '.') + 1) : 1,
+ 					  tmp4 ? atoi(tmp4) : 1,
+					  (tmp4 && index(tmp4, '.')) ?
+					  atoi(index(tmp4, '.') + 1) : 1);
 			continue;
-		    }
+		}
 		/*
-                ** associate each conf line with a class by using a pointer
-                ** to the correct class record. -avalon
-                */
+		** associate each conf line with a class by using a pointer
+		** to the correct class record. -avalon
+		*/
 		if (aconf->status & (CONF_CLIENT_MASK|CONF_LISTEN_PORT))
 		    {
 			if (Class(aconf) == 0)
