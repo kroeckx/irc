@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.5 2001/02/09 15:41:46 q Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.6 2001/02/10 23:50:29 q Exp $";
 #endif
 
 #include "os.h"
@@ -215,7 +215,6 @@ char	*nick;
 time_t	timelimit;
 {
 	Reg	aName	*wp, *wp2;
-	Reg	int	i = 0;
 
 	wp = wp2 = &was[ww_index];
 	timelimit = timeofday - timelimit;
