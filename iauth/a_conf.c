@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21.2.1 1999/10/04 12:42:59 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21.2.2 2000/01/03 19:11:20 q Exp $";
 #endif
 
 #include "os.h"
@@ -91,8 +91,16 @@ char *cfile;
 	Mlist[Mcnt] = NULL;
 
 	cfh = fopen((cfile) ? cfile : IAUTHCONF_PATH, "r");
-	if (cfh)
+	if (!cfh)
 	    {
+		if (cfile)
+			perror("Couldn't open config file");
+		else
+			sendto_ircd(">Couldn't open config file: %s",
+				strerror(errno));
+		exit(0);
+	    }
+
 		while (fgets(buffer, 160, cfh))
 		    {
 			if (ch = index(buffer, '\n'))
@@ -358,12 +366,7 @@ char *cfile;
 
 			last = &((*last)->nexti);
 		    }
-	    }
-	else if (cfile)
-	    {
-		perror("fopen");
-		exit(0);
-	    }
+
 	if (ident == NULL)
 	    {
 		ident = *last = (AnInstance *) malloc(sizeof(AnInstance));
