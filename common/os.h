@@ -729,10 +729,6 @@ static unsigned char minus_one[]={ 255, 255, 255, 255, 255, 255, 255, 255, 255,
 # define	S_ADDR		s6_addr
 # define	IN_ADDR		in6_addr
 
-# ifndef uint32_t
-#  define uint32_t __u32
-# endif
-
 # define MYDUMMY_SIZE 128
 char mydummy[MYDUMMY_SIZE];
 char mydummy2[MYDUMMY_SIZE];
