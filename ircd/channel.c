@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.16 2001/05/03 20:00:23 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.17 2001/05/06 23:09:20 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2297,7 +2297,8 @@ Reg	aClient *cptr, *sptr;
 int	parc;
 char	*parv[];
 {
-	char nbuf[BUFSIZE], *q, *name, *target, *p, mbuf[MAXMODEPARAMS + 1];
+	char nbuf[BUFSIZE], *q, *name, *target, mbuf[MAXMODEPARAMS + 1];
+	char *p = NULL;
 	int chop, cnt = 0, nj = 0;
 	aChannel *chptr = NULL;
 	aClient *acptr;
