@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.8 2000/05/29 19:28:20 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.9 2000/09/28 21:39:54 q Exp $";
 #endif
 
 #include "os.h"
@@ -2723,7 +2723,7 @@ char	*namebuf, *linebuf, *chname;
 {
 	static	char	wrerr[] = "NOTICE %s :Write error. Couldn't summon.";
 	int	fd;
-	char	line[120];
+	char	line[512];
 	struct	tm	*tp;
 
 	tp = localtime(&timeofday);
