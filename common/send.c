@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.2 2001/02/08 12:41:49 q Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.3 2001/02/28 19:03:07 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1455,6 +1455,41 @@ void	sendto_flag(u_int chan, char *pattern, ...)
 	return;
 }
 
+static int userlog;
+static int connlog;
+
+void
+logfiles_open()
+{
+#ifdef  FNAME_USERLOG
+	userlog = open(FNAME_USERLOG, O_WRONLY|O_APPEND|O_NDELAY);
+#else
+	userlog = -1;
+#endif
+#ifdef  FNAME_CONNLOG
+	connlog = open(FNAME_CONNLOG, O_WRONLY|O_APPEND|O_NDELAY);
+#else
+	connlog = -1;
+#endif;
+}
+
+void
+logfiles_close()
+{
+#ifdef FNAME_USERLOG
+	if (userlog != -1)
+	{
+		(void)close(userlog);
+	}
+#endif
+#ifdef FNAME_CONNLOG
+	if (connlog != -1)
+	{
+		(void)close(connlog);
+	}
+#endif
+}
+
 /*
  * sendto_flog
  *	cptr		used for firsttime, auth, exitc, send/received M/K
@@ -1463,6 +1498,8 @@ void	sendto_flag(u_int chan, char *pattern, ...)
  *	duration	used if no message
  *	username	can't get it from cptr
  *	hostname	i.e.
+ *
+ * duration can be 0 even if msg is null! (when time was stepped back) --Beeth
  */
 void	sendto_flog(cptr, msg, duration, username, hostname)
 aClient	*cptr;
@@ -1471,86 +1508,48 @@ time_t	duration;
 {
 	char	linebuf[1024]; /* auth reply might be long.. */
 	int	logfile;
+	char	buf[12];	/* This is potential buffer overflow.   */
+				/* I mean, when you manage to keep ircd */
+				/* running for almost 12 years ;-) --B. */
+
+	logfile = msg ? connlog : userlog;
+
+#ifndef	USE_SERVICES
+	if (logfile == -1)
+	{
+		return;
+	}
+#endif
+	if (!msg)
+	{
+		(void)sprintf(buf, "%3d:%02d:%02d",
+			(int) (duration / 3600),
+			(int) ((duration % 3600) / 60),
+			(int) (duration % 60));
+	}
+
+	(void)sprintf(linebuf,
+		"%s (%s): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
+		myctime(cptr->firsttime), msg ? msg : buf,
+		username, hostname, cptr->auth,
+		cptr->exitc, cptr->sendM, cptr->sendK,
+		cptr->receiveM, cptr->receiveK);
 
 #ifdef	USE_SERVICES
 	if (!msg)
-	    {
-		(void)sprintf(linebuf,
-	      "%s (%3d:%02d:%02d): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
-			      myctime(cptr->firsttime),
-			      (int) (duration / 3600),
-			      (int) ((duration % 3600) / 60),
-			      (int) (duration % 60),
-			      username, hostname, cptr->auth,
-			      cptr->exitc, cptr->sendM, cptr->sendK,
-			      cptr->receiveM, cptr->receiveK);
+	{
 		check_services_butone(SERVICE_WANT_USERLOG, NULL, &me,
 				      "USERLOG :%s", linebuf);
-	    }
+	}
 	else
-	    {
-		(void)sprintf(linebuf,
-			      "%s (%s): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
-			      myctime(cptr->firsttime), msg, username,
-			      hostname, cptr->auth,
-			      cptr->exitc, cptr->sendM, cptr->sendK,
-			      cptr->receiveM, cptr->receiveK);
+	{
 		check_services_butone(SERVICE_WANT_CONNLOG, NULL, &me,
 				      "CONNLOG :%s", linebuf);
-	    }
+	}
 #endif
-	/*
-	 * This conditional makes the logfile active only after
-	 * it's been created, thus logging can be turned off by
-	 * removing the file.
-	 *
-	 * stop NFS hangs...most systems should be able to
-	 * file in 3 seconds. -avalon (curtesy of wumpus)
-	 */
-	(void)alarm(3);
-	if (
-#ifdef	FNAME_USERLOG
-	    (duration && 
-	     (logfile = open(FNAME_USERLOG, O_WRONLY|O_APPEND)) != -1)
-# ifdef	FNAME_CONNLOG
-	    ||
-# endif
-#endif
-#ifdef	FNAME_CONNLOG
-	    (!duration && 
-	     (logfile = open(FNAME_CONNLOG, O_WRONLY|O_APPEND)) != -1)
-#else
-# ifndef	FNAME_USERLOG
-	    0
-# endif
-#endif
-	   )
-	    {
-		(void)alarm(0);
-#ifndef	USE_SERVICES
-		if (duration)
-			(void)sprintf(linebuf,
-	      "%s (%3d:%02d:%02d): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
-				      myctime(cptr->firsttime),
-				      (int) (duration / 3600),
-				      (int) ((duration % 3600) / 60),
-				      (int) (duration % 60),
-				      username, hostname, cptr->auth,
-				      cptr->exitc, cptr->sendM, cptr->sendK,
-				      cptr->receiveM, cptr->receiveK);
-		else
-			(void)sprintf(linebuf,
-			      "%s (%s): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
-				      myctime(cptr->firsttime), msg, username,
-				      hostname, cptr->auth,
-                                      cptr->exitc, cptr->sendM, cptr->sendK,
-                                      cptr->receiveM, cptr->receiveK);
-#endif
-		(void)alarm(3);
+	if (logfile != -1)
+	{
 		(void)write(logfile, linebuf, strlen(linebuf));
-		(void)alarm(0);
-		(void)close(logfile);
-	    }
-	(void)alarm(0);
+	}
 }
 #endif /* CLIENT_COMPILE */
