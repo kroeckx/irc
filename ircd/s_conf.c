@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.18 2003/10/11 09:59:59 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.19 2003/10/12 22:20:06 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -542,8 +542,6 @@ int	statmask;
 
 	for (tmp = conf; tmp; tmp = tmp->next)
 	    {
-		if (IsIllegal(tmp))
-			continue;
 		if (!(tmp->status & statmask) || !tmp->name || !tmp->host ||
 		    mycmp(tmp->name, name))
 			continue;
@@ -617,8 +615,6 @@ int	statmask;
  
 	for (tmp = conf; tmp; tmp = tmp->next)
 	    {
-		if (IsIllegal(tmp))
-			continue;
 		/*
 		** Accept if the *real* hostname (usually sockecthost)
 		** matches *either* host or name field of the configuration.
@@ -644,8 +640,6 @@ int	statmask;
 	for (; lp; lp = lp->next)
 	    {
 		tmp = lp->value.aconf;
-		if (IsIllegal(tmp))
-			continue;
 		if ((tmp->status & statmask) &&
 		    (((tmp->status & (CONF_SERVER_MASK|CONF_HUB)) &&
 	 	     tmp->name && !mycmp(tmp->name, name)) ||
@@ -672,8 +666,6 @@ Reg	int	statmask;
 	for (; lp; lp = lp->next)
 	    {
 		tmp = lp->value.aconf;
-		if (IsIllegal(tmp))
-			continue;
 		if (tmp->status & statmask &&
 		    (!(tmp->status & CONF_SERVER_MASK || tmp->host) ||
 	 	     (tmp->host && !match(tmp->host, host))))
@@ -699,8 +691,6 @@ int	statmask;
 	for (; lp; lp = lp->next)
 	    {
 		tmp = lp->value.aconf;
-		if (IsIllegal(tmp))
-			continue;
 		if (!(tmp->status & statmask))
 			continue;
 		s = index(tmp->host, '@');
