@@ -58,7 +58,9 @@ COMMONSRC=../common/bsd.c ../common/dbuf.c ../common/packet.c \
 	 ../common/support.c
 SRC=$(OBJS:%.o=../irc/%.c) $(COMMONSRC)
 
-MAKE = make 'CFLAGS=${CFLAGS}' 'CC=${CC}'
+MAKE = make 'CFLAGS=${CFLAGS}' 'CC=${CC}' 'IRCLIBS=${IRCLIBS}' \
+	    'LDFLAGS=${LDFLAGS}'
+
 
 all: build
 
@@ -67,8 +69,8 @@ build: irc
 install: all
 	${INSTALL} -c -s -m 711 irc $(BINDIR)
 
-irc: $(OBJS) $(COMMONOBJS)
-	$(CC) $(OBJS) $(COMMONOBJS) -o irc $(IRCLIBS) $(IRCDLIBS)
+irc:	$(OBJS) $(COMMONOBJS)
+	$(CC) ${CFLAGS} $(OBJS) $(COMMONOBJS) -o irc $(LDFLAGS) $(IRCLIBS)
 
 clparse.o: ../common/parse.c
 	${CC} ${CFLAGS} ${DFLAGS} -c ../common/parse.c -o $@
@@ -137,6 +139,6 @@ clean:
 	${RM} -f ${COMMONOBJS} ${OBJS} irc
 
 depend:
-	makedepend -fMakefile.irc -- ${INCLUDEDIR} -- ${SRC}
+	makedepend -fMakefile.irc -- ${CFLAGS} -- ${SRC}
 
 # DO NOT DELETE THIS LINE -- make depend depends on it.

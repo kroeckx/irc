@@ -56,9 +56,9 @@
 # M: [MANDATORY]. This line sets your server's name, description.
 # Fields, in order, are: 
 #
-# M:hostname:*:Description Of Your Server
+# M:hostname:*:Description Of Your Server:port
 #
-M:csa.bu.edu:*:Boston University Computer Science Department::
+M:csa.bu.edu:*:Boston University Computer Science Department:6667:
 #
 # A: [MANDATORY]. This line lists your administrative information
 # (contact address, etc). To view this information, /admin (server) will

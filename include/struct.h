@@ -121,13 +121,14 @@ typedef	struct	Zdata	aZdata;
 /*
 ** flags for bootup options (command line flags)
 */
-#define	BOOT_CONSOLE	1
-#define	BOOT_QUICK	2
-#define	BOOT_DEBUG	4
-#define	BOOT_INETD	8
-#define	BOOT_TTY	16
-#define	BOOT_OPER	32
-#define	BOOT_AUTODIE	64
+#define	BOOT_CONSOLE	0x001
+#define	BOOT_QUICK	0x002
+#define	BOOT_DEBUG	0x004
+#define	BOOT_INETD	0x008
+#define	BOOT_TTY	0x010
+#define	BOOT_OPER	0x020
+#define	BOOT_AUTODIE	0x040
+#define BOOT_BADTUNE	0x080
 
 #define	STAT_RECONNECT	-7	/* Reconnect attempt for server connections */
 #define	STAT_LOG	-6	/* logfile for -x */

@@ -174,10 +174,12 @@ int	server, parc;
 	if ((acptr = find_client(parv[server], NULL)))
 		if (acptr->from == sptr->from && !MyConnect(acptr))
 			acptr = NULL;
+	/* Match *.masked.servers */
 	if (!acptr && (acptr = find_server(parv[server], NULL)))
 		if (acptr->from == sptr->from && !MyConnect(acptr))
 			acptr = NULL;
-	if (!acptr && (acptr = find_nickserv(parv[server], NULL)))
+	/* Remote services@servers */
+	if (!acptr && (acptr = find_service(parv[server], NULL)))
 		if (acptr->from == sptr->from && !MyConnect(acptr))
 			acptr = NULL;
 	if (!acptr)
@@ -706,8 +708,12 @@ char	*parv[];
 		** there is no danger of the server being disconnected.
 		** Ultimate way to jupiter a nick ? >;-). -avalon
 		*/
-		sendto_flag(SCH_KILL, "Nick collision on %s (%s@%s)%s <- %s",
-			    sptr->name, user, host, acptr->from->name,
+		sendto_flag(SCH_KILL,
+			    "Nick collision on %s (%s@%s)%s <- (%s@%s)%s",
+			    sptr->name,
+			    (acptr->user) ? acptr->user->username : "???",
+			    (acptr->user) ? acptr->user->host : "???",
+			    acptr->from->name, user, host,
 			    get_client_name(cptr, FALSE));
 		ircstp->is_kill++;
 		sendto_one(cptr, ":%s KILL %s :%s (%s <- %s)",
@@ -798,31 +804,29 @@ char	*parv[];
 	*/
 	if (sptr == cptr)
 	    {
-		sendto_flag(SCH_KILL, "Nick collision on %s (%s@%s)%s <- %s",
-			    acptr->name, user, host, acptr->from->name,
-			    get_client_name(cptr, FALSE));
+		sendto_flag(SCH_KILL,
+			    "Nick collision on %s (%s@%s)%s <- (%s@%s)%s",
+			    acptr->name,
+			    (acptr->user) ? acptr->user->username : "???",
+			    (acptr->user) ? acptr->user->host : "???",
+			    acptr->from->name,
+			    user, host, get_client_name(cptr, FALSE));
 		/*
 		** A new NICK being introduced by a neighbouring
 		** server (e.g. message type "NICK new" received)
 		*/
 		ircstp->is_kill++;
-		sendto_serv_butone(cptr, ":%s KILL %s :%s ((%s@%s)%s <- %s)",
-				   ME, acptr->name, ME, user, host,
-				   acptr->from->name,
+		sendto_serv_butone(NULL, 
+				   ":%s KILL %s :%s ((%s@%s)%s <- (%s@%s)%s)",
+				   ME, acptr->name, ME,
+				   (acptr->user) ? acptr->user->username:"???",
+				   (acptr->user) ? acptr->user->host : "???",
+				   acptr->from->name, user, host,
 				   /* NOTE: Cannot use get_client_name twice
 				   ** here, it returns static string pointer:
 				   ** the other info would be lost
 				   */
 				   get_client_name(cptr, FALSE));
-		sendto_one(cptr, ":%s KILL %s :%s (%s <- (%s@%s)%s)",
-			    ME, acptr->name, ME, acptr->from->name,
-			    (acptr->user) ? acptr->user->username : "???",
-			    (acptr->user) ? acptr->user->host : "???",
-			    /* NOTE: Cannot use get_client_name twice
-			    ** here, it returns static string pointer:
-			    ** the other info would be lost
-			    */
-			    get_client_name(cptr, FALSE));
 		acptr->flags |= FLAGS_KILLED;
 		return exit_client(NULL, acptr, &me, "Nick collision");
 	    }

@@ -246,8 +246,10 @@ int	port;
 	(void)sscanf(ipmask, "%d.%d.%d.%d", &ad[0], &ad[1], &ad[2], &ad[3]);
 	(void)sprintf(ipname, "%d.%d.%d.%d", ad[0], ad[1], ad[2], ad[3]);
 
-	(void)sprintf(cptr->sockhost, "%-.42s.%u", ipmask, (unsigned int)port);
+	(void)sprintf(cptr->sockhost, "%-.42s.%u", ip ? ip : ME,
+		      (unsigned int)port);
 	(void)strcpy(cptr->name, ME);
+	DupString(cptr->auth, ipname);
 	/*
 	 * At first, open a new socket
 	 */
@@ -273,7 +275,7 @@ int	port;
 	if (port)
 	    {
 		server.sin_family = AF_INET;
-		if (!ip || !*ip || *ip == '*')
+		if (!ip || !isdigit(*ip))
 			server.sin_addr.s_addr = INADDR_ANY;
 		else
 			server.sin_addr.s_addr = inet_addr(ip);
@@ -312,11 +314,10 @@ int	port;
 
 	if (cptr->fd > highest_fd)
 		highest_fd = cptr->fd;
-	cptr->ip.s_addr = inet_addr(ipname);
-	cptr->port = (int)ntohs(server.sin_port);
+	cptr->ip.s_addr = server.sin_addr.s_addr;
+	cptr->port = port;
 	(void)listen(cptr->fd, LISTENQUEUE);
 	local[cptr->fd] = cptr;
-	(void)setup_ping(server.sin_port);
 
 	return 0;
 }
@@ -338,10 +339,10 @@ aConfItem *aconf;
 	cptr->from = cptr;
 	cptr->firsttime = time(NULL);
 	SetMe(cptr);
-	strncpyzt(cptr->name, aconf->host, sizeof(cptr->name));
 #ifdef	UNIXPORT
 	if (*aconf->host == '/')
 	    {
+		strncpyzt(cptr->name, aconf->host, sizeof(cptr->name));
 		if (unixport(cptr, aconf->host, aconf->port))
 			cptr->fd = -2;
 	    }
@@ -1924,9 +1925,7 @@ FdAry	*fdp;
 				       TST_READ_EVENT(resfd, res_pfd)))
 	    {
 		do_dns_async();
-#ifndef	_DO_POLL_
 		nfds--;
-#endif
 		CLR_READ_EVENT(resfd, res_pfd);
 	    }
 	if (udpfd >= 0 && nfds > 0 && (
@@ -1936,9 +1935,7 @@ FdAry	*fdp;
 				       TST_READ_EVENT(udpfd, udp_pfd)))
 	    {
 		polludp();
-#ifndef	_DO_POLL_
 		nfds--;
-#endif
 		CLR_READ_EVENT(udpfd, res_pfd);
 	    }
 
@@ -2343,16 +2340,12 @@ int	*lenp;
 	** Bind to a local IP# (with unknown port - let unix decide) so
 	** we have some chance of knowing the IP# that gets used for a host
 	** with more than one IP#.
+	** With VIFs, M:line defines outgoing IP# and initialises mysk.
 	*/
 	if (bind(cptr->fd, (SAP)&mysk, sizeof(mysk)) == -1)
 	    {
 		report_error("error binding to local port for %s:%s", cptr);
-		if (mysk.sin_addr.s_addr)
-		    {
-			mysk.sin_addr.s_addr = INADDR_ANY;
-			if (bind(cptr->fd, (SAP)&mysk, sizeof(mysk)) == -1)
-				return NULL;
-		    }
+		return NULL;
 	    }
 	/*
 	 * By this point we should know the IP# of the host listed in the
@@ -2604,7 +2597,7 @@ int	len;
 	bzero((char *)&mysk, sizeof(mysk));
 	mysk.sin_family = AF_INET;
 	
-	if ((aconf = find_me())->passwd)
+	if ((aconf = find_me())->passwd && isdigit(*aconf->passwd))
 		mysk.sin_addr.s_addr = inet_addr(aconf->passwd);
 
 	if (gethostname(name, len) == -1)
@@ -2657,8 +2650,8 @@ int	len;
 /*
 ** setup a UDP socket and listen for incoming packets
 */
-int	setup_ping(port)
-int	port;
+int	setup_ping(aconf)
+aConfItem	*aconf;
 {
 	struct	sockaddr_in	from;
 	int	on = 1;
@@ -2666,8 +2659,9 @@ int	port;
 	if (udpfd != -1)
 		return udpfd;
 	bzero((char *)&from, sizeof(from));
-	from.sin_addr.s_addr = htonl(INADDR_ANY); /* hmmpf */
-	from.sin_port = (u_short) port;
+	from.sin_addr.s_addr = aconf->passwd ? inet_addr(aconf->passwd) :
+					       htonl(INADDR_ANY); /* hmmpf */
+	from.sin_port = htons((u_short) aconf->port);
 	from.sin_family = AF_INET;
 
 	if ((udpfd = socket(AF_INET, SOCK_DGRAM, 0)) == -1)
@@ -2691,7 +2685,7 @@ int	port;
 	    {
 #ifdef	USE_SYSLOG
 		syslog(LOG_ERR, "bind udp.%d fd %d : %m",
-			from.sin_port, udpfd);
+		       ntohs(from.sin_port), udpfd);
 #endif
 		Debug((DEBUG_ERROR, "bind : %s", strerror(errno)));
 		(void)close(udpfd);

@@ -20,7 +20,6 @@ AC_PATH_PROGS(SUM, sum cksum, true)
 AC_CHECK_LIB(crypt, crypt)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, socket)
-AC_CHECK_LIB(gz, inflate)
 dnl AC_CHECK_LIB(resolv, res_init)
 
 AC_CHECK_HEADERS(sys/syslog.h stdlib.h stddef.h sys/malloc.h sys/param.h unistd.h string.h strings.h sys/cdefs.h arpa/inet.h arpa/nameser.h resolv.h sys/bitypes.h netdb.h)
@@ -155,5 +154,14 @@ main()
 }
 ],AC_DEFINE(SYS_ERRLIST_DECLARED) AC_MSG_RESULT(yes), AC_MSG_RESULT(no), :)
 
+dnl Shared linking of zlib can mess things, check it last.
+if test x$ZLIB_HOME != x; then
+	LDFLAGS="${LDFLAGS} -L${ZLIB_HOME}/lib"
+	AC_CHECK_LIB(z, inflate, LIBS="-lz $LIBS"
+			CPPFLAGS="${CPPFLAGS} -I${ZLIB_HOME}/include",
+			echo Failed to use ZLIB_HOME=${ZLIB_HOME})
+else
+       AC_CHECK_LIB(z, inflate)
+fi
 
 AC_OUTPUT(Makefile:support/Makefile.in version.c.SH:ircd/version.c.SH.in sums:ircd/crypt/sums.in)

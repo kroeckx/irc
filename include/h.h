@@ -94,7 +94,7 @@ extern	int	highest_fd, debuglevel, portnum, debugtty, maxusersperchannel;
 extern	int	readcalls, udpfd, resfd;
 extern	aClient	*add_connection __P((aClient *, int));
 extern	int	add_listener __P((aConfItem *));
-extern	int	setup_ping __P((int));
+extern	int	setup_ping __P((aConfItem *));
 extern	void	add_local_domain __P((char *, int));
 extern	int	check_client __P((aClient *));
 extern	int	check_server __P((aClient *, struct hostent *, \

@@ -437,19 +437,15 @@ Field: 1        2              3                4               5          6
                description in connect lines).
  
       Example:
-                M:tolsun.oulu.fi::Oulu, Finland
+                M:tolsun.oulu.fi::Oulu, Finland:6667
 
                 This line reads: My Host's name is "tolsun.oulu.fi" and
                 my site is located in "Oulu, Finland".
 
-                M:orion.cair.du.edu::Denver Colorado, USA
+                M:orion.cair.du.edu::Denver Colorado, USA:6667
 
                 This line reads: My Hosts name is "orion.cair.du.edu"
                 and my site is located in "Denver Colorado, USA".
-
-   NEW!!!
-      As of the 2.9.1 version of the server, the field 5 disappears.
-      To define on which port your server listens, use Port lines.
 
    3. CLIENT CONNECTIONS -   How to let clients connect to your IRCD.
 

@@ -440,7 +440,11 @@ aChannel *find_channel(chname, chptr)
 Reg	char	*chname;
 Reg	aChannel *chptr;
 {
-	return hash_find_channel(chname, chptr);
+	aChannel *achptr = chptr;
+
+	if (chname && *chname)
+		achptr = hash_find_channel(chname, chptr);
+	return achptr;
 }
 
 void	setup_server_channels(mp)

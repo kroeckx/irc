@@ -36,6 +36,8 @@ Computing Center and Jarkko Oikarinen";
 #include <math.h>
 #include "h.h"
 
+extern	char	serveropts[];
+
 aClient me;			/* That's me */
 aClient *client = &me;		/* Pointer to beginning of Client list */
 
@@ -517,7 +519,7 @@ aClient	*mp;
 static	int	bad_command()
 {
   (void)printf(
-	 "Usage: ircd [-a] [-c] [-d path]%s [-h servername] [-q] [-o] [-i] [-T tunefile] [-v]%s\n",
+	 "Usage: ircd [-a] [-b] [-c] [-d path]%s [-h servername] [-q] [-o] [-i] [-T tunefile] [-v] %s\n",
 #ifdef CMDLINE_CONFIG
 	 " [-f config]",
 #else
@@ -616,6 +618,9 @@ char	*argv[];
                     case 'a':
 			bootopt |= BOOT_AUTODIE;
 			break;
+		    case 'b':
+			bootopt |= BOOT_BADTUNE;
+			break;
 		    case 'c':
 			bootopt |= BOOT_CONSOLE;
 			break;
@@ -657,13 +662,15 @@ char	*argv[];
 			tunefile = p;
 			break;
 		    case 'v':
+			(void)printf("ircd %s %s\n\tzlib %s\n\t%s #%s\n",
+				     version, serveropts,
 #ifndef	ZIP_LINKS
-			(void)printf("ircd %s\n", version);
+				     "not used",
 #else
-			(void)printf("ircd %s (using zlib %s)\n", version,
-				     zlib_version);
+				     zlib_version,
 #endif
-			exit(0);
+				     creation, generation);
+			  exit(0);
 		    case 'x':
 #ifdef	DEBUGMODE
                         (void)setuid((uid_t)uid);
@@ -1059,21 +1066,39 @@ char *filename;
 void ircd_readtune(filename)
 char *filename;
 {
-	int fd;
+	int fd, t_data[6];
 	char buf[100];
 
 	if ((fd = open(filename, O_RDONLY)) != -1)
 	    {
 		read(fd, buf, 100);	/* no panic if this fails.. */
-		if (sscanf(buf, "%d\n%d\n%d\n%d\n%d\n%d\n", &ww_size,
-			    &lk_size, &_HASHSIZE, &_CHANNELHASHSIZE,
-			    &_SERVERSIZE, &poolsize) != 6)
+		if (sscanf(buf, "%d\n%d\n%d\n%d\n%d\n%d\n", &t_data[0],
+                           &t_data[1], &t_data[2], &t_data[3],
+                           &t_data[4], &t_data[5]) != 6)
 		    {
-			fprintf(stderr, "ircd tune file %s: bad format\n",
-				filename);
 			close(fd);
-			exit(1);
+			if (bootopt & BOOT_BADTUNE)
+				return;
+			else
+			    {
+				fprintf(stderr,
+					"ircd tune file %s: bad format\n",
+					filename);
+				exit(1);
+			    }
 		    }
+
+		/*
+		** Initiate the tune-values after successfully
+		** reading the tune-file.
+		*/
+		ww_size = t_data[0];
+		lk_size = t_data[1];
+		_HASHSIZE = t_data[2];
+		_CHANNELHASHSIZE = t_data[3];
+		_SERVERSIZE = t_data[4];
+		poolsize = t_data[5];
+
 		/*
 		** the lock array only grows if the whowas array grows,
 		** I don't think it should be initialized with a lower

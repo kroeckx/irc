@@ -37,8 +37,10 @@
 #include <sys/param.h>
 #ifdef HAVE_SYS_BITYPES_H
 # include <sys/bitypes.h>
-#elif (!defined(BSD)) || (BSD < 199306)
-# include "bitypes.h"
+#else
+# if (!defined(BSD)) || (BSD < 199306)
+#  include "bitypes.h"
+# endif
 #endif
 
 #ifdef	HAVE_UNISTD_H

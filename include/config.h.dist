@@ -441,11 +441,6 @@
  * LOCAL_KILL_ONLY restricts KILLs to clients which are connected to the
  * server the Operator is connected to (ie lets them deal with local
  * problem users or 'ghost' clients
- *
- * NOTE: #define'ing this on an IRC net with servers which have a version
- *	 earlier than 2.7 is prohibited.  Such an action and subsequent use
- *	 of KILL for non-local clients should be punished by removal of the
- *	 server's links (if only for ignoring this warning!).
  */
 #undef	LOCAL_KILL_ONLY
 #endif

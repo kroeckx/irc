@@ -823,7 +823,7 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 				    acptr->from == cptr &&
 				    match_it(acptr, mask, what))
 					break;
-			if (!acptr)
+			if (!user)
 				continue;
 		    }
 		/* my client, does he match ? */

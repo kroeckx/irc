@@ -5,7 +5,7 @@ ircd \- The Internet Relay Chat Program Server
 .SH SYNOPSIS
 .hy 0
 .IP \fBircd\fP
-[-a] [-c] [-i] [-o] [-q] [-t] [-d directory]
+[-a] [-b] [-c] [-i] [-o] [-q] [-t] [-d directory]
 [-f configfile] [-x debuglevel] [-h hostname] [-T tunefile]
 .SH DESCRIPTION
 .LP
@@ -82,7 +82,12 @@ Allows the user to manually set the server name at startup. The default
 name is hostname.domainname.
 .B \-T tunefile
 Specifies the ircd.tune file to be used for this ircdaemon. The option
-is used to override the default ircd.tune given at compile time.
+is used to override the default ircd.tune given at compile
+time.
+.B -b
+If the ircd.tune file is corrupted, the server will not
+start.  This option will make the server start anyways, with
+the default values (ignoring the corrupted file).
 .TP
 .SH
 If you plan to connect your \fIircd\fP server to an existing Irc-Network,

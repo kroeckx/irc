@@ -65,7 +65,7 @@ Reg	aClient *cptr;
     {
 	aClient *acptr = cptr;
 
-	if (name)
+	if (name && *name)
 		acptr = hash_find_client(name, cptr);
 
 	return acptr;
@@ -76,20 +76,30 @@ char	*name;
 Reg	aClient *cptr;
     {
 	aClient *acptr = cptr;
+	char	*serv;
 
-	if (name)
-		acptr = hash_find_client(name, cptr);
-	/* This needs support for multiple services.. */
+	if (name && *name)
+		if ((serv = (char *)index(name, '@'))) {
+			if (*name == '@' || !*(serv+1))	/* NULL@ or @NULL */
+				return acptr;
+			*serv++ = '\0';
+			acptr = hash_find_server(serv, cptr);
+			if (acptr && IsMe(acptr))
+				acptr = hash_find_client(name, cptr);
+			*--serv = '@';
+		} else
+			acptr = hash_find_client(name, cptr);
 	return acptr;
     }
 
+/* Obsoleted as of 2.9.3/970114/Vesa by find_service() */
 aClient	*find_nickserv(name, cptr)
 char	*name;
 Reg	aClient *cptr;
     {
 	aClient *acptr = cptr;
 
-	if (name)
+	if (name && *name)
 		acptr = hash_find_nickserv(name, cptr);
 
 	return acptr;
@@ -102,7 +112,7 @@ aClient *cptr;
     {
 	Reg	aClient	*c2ptr = cptr;
 
-	if (!name)
+	if (!name || !*name)
 		return c2ptr;
 
 	for (c2ptr = client; c2ptr; c2ptr = c2ptr->next) 
@@ -167,7 +177,7 @@ Reg	aClient *cptr;
 {
 	aClient *acptr = cptr;
 
-	if (name)
+	if (name && *name)
 		acptr = hash_find_server(name, cptr);
 	return acptr;
 }
@@ -184,7 +194,7 @@ aClient *cptr;
 	Reg	aClient	*c2ptr = cptr;
 	Reg	char	*mask = servermask;
 
-	if (!name)
+	if (!name || !*name)
 		return c2ptr;
 	if ((c2ptr = hash_find_server(name, cptr)))
 		return (c2ptr);
@@ -225,7 +235,7 @@ aClient *cptr;
 	Reg	aClient	*c2ptr = cptr;
 	Reg	aServer	*sp = NULL;
 
-	if (!name)
+	if (!name || !*name)
 		return c2ptr;
 
 	if ((c2ptr = hash_find_server(name, cptr)))
@@ -253,7 +263,7 @@ aClient	*cptr;
 {
 	Reg	aClient *c2ptr = cptr;
 
-	if (!name)
+	if (!name || !*name)
 		return c2ptr;
 
 	for (c2ptr = client; c2ptr; c2ptr = c2ptr->next)
@@ -353,8 +363,8 @@ char	*buffer, *bufend;
 			if (!from || matches(from->name, sender))
 				from = find_server(sender, (aClient *)NULL);
 #ifndef	CLIENT_COMPILE
-			else if (!from && index(sender, '@') &&
-				 !(from = find_nickserv(sender, NULL)))
+			/* Is there svc@server prefix ever? -Vesa */
+			else if (!from && index(sender, '@'))
 				from = find_service(sender, (aClient *)NULL);
 			if (!from)
 				from = find_mask(sender, (aClient *) NULL);

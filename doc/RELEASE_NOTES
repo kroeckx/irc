@@ -17,3 +17,7 @@ and 2.7 servers on the same network.
 ---
 
 2.9.3 supports compression of server links, see INSTALL.
+
+---
+
+2.9.3 reintroduce the port number in the M line, see INSTALL
