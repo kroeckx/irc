@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.1 2000/01/01 22:25:57 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.2 2000/01/03 18:24:37 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1197,7 +1197,7 @@ aCache	*cachep;
 				cp->he.h_addr_list,
 				addrcount));
 #endif
-			for (; addrcount; addrcount--)
+			for (i = addrcount; i; i--)
 			    {
 				*ab++ = (struct IN_ADDR *)t;
 				t += sizeof(struct IN_ADDR);
