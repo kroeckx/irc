@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.66 1999/08/15 21:07:43 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.1 2000/02/10 18:56:13 q Exp $";
 #endif
 
 #include "os.h"
@@ -317,12 +317,8 @@ aClient	*cptr;
 	else
 		id = "";
 
-	if (!strncmp(cptr->info, "021099", 6))
-		cptr->hopcount = SV_2_10|SV_UID;
-	else if (!strncmp(cptr->info, "0210", 4))
+	if (!strncmp(cptr->info, "021", 3))
 		cptr->hopcount = SV_29|SV_NJOIN|SV_NMODE|SV_NCHAN; /* SV_2_10*/
-	else if (!strncmp(cptr->info, "021", 3))
-		cptr->hopcount = SV_2_10|SV_UID;
 	else if (!strncmp(cptr->info, "0209", 4))
 		cptr->hopcount = SV_29|SV_OLDSQUIT;	/* 2.9+ protocol */
 	else
@@ -956,20 +952,11 @@ Reg	aClient	*cptr;
 			else
 				stok = acptr->user->servp->tok;
 			send_umode(NULL, acptr, 0, SEND_UMODES, buf);
-			if (cptr->serv->version & SV_UID && *acptr->user->uid)
-				sendto_one(cptr,
-					   "UNICK %s %s %d %s %s %s %s :%s",
-					   acptr->user->uid, acptr->name,
-					   acptr->hopcount + 1,
-					   acptr->user->username,
-					   acptr->user->host, stok,
-					   (*buf) ? buf : "+", acptr->info);
-			else
-				sendto_one(cptr,"NICK %s %d %s %s %s %s :%s",
-					   acptr->name, acptr->hopcount + 1,
-					   acptr->user->username,
-					   acptr->user->host, stok,
-					   (*buf) ? buf : "+", acptr->info);
+			sendto_one(cptr,"NICK %s %d %s %s %s %s :%s",
+				   acptr->name, acptr->hopcount + 1,
+				   acptr->user->username,
+				   acptr->user->host, stok,
+				   (*buf) ? buf : "+", acptr->info);
 			if ((cptr->serv->version & SV_NJOIN) == 0)
 				send_user_joins(cptr, acptr);
 		    }
@@ -1381,8 +1368,8 @@ char	*parv[];
 	aClient	*acptr;
 	char	stat = parc > 1 ? parv[1][0] : '\0';
 	Reg	int	i;
-	int	doall = 0, wilds = 0;
-	char	*name = NULL, *cm = NULL;
+	int	wilds, doall;
+	char	*name, *cm;
 
 	if (IsServer(cptr) &&
 	    (stat != 'd' && stat != 'p' && stat != 'q' && stat != 's' &&
@@ -1402,31 +1389,17 @@ char	*parv[];
 				2, parc, parv) != HUNTED_ISME)
 			return 5;
 	    }
-	else if (parc == 4)
+	else if (parc >= 3)
 	    {
 		if (hunt_server(cptr, sptr, ":%s STATS %s %s %s",
 				2, parc, parv) != HUNTED_ISME)
 			return 5;
 	    }
 
-	if (parc > 2)
-	    {
-		name = parv[2];
-		if (!mycmp(name, ME))
-			doall = 2;
-		else if (match(name, ME) == 0)
-			doall = 1;
-		if (index(name, '*') || index(name, '?'))
-			wilds = 1;
-		if (parc > 3)
-		    {
-			cm = parv[3];
-			if (!index(cm, '*') && !index(cm, '?'))
-				wilds = 0, doall = 0;
-		    }
-	    }
-	else
-		name = ME;
+	name = (parc > 2) ? parv[2] : ME;
+	cm = (parc > 3) ? parv[3]: name;
+	doall = !match(name, ME) && !match(cm, ME);
+	wilds = index(cm, '*') || index(cm, '?');
 
 	switch (stat)
 	{
@@ -1437,34 +1410,39 @@ char	*parv[];
 		 * are invisible not being visible to 'foreigners' who use
 		 * a wild card based search to list it.
 		 */
-		for (i = 0; i <= highest_fd; i++)
+		if (doall || wilds)
 		    {
-			if (!(acptr = local[i]))
-				continue;
-#if 0
-			if (IsPerson(acptr) && IsInvisible(acptr) &&
-			    (doall || wilds) && !(MyConnect(sptr) &&
-			     IsLocal(sptr) && IsOper(sptr)) &&
-			    !IsAnOper(acptr) && acptr != sptr)
-#endif
-			if (IsPerson(acptr) &&
-			    (doall || wilds) &&
-			    !(MyConnect(sptr) && IsAnOper(sptr)) &&
-			    acptr != sptr)
-				continue;
-			if (!doall && wilds && match(name, acptr->name))
-				continue;
-			if (!(doall || wilds) &&
-			    ((!cm && mycmp(name, acptr->name)) ||
-			     (cm && match(cm, acptr->name))))
-				continue;
-			sendto_one(cptr, Lformat, ME,
-				   RPL_STATSLINKINFO, parv[0],
-				   get_client_name(acptr, isupper(stat)),
-				   (int)DBufLength(&acptr->sendQ),
-				   (int)acptr->sendM, (int)acptr->sendK,
-				   (int)acptr->receiveM, (int)acptr->receiveK,
-				   timeofday - acptr->firsttime);
+			for (i = 0; i <= highest_fd; i++)
+			    {
+				if (!(acptr = local[i]))
+					continue;
+				if (IsPerson(acptr) && !(MyConnect(sptr) 
+				    && IsAnOper(sptr)) && acptr != sptr)
+					continue;
+				if (wilds && match(cm, acptr->name))
+					continue;
+				sendto_one(cptr, Lformat, ME,
+					RPL_STATSLINKINFO, parv[0],
+					get_client_name(acptr, isupper(stat)),
+					(int)DBufLength(&acptr->sendQ),
+					(int)acptr->sendM, (int)acptr->sendK,
+					(int)acptr->receiveM, 
+					(int)acptr->receiveK,
+					timeofday - acptr->firsttime);
+			    }
+		    }
+		else
+		    {
+			if ((acptr = find_client(cm, NULL)))
+				sendto_one(cptr, Lformat, ME,
+					RPL_STATSLINKINFO, parv[0],
+					get_client_name(acptr, isupper(stat)),
+					(int)DBufLength(&acptr->sendQ),
+					(int)acptr->sendM, (int)acptr->sendK,
+					(int)acptr->receiveM,
+					(int)acptr->receiveK,
+					timeofday - acptr->firsttime);
+			
 		    }
 		break;
 #if defined(USE_IAUTH)
