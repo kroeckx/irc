@@ -1,9 +1,7 @@
 /* 
-** Powered by Linux. :-)
-**
 ** Copyright (c) 1998 Kaspar 'Kasi' Landsberg, <kl@berlin.Snafu.DE> 
 **
-** File     : tkserv.c v1.3.5
+** File     : tkserv.c v1.3.6
 ** Author   : Kaspar 'Kasi' Landsberg, <kl@snafu.de>
 ** Desc.    : Temporary K-line Service.
 **            For further info see the README file.
@@ -25,7 +23,7 @@
 ** PS: Casting rules the world! (doh)
 ** 
 ** INET6 and fprintf() bug fixes by mro - 20000828
-** some buffer overflows fixes -- 20010306
+** some buffer overflows fixes and general cleanup by Beeth -- 20010307
 ** 
 */
 
@@ -48,7 +46,7 @@
 #define TKS_MAXARGS 250
 
 /* The version information */
-#define TKS_VERSION "Hello, i'm TkServ v1.3.5."
+#define TKS_VERSION "Hello, i'm TkServ v1.3.6."
 
 static char *nuh;
 FILE *tks_logf;
@@ -330,6 +328,7 @@ int is_opered(void)
 int must_be_opered()
 {
     FILE *fp;
+    int retv = 1;
 
     /* if the access file exists, check for auth */
     if ((fp = fopen(TKSERV_ACCESSFILE, "r")) != NULL)
@@ -345,34 +344,32 @@ int must_be_opered()
             if (token)
 	    {
                 access_uh  = (char *) strdup(token);
-	    }
                 
-            /* check for access file corruption */
-            if (!access_uh)
-            {
-                tks_log("Corrupt access file. RTFM. :-)");
-                free(access_uh);
-                return(0);
-            }
+                /* check for access file corruption */
+                if (*access_uh == '\0')
+                {
+                    tks_log("Corrupt access file. RTFM. :-)");
+                    /* if access file is corrupted, better safe than sorry */
+                    retv = 1;
+                }
 
-	    /* do we need an oper? */
-            if (*access_uh == '!')
-            {
-                if (!fnmatch((char *) (strchr(access_uh, '!') + 1), uh, 0))
+	        /* do we need an oper? */
+                if (*access_uh == '!' &&
+                   !fnmatch((char *) (strchr(access_uh, '!') + 1), uh, 0))
 		{
-                    free(access_uh);
-                    return(0);
+                    retv = 0;
 		}
+                free(access_uh);
             }
-            free(access_uh);
         }
+        fclose(fp);
     }
     else
     {
         tks_log("%s not found.", TKSERV_ACCESSFILE);
     }
 
-    return(1);
+    return(retv);
 }
 
 /* check whether origin is authorized to use the service */
@@ -430,7 +427,7 @@ int is_authorized(char *pwd, char *host)
 	    }
 
             /* check for access file corruption */
-            if (!access_uh || !access_pwd)
+            if (!*access_uh || !*access_pwd)
             {
                 tks_log("Corrupt access file. RTFM. :-)");
 
