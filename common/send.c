@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.7 2001/05/14 11:53:17 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.8 2001/05/14 17:45:11 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -920,7 +920,7 @@ void	sendto_common_channels(aClient *user, char *pattern, ...)
 				cptr = lp->value.cptr;
 				if (user == cptr)
 					continue;
-				if (!cptr->user) || sentalong[cptr->fd])
+				if (!cptr->user || sentalong[cptr->fd])
 					continue;
 				sentalong[cptr->fd]++;
 #ifndef DEBUGMODE
