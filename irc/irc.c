@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: irc.c,v 1.6.4.1 1999/10/30 19:28:37 q Exp $";
+static  char rcsid[] = "@(#)$Id: irc.c,v 1.6.4.2 2001/02/09 13:56:26 q Exp $";
 #endif
  
 #include "os.h"
@@ -342,7 +342,9 @@ char	*argv[];
 		if (logfile)
 			do_log(NULL, NULL);
 		printf("Press any key.");
+#ifdef	DOCURSES
 		refresh();
+#endif
         	getchar();
 		printf("\n");
 #ifdef DOCURSES
