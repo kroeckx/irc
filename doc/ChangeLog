@@ -1,3 +1,5 @@
+2.10.3p2
+
 2001-07-07  Piotr Kucharski
 
 	* send.c/send_message(): once we adjusted pool size during
@@ -5,6 +7,8 @@
 	* channel.c/send_mode_list(), send_channel_modes(): reverted
 	  change from 2001-02-07 (about space in MODEs); fixed
 	  sending more than MAXMODEPARAMS modes (from Q).
+	* s_user.c/send_whois(): get rid of one find_server(), we
+	  don't need it.
 
 2001-07-05  Piotr Kucharski
 
