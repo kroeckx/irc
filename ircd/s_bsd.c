@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.4 1998/05/17 20:29:32 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.22.2.5 1998/06/11 15:24:47 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -2762,13 +2762,15 @@ aConfItem *aconf;
 	sin.SIN_PORT = htons(cp->port);
 	sin.SIN_FAMILY = AFINET;
 	(void)gettimeofday(&pi.pi_tv, NULL);
-	Debug((DEBUG_SEND,"Send ping to %s,%d fd %d, %d bytes",
 #ifdef INET6
+	Debug((DEBUG_SEND,"Send ping to %s,%d fd %d, %d bytes",
 	       inet_ntop(AF_INET6, (char *)&aconf->ipnum,mydummy,MYDUMMY_SIZE),
-#else
-	       inetntoa((char *)&aconf->ipnum),
-#endif
 	       cp->port, udpfd, sizeof(pi)));
+#else
+	Debug((DEBUG_SEND,"Send ping to %s,%d fd %d, %d bytes",
+	       inetntoa((char *)&aconf->ipnum),
+	       cp->port, udpfd, sizeof(pi)));
+#endif
 	(void)sendto(udpfd, (char *)&pi, sizeof(pi), 0,(SAP)&sin,sizeof(sin));
 }
 
@@ -2881,14 +2883,16 @@ static	void	polludp()
 	else
 		cnt = 0, last = timeofday;
 
-	Debug((DEBUG_NOTICE, "udp (%d) %d bytes from %s,%d", cnt, n,
 #ifdef INET6
+	Debug((DEBUG_NOTICE, "udp (%d) %d bytes from %s,%d", cnt, n,
 	       inet_ntop(AF_INET6, (char *)&from.sin6_addr, mydummy,
 			 MYDUMMY_SIZE),
-#else
-	       inetntoa((char *)&from.sin_addr),
-#endif
 	       ntohs(from.SIN_PORT)));
+#else
+	Debug((DEBUG_NOTICE, "udp (%d) %d bytes from %s,%d", cnt, n,
+	       inetntoa((char *)&from.sin_addr),
+	       ntohs(from.SIN_PORT)));
+#endif
 
 	readbuf[n] = '\0';
 	ircstp->is_udpok++;
