@@ -206,7 +206,7 @@ time_t	currenttime;
 	for (aconf = conf; aconf; aconf = aconf->next )
 	    {
 		/* Also when already connecting! (update holdtimes) --SRB */
-		if (!(aconf->status & CONF_CONNECT_SERVER))
+		if (!(aconf->status & (CONF_CONNECT_SERVER|CONF_ZCONNECT_SERVER)))
 			continue;
 		/*
 		** Skip this entry if the use of it is still on hold until
@@ -566,6 +566,23 @@ char	*argv[];
 	    }
 #endif /*CHROOTDIR*/
 
+#ifdef	ZIP_LINKS
+	if (zlib_version[0] == '0')
+	    {
+		fprintf(stderr, "zlib version 1.0 or higher required\n");
+		exit(1);
+	    }
+	if (zlib_version[0] != ZLIB_VERSION[0])
+	    {
+        	fprintf(stderr, "incompatible zlib version\n");
+		exit(1);
+	    }
+	if (strcmp(zlib_version, ZLIB_VERSION) != 0)
+	    {
+		fprintf(stderr, "warning: different zlib version\n");
+	    }
+#endif
+
 	myargv = argv;
 	(void)umask(077);                /* better safe than sorry --SRB */
 	bzero((char *)&me, sizeof(me));
@@ -639,7 +656,12 @@ char	*argv[];
 			tunefile = p;
 			break;
 		    case 'v':
+#ifndef	ZIP_LINKS
 			(void)printf("ircd %s\n", version);
+#else
+			(void)printf("ircd %s (using zlib %s)\n", version,
+				     zlib_version);
+#endif
 			exit(0);
 		    case 'x':
 #ifdef	DEBUGMODE

@@ -20,6 +20,7 @@ AC_PATH_PROGS(SUM, sum cksum, true)
 AC_CHECK_LIB(crypt, crypt)
 AC_CHECK_LIB(socket, socket)
 AC_CHECK_LIB(nsl, socket)
+AC_CHECK_LIB(gz, inflate)
 dnl AC_CHECK_LIB(resolv, res_init)
 
 AC_CHECK_HEADERS(sys/syslog.h stdlib.h stddef.h sys/malloc.h sys/param.h unistd.h string.h strings.h sys/cdefs.h arpa/inet.h arpa/nameser.h resolv.h sys/bitypes.h netdb.h)

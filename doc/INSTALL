@@ -25,10 +25,9 @@ Overview of this document:
 
   1) Installing IRC
   2) The config.h file
-  3) Editing the Makefile
-  4) Compiling IRC
-  5) The ircd.conf file
-  6) Mailing list
+  3) Editing the Makefile, and compiling
+  4) The ircd.conf file
+  5) Mailing list
 
 1) So that ircd/irc will compile and work correctly with your version of
    Unix, it is necessary that you run "make" first.  This will run
@@ -112,7 +111,26 @@ Overview of this document:
       To further curb the actions of guest operators, LOCAL_KILL_ONLY can
       be defined to only allow locally connected clients to be KILLed.
 
-   h) The rest of the user changable #define's should be pretty much self
+   h) ZIP_LINKS, ZIP_LEVEL
+
+	As of the 2.9.3 version of the server, server-server connections
+      may be compressed using the zlib.  In order to compile the server
+      with this feature, you MUST have the zlib package (version 1.0 or higher)
+      already compiled and define ZIP_LINKS in the config.h file. Compression
+      use for server-server connections is separately configured in the
+      ircd.conf file for each server-server link.  ZIP_LEVEL allows you to
+      control the compression level that will be used.  Values above 5 will
+      noticeably increase the CPU used by the server.
+
+	The zlib package may be found at http://quest.jpl.nasa.gov/zlib/
+      The data format used by the zlib library is described by RFCs (Request
+      for Comments) 1950 to 1952 in the files 
+      ftp://ds.internic.net/rfc/rfc1950.txt (zlib format), rfc1951.txt (deflate
+      format) and rfc1952.txt (gzip format). These documents are also
+      available in other formats from
+      ftp://ftp.uu.net/graphics/png/documents/zlib/zdoc-index.html
+
+   i) The rest of the user changable #define's should be pretty much self
       explanatory in the config.h file.  It is *NOT* recommended that any
       of the file undef the line with "STOP STOP" in it be changed.
 
@@ -141,7 +159,7 @@ Overview of this document:
    The ircd.conf file contains various records that specify configuration
    options.  The record types are as follows:
    
-   1.  Server connections   	(C,N)
+   1.  Server connections   	(C,c,N)
    2.  Machine information	(M)
    3.  Client connections	(I,i)
    4.  Default local server	(U)
@@ -237,6 +255,12 @@ Field: 1        2              3                4               5          6
     Field 6: The class field should refer to an existing class and
              determines the maximum number of simultaneous uses of the
              C-line allowable through the max. links field in the Y-line.
+
+   NEW!!!
+      As of the 2.9.3 version of the server, server connections can be
+      compressed with the zlib library.  To define a compressed connection,
+      you must have compiled the server with ZIP_LINKS defined (cf 2.h), and
+      use a _lowercase_ C line.
 
    Some examples:
 

@@ -156,6 +156,9 @@ aClient	*from;
 		cptr->buffer[0] = '\0';
 		cptr->authfd = -1;
 		cptr->exitc = EXITC_UNDEF;
+#ifdef	ZIP_LINKS
+		cptr->zip = NULL;
+#endif
 	    }
 	return (cptr);
 }

@@ -114,7 +114,10 @@ static	struct	sockaddr *connect_unix __P((aConfItem *, aClient *, int *));
 static	void	add_unixconnection __P((aClient *, int));
 static	char	unixpath[256];
 #endif
-static	char	readbuf[16384];
+static	char	readbuf[READBUF_SIZE];
+
+#define	CFLAG	(CONF_CONNECT_SERVER|CONF_ZCONNECT_SERVER)
+#define	NFLAG	CONF_NOCONNECT_SERVER
 
 /*
  * Try and find the correct name to use with getrlimit() for setting the max.
@@ -698,8 +701,6 @@ Reg	aClient	*cptr;
 	return 0;
 }
 
-#define	CFLAG	CONF_CONNECT_SERVER
-#define	NFLAG	CONF_NOCONNECT_SERVER
 /*
  * check_server_init(), check_server()
  *	check access for a server given its name (passed in cptr struct).
@@ -925,8 +926,6 @@ check_serverback:
 		return m_server_estab(cptr);
 	return 0;
 }
-#undef	CFLAG
-#undef	NFLAG
 
 /*
 ** completed_connection
@@ -943,7 +942,7 @@ aClient	*cptr;
 
 	SetHandshake(cptr);
 	
-	aconf = find_conf(cptr->confs, cptr->name, CONF_CONNECT_SERVER);
+	aconf = find_conf(cptr->confs, cptr->name, CFLAG);
 	if (!aconf)
 	    {
 		sendto_flag(SCH_NOTICE,
@@ -951,7 +950,11 @@ aClient	*cptr;
 		return -1;
 	    }
 	if (!BadPtr(aconf->passwd))
+#ifndef	ZIP_LINKS
 		sendto_one(cptr, "PASS %s %s", aconf->passwd, pass_version);
+#else
+		sendto_one(cptr, "PASS %s %sZ", aconf->passwd, pass_version);
+#endif
 
 	aconf = find_conf(cptr->confs, cptr->name, CONF_NOCONNECT_SERVER);
 	if (!aconf)
@@ -978,8 +981,16 @@ aClient	*cptr;
 
 	return -1; /* needs to be fixed */
 
+#ifdef	ZIP_LINKS
+	/*
+	 * reconnecting will not work with compressed links,
+	 * unless someones fixes reconnect and implements what's needed
+	 * to have it work for compressed links. -krys
+	 */
+	return -1;
+#else
 	if (!IsServer(cptr) ||
-	    !(aconf = find_conf_name(cptr->name, CONF_CONNECT_SERVER)))
+	    !(aconf = find_conf_name(cptr->name, CFLAG)))
 		return -1;
 
 	if (!aconf->port)
@@ -1038,6 +1049,7 @@ aClient	*cptr;
 	Debug((DEBUG_NOTICE, "Reconnect %s %#x via %#x %d", cptr->name, cptr,
 		acptr, acptr->fd));
 	return 0;
+#endif
 }
 
 /*
@@ -1101,7 +1113,7 @@ aClient *cptr;
 	 * a 'quick' reconnect, else reset the next-connect cycle.
 	 */
 	if ((aconf = find_conf_exact(cptr->name, cptr->username,
-				    cptr->sockhost, CONF_CONNECT_SERVER)))
+				    cptr->sockhost, CFLAG)))
 	    {
 		/*
 		 * Reschedule a faster reconnect, if this was a automaticly
@@ -1123,7 +1135,16 @@ aClient *cptr;
 	    {
 		flush_connections(i);
 		if (IsServer(cptr))
+		    {
 			del_fd(i, &fdas);
+#ifdef	ZIP_LINKS
+			/*
+			** the connection might have zip data (even if
+			** FLAGS_ZIP is not set)
+			*/
+			zip_free(cptr);
+#endif
+		    }
 		else if (IsClient(cptr))
 			del_fd(i, &fdaa);
 		del_fd(i, &fdall);
@@ -1674,7 +1695,12 @@ FdAry	*fdp;
 			    }
 
 			if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
+#ifdef	ZIP_LINKS
+			    IsReconnect(cptr) || ((cptr->flags & FLAGS_ZIP) &&
+						  (cptr->zip->outcount > 0)))
+#else
 			    IsReconnect(cptr))
+#endif
 #ifndef	pyr
 				FD_SET(fd, &write_set);
 #else
@@ -2028,7 +2054,12 @@ FdAry	*fdp;
 			    }
 
 			if (DBufLength(&cptr->sendQ) || IsConnecting(cptr) ||
+#ifdef	ZIP_LINKS
+			    IsReconnect(cptr) || ((cptr->flags & FLAGS_ZIP) &&
+						  (cptr->zip->outcount > 0)))
+#else
 			    IsReconnect(cptr))
+#endif
 #ifndef	pyr
 				SET_WRITE_EVENT( fd );
 #else
@@ -2381,11 +2412,10 @@ struct	hostent	*hp;
 	 * No need to check access and do gethostbyaddr calls.
 	 * There must at least be one as we got here C line...  meLazy
 	 */
-	(void)attach_confs_host(cptr, aconf->host,
-		       CONF_NOCONNECT_SERVER | CONF_CONNECT_SERVER);
+	(void)attach_confs_host(cptr, aconf->host, CFLAG|NFLAG);
 
-	if (!find_conf_host(cptr->confs, aconf->host, CONF_NOCONNECT_SERVER) ||
-	    !find_conf_host(cptr->confs, aconf->host, CONF_CONNECT_SERVER))
+	if (!find_conf_host(cptr->confs, aconf->host, NFLAG) ||
+	    !find_conf_host(cptr->confs, aconf->host, CFLAG))
 	    {
       		sendto_flag(SCH_NOTICE,
 			    "Host %s is not enabled for connecting:no C/N-line",

@@ -505,6 +505,10 @@ char	*parv[];
 	*/
 	/* hop = 1 really for local client, return it in m_server_estab() */
 	cptr->hopcount = check_version(cptr->info);
+#ifdef	ZIP_LINKS
+	if (cptr->info[strlen(cptr->info)-1] == 'Z')
+		cptr->flags |= FLAGS_ZIPRQ;
+#endif
 	strncpyzt(cptr->name, host, sizeof(cptr->name));
 	strncpyzt(cptr->info, info[0] ? info:ME, sizeof(cptr->info));
 
@@ -513,7 +517,7 @@ char	*parv[];
 	case 0 :
 		return m_server_estab(cptr);
 	case 1 :
-		sendto_flag(SCH_NOTICE, "Checking access for %s ",
+		sendto_flag(SCH_NOTICE, "Checking access for %s",
 			    get_client_name(cptr,TRUE));
 		return 1;
 	default :
@@ -546,7 +550,8 @@ Reg	aClient	*cptr;
 			    "Access denied. No N line for server %s", inpath);
 		return exit_client(cptr, cptr, &me, "No N line for server");
 	    }
-	if (!(bconf = find_conf(cptr->confs, host, CONF_CONNECT_SERVER)))
+	if (!(bconf = find_conf(cptr->confs, host, CONF_CONNECT_SERVER|
+				CONF_ZCONNECT_SERVER)))
 	    {
 		ircstp->is_ref++;
 		sendto_one(cptr, "ERROR :Only N (no C) field for server %s",
@@ -610,8 +615,15 @@ Reg	aClient	*cptr;
 	if (IsUnknown(cptr))
 	    {
 		if (bconf->passwd[0])
+#ifndef	ZIP_LINKS
 			sendto_one(cptr,"PASS %s %s", bconf->passwd,
 				   pass_version);
+#else
+			sendto_one(cptr,"PASS %s %s%s", bconf->passwd,
+				   pass_version,
+				   (bconf->status == CONF_ZCONNECT_SERVER)?
+				   "Z" : "");
+#endif
 		/*
 		** Pass my info to the new server
 		*/
@@ -659,6 +671,23 @@ Reg	aClient	*cptr;
 		*s = '@';
 	    }
 
+#ifdef	ZIP_LINKS
+	if ((cptr->flags & FLAGS_ZIPRQ) &&
+	    (bconf->status == CONF_ZCONNECT_SERVER))	    
+	    {
+		if (zip_init(cptr) == -1)
+		    {
+			zip_free(cptr);
+			sendto_flag(SCH_ERROR,
+			    "Unable to setup compressed link for %s",
+				    get_client_name(cptr, TRUE));
+			return exit_client(cptr, cptr, &me,
+					   "zip_init() failed");
+		    }
+		cptr->flags |= FLAGS_ZIP;
+	    }
+#endif
+
 	det_confs_butmask(cptr, CONF_LEAF|CONF_HUB|CONF_NOCONNECT_SERVER);
 	/*
 	** *WARNING*
@@ -677,8 +706,8 @@ Reg	aClient	*cptr;
 	istat.is_serv++;
 	istat.is_myserv++;
 	nextping = timeofday;
-	sendto_flag(SCH_NOTICE, "Link with %s established. (%d)", inpath,
-		    cptr->hopcount);
+	sendto_flag(SCH_NOTICE, "Link with %s established. (%d%s)", inpath,
+		    cptr->hopcount, (cptr->flags & FLAGS_ZIP) ? "z" : "");
 	(void)add_to_client_hash_table(cptr->name, cptr);
 	/* doesnt duplicate cptr->serv if allocted this struct already */
 	(void)make_server(cptr);
@@ -827,6 +856,18 @@ Reg	aClient	*cptr;
 				send_channel_modes(cptr, chptr);
 	}
 	cptr->flags &= ~FLAGS_CBURST;
+#ifdef	ZIP_LINKS
+ 	/*
+ 	** some stats about the connect burst,
+ 	** they are slightly incorrect because of cptr->zip->outbuf.
+ 	*/
+ 	if ((cptr->flags & FLAGS_ZIP) && cptr->zip->out->total_in)
+	  sendto_flag(SCH_NOTICE,
+		      "Connect burst to %s: %lu, compressed: %lu (%3.1f%%)",
+		      get_client_name(cptr, TRUE),
+		      cptr->zip->out->total_in,cptr->zip->out->total_out,
+ 	    (float) 100*cptr->zip->out->total_out/cptr->zip->out->total_in);
+#endif
 	return 0;
 }
 
@@ -854,7 +895,8 @@ char	*parv[];
 		    bcmp((char *)&acptr->ip, (char *)&cptr->ip,
 			 sizeof(acptr->ip)) || mycmp(acptr->name, name))
 			continue;
-		if (!(aconf = find_conf_name(name, CONF_CONNECT_SERVER)) ||
+		if (!(aconf = find_conf_name(name, CONF_CONNECT_SERVER|
+					     CONF_ZCONNECT_SERVER)) ||
 		    atoi(parv[2]) != acptr->receiveM)
 			break;
 		attach_confs(acptr, name, CONF_SERVER_MASK);
@@ -1081,7 +1123,8 @@ char	*parv[];
 **	      it--not reversed as in ircd.conf!
 */
 
-static int report_array[12][3] = {
+static int report_array[13][3] = {
+		{ CONF_ZCONNECT_SERVER,	  RPL_STATSCLINE, 'c'},
 		{ CONF_CONNECT_SERVER,	  RPL_STATSCLINE, 'C'},
 		{ CONF_NOCONNECT_SERVER,  RPL_STATSNLINE, 'N'},
 		{ CONF_CLIENT,		  RPL_STATSILINE, 'I'},
@@ -1239,8 +1282,9 @@ char	*parv[];
 				   timeofday - acptr->firsttime);
 		    }
 		break;
-	case 'C' : case 'c' : /* C and N conf lines */
+	case 'c' : case 'C' : /* C and N conf lines */
 		report_configured_links(cptr, parv[0], CONF_CONNECT_SERVER|
+					CONF_ZCONNECT_SERVER|
 					CONF_NOCONNECT_SERVER);
 		break;
 	case 'd' : case 'D' : /* defines */
@@ -1596,7 +1640,8 @@ char	*parv[];
 	/* Checked first servernames, then try hostnames. */
 	if (!aconf)
 		for (aconf = conf; aconf; aconf = aconf->next)
-			if (aconf->status == CONF_CONNECT_SERVER &&
+			if ((aconf->status == CONF_CONNECT_SERVER ||
+			     aconf->status == CONF_ZCONNECT_SERVER) &&
 			    (matches(parv[1], aconf->host) == 0 ||
 			     matches(parv[1], index(aconf->host, '@')+1) == 0))
 		  		break;
@@ -1827,7 +1872,9 @@ char	*parv[];
 
 		ac2ptr = next_client(client, parv[1]);
 		sendto_one(sptr, rpl_str(RPL_TRACELINK, parv[0]),
-			   version, debugmode, tname, ac2ptr->from->name);
+			   version, debugmode, tname, ac2ptr->from->name,
+			   ac2ptr->from->serv->version,
+			   (ac2ptr->from->flags & FLAGS_ZIP) ? "z" : "");
 		return 2;
 	    }
 	case HUNTED_ISME:
@@ -1932,15 +1979,16 @@ char	*parv[];
 					   link_u[i], name, acptr->serv->by,
 					   acptr->serv->user->username,
 					   acptr->serv->user->host,
-					   acptr->serv->version);
+					   acptr->serv->version,
+					   (acptr->flags & FLAGS_ZIP) ?"z":"");
 			else
 				sendto_one(sptr, rpl_str(RPL_TRACESERVER,
 					   parv[0]), class, link_s[i],
 					   link_u[i], name,
 					   *(acptr->serv->by) ?
 					   acptr->serv->by : "*", "*", ME,
-					   acptr->serv->version);
-			break;
+					   acptr->serv->version,
+					   (acptr->flags & FLAGS_ZIP) ?"z":"");			break;
 		case STAT_RECONNECT:
 			sendto_one(sptr, rpl_str(RPL_TRACERECONNECT, parv[0]),
 				   class, name);

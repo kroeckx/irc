@@ -506,18 +506,26 @@
 #define	SENDQ_ALWAYS
 
 /*
- * V28PlusOnly enables features which are NOT backward compatible with
- * 2.7 (or earlier versions) servers. If you define it, make SURE the
- * only have 2.8 (and above) servers.
- */
-#define V28PlusOnly
-
-/*
  * Defining this will save some CPU cycles but will make the server unable
  * to understand the old protocol. If you define the following, you can only
  * link to servers with a version 2.9 or higher.
  */
-/* #define NoV28Links */
+#define NoV28Links
+
+/*
+ * Defining this will enable the use of compressed server-server links.
+ * In order to have it work, you must have the zlib version 1.0 or higher.
+ */
+/* #define ZIP_LINKS */
+
+#ifdef ZIP_LINKS
+/*
+ * the compression level used. (Suggested values: 3, 4, 5)
+ * Above 5 will only give a *very* marginal increase in compression for a
+ * *very* large increase in CPU usage.
+ */ 
+# define	ZIP_LEVEL	5
+#endif
 
 /* ------------------------- END CONFIGURATION SECTION -------------------- */
 #define	MYNAME SPATH
@@ -563,6 +571,7 @@
 #ifdef	CLIENT_COMPILE
 #undef	SENDQ_ALWAYS
 #undef	NPATH		/* _dl */
+#undef	ZIP_LINKS
 #endif
 
 #ifdef DEBUGMODE
@@ -634,6 +643,12 @@ error CLIENT_FLOOD needs redefining.
 error CLIENT_FLOOD undefined
 #endif
 
+#if defined(ZIP_LINKS)
+# if	(ZIP_MINIMUM > ZIP_MAXIMUM)
+error ZIP_MINIMUM needs redefining.
+# endif
+#endif
+
 /*
  * Some ugliness for AIX platforms.
  */
@@ -652,6 +667,14 @@ error CLIENT_FLOOD undefined
 #endif
 
 #define Reg register
+
+/*
+** you wouldn't want to compress messages one by one.. would you?
+** (it's not implemented anyways)
+*/
+#ifdef	ZIP_LINKS
+# define	SENDQ_ALWAYS
+#endif
 
 #if (defined(sun) && (defined(__SVR4) || defined(__svr4__))) || defined(SGI)
 # define _DO_POLL_

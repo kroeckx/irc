@@ -1,3 +1,39 @@
+Mon Dec  2 11:02:54 1996  Christophe Kalt
+
+	* s_user.c:
+
+		* changed error notice
+	
+	* send.c:
+
+		* #*.mask messages now propagated to other servers.
+	
+	* s_service.c:
+
+		* added missing else.
+
+	* config.h.dist, s_debug.c, channel.c:
+
+		* removed all references to V28PlusOnly
+		* made NoV28Link defined by default
+
+Wed Nov 27 18:09:42 1996  Christophe Kalt
+
+	* struct.h, class.c, ircd.c, s_bsd.c, s_conf.c, s_serv.c:
+
+		* added lowercase c config line
+
+Tue Oct  1 22:29:31 1996  Christophe Kalt
+
+	* added config.h to dependancies in Makefile.ircd
+
+	* config.h.dist, h.h, struct.h, packet.c, send.c, ircd.c, s_bsd.c,
+	s_debug.c, s_serv.c, s_user.c, s_err.c, list.c,	Makefile.ircd,
+	configure.in:
+
+		* added #define ZIP_LINKS and s_zip.c.
+		* made configure look for the zlib (-lgz).
+		* implemented server-server zlib compression.
 /************************************************************************
  *   IRC - Internet Relay Chat, doc/ChangeLog
  *   Copyright (C) 1990, Mike Bolotski

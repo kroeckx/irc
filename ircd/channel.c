@@ -1633,9 +1633,7 @@ char	*parv[];
 		return 1;
 	    }
 
-#ifdef	V28PlusOnly
 	*buf = '\0';
-#endif
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
@@ -1665,7 +1663,6 @@ char	*parv[];
 		/*
 		**  Remove user from the old channel (if any)
 		*/
-#ifdef V28PlusOnly
 		if (!index(name, ':')) {	/* channel:*.mask */
 			if (*name != '&')
 # ifndef NoV28Links
@@ -1680,17 +1677,14 @@ char	*parv[];
 					(void)strcat(buf, name);
 				}
 		} else
-#endif /* V28PlusOnly */
 			sendto_match_servs(chptr, cptr, PartFmt,
 				   	   parv[0], name, comment);
 		sendto_channel_butserv(chptr, sptr, PartFmt,
 				       parv[0], name, comment);
 		remove_user_from_channel(sptr, chptr);
 	    }
-#ifdef	V28PlusOnly
 	if (*buf)
 		sendto_serv_butone(cptr, PartFmt, parv[0], buf, comment);
-#endif
 	return 1;
     }
 
@@ -1710,9 +1704,7 @@ char	*parv[];
 	aChannel *chptr;
 	int	chasing = 0, penalty = 0;
 	char	*comment, *name, *p = NULL, *user, *p2 = NULL;
-#ifdef	V28PlusOnly
 	int	mlen, len = 0, nlen;
-#endif
 
 	if (parc < 3 || *parv[1] == '\0')
 	    {
@@ -1727,9 +1719,7 @@ char	*parv[];
 		comment[TOPICLEN] = '\0';
 
 	*nickbuf = *buf = '\0';
-#ifdef	V28PlusOnly
 	mlen = 7 + strlen(parv[0]);
-#endif
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
@@ -1750,7 +1740,6 @@ char	*parv[];
 				   parv[0]), chptr->chname);
 			continue;
 		    }
-#ifdef	V28PlusOnly
 		if (len + mlen + strlen(name) < (size_t) BUFSIZE / 2)
 		    {
 			if (*buf)
@@ -1761,23 +1750,19 @@ char	*parv[];
 		else
 			continue;
 		nlen = 0;
-#endif
 
 		for (; (user = strtoken(&p2, parv[2], ",")); parv[2] = NULL)
 		    {
 			if (!(who = find_chasing(sptr, user, &chasing)))
 				continue; /* No such user left! */
-#ifdef	V28PlusOnly
 			if (nlen + mlen + strlen(who->name) >
 			    (size_t) BUFSIZE - NICKLEN)
 				continue;
-#endif
 			if (IsMember(who, chptr))
 			    {
 				sendto_channel_butserv(chptr, sptr,
 						":%s KICK %s %s :%s", parv[0],
 						name, who->name, comment);
-#ifdef	V28PlusOnly
 				/* Don't send &local &kicks out */
 				if (*chptr->chname != '&') {
 					if (*nickbuf)
@@ -1785,7 +1770,6 @@ char	*parv[];
 					(void)strcat(nickbuf, who->name);
 					nlen += strlen(who->name);
 				} else
-#endif
 				  sendto_match_servs(chptr, cptr,
 						   ":%s KICK %s %s :%s",
 						   parv[0], name,
@@ -1797,22 +1781,12 @@ char	*parv[];
 				sendto_one(sptr,
 					   err_str(ERR_USERNOTINCHANNEL,
 					   parv[0]), user, name);
-#ifndef	V28PlusOnly
-			if (!IsServer(cptr))
-				break;
-#endif
 		    } /* loop on parv[2] */
-#ifndef	V28PlusOnly
-		if (!IsServer(cptr))
-			break;
-#endif
 	    } /* loop on parv[1] */
 
-#ifdef	V28PlusOnly
 	if (*buf && *nickbuf)
 		sendto_serv_butone(cptr, ":%s KICK %s %s :%s",
 				   parv[0], buf, nickbuf, comment);
-#endif
 	return penalty;
 }
 

@@ -49,6 +49,10 @@
 #endif
 #include <sys/time.h>
 
+#ifdef	ZIP_LINKS
+#include <zlib.h>
+#endif
+
 typedef	struct	ConfItem aConfItem;
 typedef	struct 	Client	aClient;
 typedef	struct	Channel	aChannel;
@@ -59,6 +63,7 @@ typedef	struct	SLink	Link;
 typedef	struct	SMode	Mode;
 typedef	struct	fdarray	FdAry;
 typedef	struct	CPing	aCPing;
+typedef	struct	Zdata	aZdata;
 
 #include "service.h"
 
@@ -87,6 +92,8 @@ typedef	struct	CPing	aCPing;
 #define	MAXBANLENGTH	1024
 #define	BANLEN		(USERLEN + NICKLEN + HOSTLEN + 3)
 
+#define	READBUF_SIZE	16384	/* used in s_bsd.c *AND* s_zip.c ! */
+ 
 /*
  * Make up some numbers which should reflect average leaf server connect
  * queue max size.
@@ -182,6 +189,8 @@ typedef	struct	CPing	aCPing;
 #define FLAGS_SPLIT     0x80000 /* client QUITting because of a netsplit */
 #define FLAGS_HIDDEN   0x100000 /* netsplit is behind a hostmask */
 #define	FLAGS_UNKCMD   0x200000	/* has sent an unknown command */
+#define	FLAGS_ZIP      0x400000 /* link is zipped */
+#define	FLAGS_ZIPRQ    0x800000 /* zip requested */
 
 #define	FLAGS_OPER       0x0001	/* Operator */
 #define	FLAGS_LOCOP      0x0002 /* Local operator -- SRB */
@@ -288,27 +297,29 @@ struct	ConfItem	{
 
 #define	CONF_ILLEGAL		0x80000000
 #define	CONF_MATCH		0x40000000
-#define	CONF_QUARANTINED_SERVER	0x0001
-#define	CONF_CLIENT		0x0002
-#define CONF_RCLIENT            0x0004
-#define	CONF_CONNECT_SERVER	0x0008
-#define	CONF_NOCONNECT_SERVER	0x0010
-#define	CONF_LOCOP		0x0020
-#define	CONF_OPERATOR		0x0040
-#define	CONF_ME			0x0080
-#define	CONF_KILL		0x0100
-#define	CONF_ADMIN		0x0200
+#define	CONF_QUARANTINED_SERVER	0x00001
+#define	CONF_CLIENT		0x00002
+#define CONF_RCLIENT            0x00004
+#define	CONF_CONNECT_SERVER	0x00008
+#define	CONF_NOCONNECT_SERVER	0x00010
+#define	CONF_ZCONNECT_SERVER	0x00020
+#define	CONF_LOCOP		0x00040
+#define	CONF_OPERATOR		0x00080
+#define	CONF_ME			0x00100
+#define	CONF_KILL		0x00200
+#define	CONF_ADMIN		0x00400
 #ifdef 	R_LINES
-#define	CONF_RESTRICT		0x0400
+#define	CONF_RESTRICT		0x00800
 #endif
-#define	CONF_CLASS		0x0800
-#define	CONF_SERVICE		0x1000
-#define	CONF_LEAF		0x2000
-#define	CONF_LISTEN_PORT	0x4000
-#define	CONF_HUB		0x8000
+#define	CONF_CLASS		0x01000
+#define	CONF_SERVICE		0x02000
+#define	CONF_LEAF		0x04000
+#define	CONF_LISTEN_PORT	0x08000
+#define	CONF_HUB		0x10000
 
 #define	CONF_OPS		(CONF_OPERATOR | CONF_LOCOP)
-#define	CONF_SERVER_MASK	(CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER)
+#define	CONF_SERVER_MASK	(CONF_CONNECT_SERVER | CONF_NOCONNECT_SERVER |\
+				 CONF_ZCONNECT_SERVER)
 #define	CONF_CLIENT_MASK	(CONF_CLIENT | CONF_RCLIENT | CONF_SERVICE | CONF_OPS | \
 				 CONF_SERVER_MASK)
 
@@ -324,6 +335,23 @@ typedef	struct	{
 
 #define	PING_REPLY	0x01
 #define	PING_CPING	0x02
+
+#ifdef	ZIP_LINKS
+/* the minimum amount of data needed to trigger compression */
+# define	ZIP_MINIMUM	4096
+
+/* the maximum amount of data to be compressed (can actually be a bit more) */
+# define	ZIP_MAXIMUM	8192	/* WARNING: *DON'T* CHANGE THIS!!!! */
+
+struct Zdata {
+	z_stream	*in;		/* input zip stream data */
+	z_stream	*out;		/* output zip stream data */
+	char		inbuf[ZIP_MAXIMUM]; /* incoming zipped buffer */
+	char		outbuf[ZIP_MAXIMUM]; /* outgoing (unzipped) buffer */
+	int		incount;	/* size of inbuf content */
+	int		outcount;	/* size of outbuf content */
+};
+#endif
 
 /*
  * Client structures
@@ -419,6 +447,9 @@ struct Client	{
 	*/
 	int	count;		/* Amount of data in buffer */
 	char	buffer[BUFSIZE]; /* Incoming message buffer */
+#ifdef	ZIP_LINKS
+	aZdata	*zip;		/* zip data */
+#endif
 	short	lastsq;		/* # of 2k blocks when sendqueued called last*/
 	dbuf	sendQ;		/* Outgoing message queue--if socket full */
 	dbuf	recvQ;		/* Hold for data incoming yet to be parsed */

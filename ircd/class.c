@@ -95,7 +95,8 @@ aClient	*acptr;
 		    {
 			aconf = link->value.aconf;
 			if (aconf->status & (CONF_CLIENT|CONF_CONNECT_SERVER|
-					     CONF_NOCONNECT_SERVER))
+					     CONF_NOCONNECT_SERVER|
+					     CONF_ZCONNECT_SERVER))
 			    {
 				ping2 = get_conf_ping(aconf);
 				if ((ping2 != BAD_PING) && ((ping > ping2) ||

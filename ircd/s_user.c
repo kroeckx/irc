@@ -1566,8 +1566,9 @@ char	*parv[];
 		else if (!sp)
 		    {
 			sendto_flag(SCH_ERROR,
-                        	    "ERROR: USER:%s without SERVER:%s",
-				    parv[0], server);
+                        	    "ERROR: USER:%s without SERVER:%s from %s",
+				    parv[0], server,
+				    get_client_name(cptr, FALSE));
 			ircstp->is_nosrv++;
 			return exit_client(NULL, sptr, &me, "No Such Server");
 		    }
@@ -2207,7 +2208,7 @@ char	*parv[];
 		return 1;
 	    }
 	if (parc > 2 && parv[2])
-		strncpyzt(cptr->info, parv[2], NICKLEN);
+		strncpyzt(cptr->info, parv[2], 12);
 	strncpyzt(cptr->passwd, password, sizeof(cptr->passwd));
 	return 0;
     }

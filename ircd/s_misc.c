@@ -462,6 +462,7 @@ char	*comment;	/* Reason for the exit */
 		** harm to check for all local clients. In
 		** future some other clients than servers might
 		** have remotes too...
+		** now, I think it harms big client servers... - krys
 		**
 		** Close the Client connection first and mark it
 		** so that no messages are attempted to send to it.

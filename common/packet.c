@@ -36,6 +36,12 @@ Computing Center and Jarkko Oikarinen";
 **	buffer - pointr to the buffer containing the newly read data
 **	length - number of valid bytes of data in the buffer
 **
+**	The buffer might be partially or totally zipped.
+**	At the beginning of the compressed flow, it is possible that
+**	an uncompressed ERROR message will be found.  This occurs when
+**	the connection fails on the other server before switching
+**	to compressed mode.
+**
 ** Note:
 **	It is implicitly assumed that dopacket is called only
 **	with cptr of "local" variation, which contains all the
@@ -49,7 +55,7 @@ Reg	int	length;
 	Reg	char	*ch1;
 	Reg	char	*ch2, *bufptr;
 	aClient	*acpt = cptr->acpt;
-	int	r = 1;
+	int	r = 1, zipped = 0;
  
 	me.receiveB += length; /* Update bytes received */
 	cptr->receiveB += length;
@@ -72,10 +78,25 @@ Reg	int	length;
 		me.receiveK += (me.receiveB >> 10);
 		me.receiveB &= 0x03ff;
 	    }
+
 	bufptr = cptr->buffer;
 	ch1 = bufptr + cptr->count;
 	ch2 = buffer;
-	while (--length >= 0)
+#ifdef	ZIP_LINKS
+	if (cptr->flags & FLAGS_ZIP)
+	    {
+		/* uncompressed buffer first */
+		zipped = length;
+		ch2 = unzip_packet(cptr, buffer, &zipped);
+		length = zipped;
+		zipped = 1;
+		if (length == -1)
+			return exit_client(cptr, cptr, &me,
+					   "fatal error in unzip_packet()");
+	    }
+#endif
+
+	while (--length >= 0 && ch2)
 	    {
 		Reg	char	c;
 
@@ -120,6 +141,30 @@ Reg	int	length;
 						   "Dead Socket");
 			    }
 #endif
+#ifdef	ZIP_LINKS
+			if ((cptr->flags & FLAGS_ZIP) && (zipped == 0) &&
+			    (length > 0))
+			    {
+				/*
+				** beginning of server connection, the buffer
+				** contained PASS/SERVER and is now zipped!
+				** Ignore the '\n' that should be here.
+				*/
+				if (*ch2 == '\n')
+				    {
+					ch2++;
+					zipped = length - 1;
+				    }
+				else
+					zipped = length; /* impossible case? */
+				ch2 = unzip_packet(cptr, ch2, &zipped);
+				length = zipped;
+				zipped = 1;
+				if (length == -1)
+					return exit_client(cptr, cptr, &me,
+					   "fatal error in unzip_packet()");
+			    }
+#endif
 			ch1 = bufptr;
 		    }
 		else if (ch1 < bufptr + (sizeof(cptr->buffer)-1))
@@ -128,3 +173,4 @@ Reg	int	length;
 	cptr->count = ch1 - bufptr;
 	return r;
 }
+

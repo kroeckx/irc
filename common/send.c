@@ -50,7 +50,7 @@ static	int	sentalong[MAXCONNECTIONS];
 **	generate ExitClient from the main loop.
 **
 **	If 'notice' is not NULL, it is assumed to be a format
-**	for a message to local opers. I can contain only one
+**	for a message to local opers. It can contain only one
 **	'%s', which will be replaced by the sockhost field of
 **	the failing link.
 **
@@ -112,6 +112,9 @@ int	fd;
 **	Internal utility which delivers one message buffer to the
 **	socket. Takes care of the error handling and buffering, if
 **	needed.
+**	if SENDQ_ALWAYS is defined, the message will be queued.
+**	if ZIP_LINKS is defined, the message will eventually be compressed,
+**	anything stored in the sendQ is compressed.
 */
 static	int	send_message(to, msg, len)
 aClient	*to;
@@ -164,7 +167,7 @@ int	len;
 			to->exitc = EXITC_SENDQ;
 			return dead_link(to, "Max Sendq exceeded");
 		    }
-#  else
+#  else /* HUB */
 		if (IsServer(to))
 			sendto_flag(SCH_ERROR,
 				"Max SendQ limit exceeded for %s: %d > %d",
@@ -172,12 +175,26 @@ int	len;
 				DBufLength(&to->sendQ), get_sendq(to));
 		to->exitc = EXITC_SENDQ;
 		return dead_link(to, "Max Sendq exceeded");
-#  endif
+#  endif /* HUB */
 	    }
 	else
 # endif
+	    {
 tryagain:
+# ifdef	ZIP_LINKS
+	        /*
+		** data is first stored in to->zip->outbuf until
+		** it's big enough to be compressed and stored in the sendq.
+		** send_queued is then responsible to never let the sendQ
+		** be empty and to->zip->outbuf not empty.
+		*/
+		if (to->flags & FLAGS_ZIP)
+			msg = zip_buffer(to, msg, &len, 0);
+
+		if (len && (i = dbuf_put(&to->sendQ, msg, len)) < 0)
+# else 	/* ZIP_LINKS */
 		if ((i = dbuf_put(&to->sendQ, msg, len)) < 0)
+# endif	/* ZIP_LINKS */
 			if (i == -2 && CBurst(to))
 			    {	/* poolsize was exceeded while connect burst */
 				aConfItem	*aconf = to->serv->nline;
@@ -195,6 +212,7 @@ tryagain:
 				return dead_link(to,
 					"Buffer allocation error for %s");
 			    }
+	    }
 	/*
 	** Update statistics. The following is slightly incorrect
 	** because it counts messages even if queued, but bytes
@@ -306,7 +324,7 @@ int	send_queued(to)
 aClient *to;
 {
 	char	*msg;
-	int	len, rlen;
+	int	len, rlen, more = 0;
 
 	/*
 	** Once socket is marked dead, we cannot start writing to it,
@@ -325,7 +343,32 @@ aClient *to;
 		return -1;
 #endif
 	    }
-	while (DBufLength(&to->sendQ) > 0)
+#ifdef	ZIP_LINKS
+	/*
+	** Here, we must make sure than nothing will be left in to->zip->outbuf
+	** This buffer needs to be compressed and sent if all the sendQ is sent
+	*/
+	if ((to->flags & FLAGS_ZIP) && to->zip->outcount)
+	    {
+		if (DBufLength(&to->sendQ) > 0)
+			more = 1;
+		else
+		    {
+			msg = zip_buffer(to, NULL, &len, 1);
+			
+			if (len == -1)
+			       return dead_link("fatal error in zip_buffer()");
+
+			if (dbuf_put(&to->sendQ, msg, len) < 0)
+			    {
+				to->exitc = EXITC_MBUF;
+				return dead_link(to,
+					 "Buffer allocation error for %s");
+			    }
+		    }
+	    }
+#endif
+	while (DBufLength(&to->sendQ) > 0 || more)
 	    {
 		msg = dbuf_map(&to->sendQ, &len);
 					/* Returns always len > 0 */
@@ -335,6 +378,28 @@ aClient *to;
 		to->lastsq = DBufLength(&to->sendQ)/1024;
 		if (rlen < len) /* ..or should I continue until rlen==0? */
 			break;
+
+#ifdef	ZIP_LINKS
+		if (DBufLength(&to->sendQ) == 0 && more)
+		    {
+			/*
+			** The sendQ is now empty, compress what's left
+			** uncompressed and try to send it too
+			*/
+			more = 0;
+			msg = zip_buffer(to, NULL, &len, 1);
+
+			if (len == -1)
+			       return dead_link("fatal error in zip_buffer()");
+
+			if (dbuf_put(&to->sendQ, msg, len) < 0)
+			    {
+				to->exitc = EXITC_MBUF;
+				return dead_link(to,
+					 "Buffer allocation error for %s");
+			    }
+		    }
+#endif
 	    }
 
 	return (IsDead(to)) ? -1 : 0;
@@ -457,8 +522,11 @@ static	anUser	ausr = { NULL, NULL, NULL, NULL, 0, 0, 0, 0, NULL, NULL, NULL,
 static	aClient	anon = { NULL, NULL, NULL, &ausr, NULL, NULL, 0, 0, 0, 0,
 			 0,/*flags*/
 			 &anon, -2, 0, STAT_CLIENT, "anonymous", "anonymous",
-			 "anonymous identity hider", 0, "", 0,
-			 {0, 0, NULL }, {0, 0, NULL },
+			 "anonymous identity hider", 0, "",
+# ifdef	ZIP_LINKS
+			 NULL,
+# endif
+			 0, {0, 0, NULL }, {0, 0, NULL },
 			 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0
 #if defined(__STDC__)	/* hack around union{} initialization	-Vesa */
 			 ,{0}, NULL, "", ""
@@ -467,8 +535,11 @@ static	aClient	anon = { NULL, NULL, NULL, &ausr, NULL, NULL, 0, 0, 0, 0,
 #else
 static	aClient	anon = { NULL, NULL, NULL, &ausr, NULL, NULL, 0, 0,/*flags*/
 			 &anon, -2, 0, STAT_CLIENT, "anonymous", "anonymous",
-			 "anonymous identity hider", 0, "", 0,
-			 {0, 0, NULL }, {0, 0, NULL },
+			 "anonymous identity hider", 0, "",
+# ifdef	ZIP_LINKS
+			 NULL,
+# endif
+			 0, {0, 0, NULL }, {0, 0, NULL },
 			 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, NULL, NULL, 0, 0, 0, 0
 #if defined(__STDC__)	/* hack around union{} initialization	-Vesa */
 			 ,{0}, NULL, "", ""
@@ -757,9 +828,16 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 					  p1, p2, p3, p4, p5, p6, p7, p8);
 		    }
 		/* my client, does he match ? */
-		else if (IsRegisteredUser(cptr) && match_it(cptr, mask, what))
-			sendto_prefix_one(cptr, from, pattern,
-					  p1, p2, p3, p4, p5, p6, p7, p8);
+		else 
+		    {
+		        if (IsRegisteredUser(cptr) && 
+			    match_it(cptr, mask, what))
+				sendto_prefix_one(cptr, from, pattern, p1,
+						  p2, p3, p4, p5, p6, p7, p8);
+			if (IsServer(cptr)) /* UGH! */
+				sendto_prefix_one(cptr, from, pattern, p1,
+						  p2, p3, p4, p5, p6, p7, p8);
+		    }
 	    }
 	return;
 }

@@ -277,9 +277,16 @@ extern	void	count_memory __P((aClient *, char *, int));
 extern	void	send_defines __P((aClient *, char *));
 #endif
 
-#ifdef KRYS
+#ifdef	KRYS
 extern	char	*find_server_string __P((int));
 extern	int	find_server_num __P((char *));
 #endif
 
 extern	char	*make_version();
+
+#ifdef	ZIP_LINKS
+extern	int	zip_init __P((aClient *));
+extern	char	*unzip_packet __P((aClient *, char *, int *));
+extern	char	*zip_buffer __P((aClient *, char *, int *, int));
+extern	void	zip_free __P((aClient *));
+#endif

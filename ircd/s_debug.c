@@ -122,8 +122,8 @@ char	serveropts[] = {
 #ifdef	USE_SYSLOG
 'Y',
 #endif
-#ifdef	V28PlusOnly
-'8',
+#ifdef	ZIP_LINKS
+'Z',
 #endif
 #ifdef MIRC_KLUDGE
 '$',

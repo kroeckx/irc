@@ -179,7 +179,8 @@ Reg	Link	*lp;
 		aconf = lp->value.aconf;
 		if (!(aconf->status & CONF_SERVER_MASK))
 			continue;
-		if (aconf->status == CONF_CONNECT_SERVER && !cline)
+		if ((aconf->status == CONF_CONNECT_SERVER ||
+		     aconf->status == CONF_ZCONNECT_SERVER) && !cline)
 			cline = aconf;
 		else if (aconf->status == CONF_NOCONNECT_SERVER && !nline)
 			nline = aconf;
@@ -824,9 +825,13 @@ int	opt;
 				aconf->status = CONF_ADMIN;
 				break;
 			case 'C': /* Server where I should try to connect */
-			case 'c': /* in case of lp failures             */
+			  	  /* in case of lp failures             */
 				ccount++;
 				aconf->status = CONF_CONNECT_SERVER;
+				break;
+			case 'c':
+				ccount++;
+				aconf->status = CONF_ZCONNECT_SERVER;
 				break;
 			case 'H': /* Hub server line */
 			case 'h':
@@ -918,6 +923,8 @@ int	opt;
 			aconf->port = atoi(tmp);
 			if (aconf->status == CONF_CONNECT_SERVER)
 				DupString(tmp2, tmp);
+			if (aconf->status == CONF_ZCONNECT_SERVER)
+				DupString(tmp2, tmp);
 			if ((tmp = getfield(NULL)) == NULL)
 				break;
 			Class(aconf) = find_class(atoi(tmp));
@@ -997,7 +1004,7 @@ int	opt;
 			else if (!(opt & BOOT_QUICK))
 				(void)lookup_confhost(aconf);
 		    }
-		if (aconf->status & CONF_CONNECT_SERVER)
+		if (aconf->status & (CONF_CONNECT_SERVER | CONF_ZCONNECT_SERVER))
 		    {
 			aconf->ping = (aCPing *)MyMalloc(sizeof(aCPing));
 			bzero((char *)aconf->ping, sizeof(*aconf->ping));
