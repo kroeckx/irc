@@ -1,4 +1,9 @@
-1999-11-03  Christophe Kalt  <kalt@azurite>
+1999-11-10  Christophe Kalt
+
+	* struct_def.h, channel.c: added code to reject clients trying to
+	join a channel used by the PrettyPark virus.  (This is a sad day).
+
+1999-11-03  Christophe Kalt
 
 	* configure.in: check for getipnodebyname() for IPv6.
 

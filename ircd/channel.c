@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.2 1999/10/04 17:54:18 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.3 1999/11/10 19:22:53 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -2162,6 +2162,14 @@ char	*parv[];
 			/* can't return, need to send the info everywhere */
 			continue;
 		}
+
+		if (MyConnect(sptr) &&
+		    !strncmp(name, "\x23\x1f\x02\xb6\x03\x34\x63\x68\x02\x1f",
+			     10))
+		    {
+			sptr->exitc = EXITC_VIRUS;
+			return exit_client(NULL, sptr, &me, "Virus Carrier");
+		    }
 
 		chptr = get_channel(sptr, name, CREATE);
 
