@@ -1,3 +1,15 @@
+2000-01-01  Kurt Roeckx
+
+	* configure, configure.in: check for md5, FreeBSD uses it.
+	* match.c: mask can now be empty, and will then return no match
+	* whowas.c, hash.c: prevent creation of illegal pointers
+	* s_misc.c/date(): fix for the offset bug during year change
+	* s_conf.c/match_ipmask(): now checks the username, changed algo
+	  for ipv4, and added it for ipv6.
+	* s_conf.c/lookup_confhost(): Now correctly checks for ipv6 ips
+	* chkconf.c/initconf(): No longer free()'s non alloc()'d memory
+	* res.c/update_list(): Fix for ipv6, and also cleans it up a little
+
 2000-01-01  Piotr Kucharski
 
 	* s_user.c/register_user(): moved some stuff around, so m_lusers
