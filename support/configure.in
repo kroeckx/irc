@@ -818,7 +818,6 @@ fi
 ])
 
 AC_DEFUN(IRC_LDM, [
-echo $enable_dsm
 if test -f ../ircd/s_ldm.c; then
   AC_DEFINE(PRETTY_PLEASE)
   LDMOBJ="s_ldm.o"
@@ -1443,7 +1442,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.4.1 1999/10/05 18:23:22 kalt Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.4.2 1999/10/06 15:03:12 kalt Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)

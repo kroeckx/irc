@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in Id: configure.in,v 1.46 1999/08/13 17:18:23 kalt Exp 
+# From configure.in Id: configure.in,v 1.46.4.1 1999/10/05 18:23:22 kalt Exp 
 
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.13 
@@ -4140,7 +4140,6 @@ echo "configure:4134: checking for IPv6 name server addresses in resolv.conf ($i
 fi
 
 
-echo $enable_dsm
 if test -f ../ircd/s_ldm.c; then
   cat >> confdefs.h <<\EOF
 #define PRETTY_PLEASE 1
@@ -4166,17 +4165,17 @@ EOF
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6
-echo "configure:4170: checking for $ac_hdr" >&5
+echo "configure:4169: checking for $ac_hdr" >&5
 if eval "test \"`echo '$''{'ac_cv_header_$ac_safe'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4175 "configure"
+#line 4174 "configure"
 #include "confdefs.h"
 #include <$ac_hdr>
 EOF
 ac_try="$ac_cpp conftest.$ac_ext >/dev/null 2>conftest.out"
-{ (eval echo configure:4180: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
+{ (eval echo configure:4179: \"$ac_try\") 1>&5; (eval $ac_try) 2>&5; }
 ac_err=`grep -v '^ *+' conftest.out | grep -v "^conftest.${ac_ext}\$"`
 if test -z "$ac_err"; then
   rm -rf conftest*
@@ -4203,7 +4202,7 @@ fi
 done
 
   echo $ac_n "checking for dlclose in -ldl""... $ac_c" 1>&6
-echo "configure:4207: checking for dlclose in -ldl" >&5
+echo "configure:4206: checking for dlclose in -ldl" >&5
 ac_lib_var=`echo dl'_'dlclose | sed 'y%./+-%__p_%'`
 if eval "test \"`echo '$''{'ac_cv_lib_$ac_lib_var'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
@@ -4211,7 +4210,7 @@ else
   ac_save_LIBS="$LIBS"
 LIBS="-ldl  $LIBS"
 cat > conftest.$ac_ext <<EOF
-#line 4215 "configure"
+#line 4214 "configure"
 #include "confdefs.h"
 /* Override any gcc2 internal prototype to avoid an error.  */
 /* We use char because int might match the return type of a gcc2
@@ -4222,7 +4221,7 @@ int main() {
 dlclose()
 ; return 0; }
 EOF
-if { (eval echo configure:4226: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
+if { (eval echo configure:4225: \"$ac_link\") 1>&5; (eval $ac_link) 2>&5; } && test -s conftest${ac_exeext}; then
   rm -rf conftest*
   eval "ac_cv_lib_$ac_lib_var=yes"
 else
@@ -4246,12 +4245,12 @@ fi
 fi
 
 echo $ac_n "checking whether this is an alpha/beta release""... $ac_c" 1>&6
-echo "configure:4250: checking whether this is an alpha/beta release" >&5
+echo "configure:4249: checking whether this is an alpha/beta release" >&5
 if eval "test \"`echo '$''{'irc_cv_alpha_beta'+set}'`\" = set"; then
   echo $ac_n "(cached) $ac_c" 1>&6
 else
   cat > conftest.$ac_ext <<EOF
-#line 4255 "configure"
+#line 4254 "configure"
 #include "confdefs.h"
 #include "../common/patchlevel.h"
 #ifdef PATCHLEVEL
