@@ -169,8 +169,7 @@ extern	void	sendto_flag();
 
 extern	void	setup_svchans __P(());
 
-extern	void	sendto_flog __P((char *, char *, time_t, char *, char *,
-				 char *, char *));
+extern	void	sendto_flog __P((aClient *, char *, time_t, char *, char *));
 extern	int	writecalls, writeb[];
 extern	int	deliver_it __P((aClient *, char *, int));
 

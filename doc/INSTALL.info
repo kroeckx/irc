@@ -1,5 +1,5 @@
 This is Info file INSTALL.info, produced by Makeinfo-1.55 from the
-input file /tmp/sgml2info22654tmp2.
+input file /tmp/sgml2info14172tmp2.
 
    \input texinfo
 
@@ -20,7 +20,7 @@ Installing IRC - The Internet Relay Chat Program
 * The config-h file::
 * Editing the Makefile and compiling::
 * The ircd-conf file::
-* Mailing list::
+* Related resources::
 
 
 File: INSTALL.info,  Node: Installing IRC-,  Next: The config-h file,  Prev: Top,  Up: Top
@@ -253,7 +253,7 @@ you might need to uncomment the correct "IRCDLIBS", "IRCLIBS" and
 edit Makefile as appropriate.
 
 
-File: INSTALL.info,  Node: The ircd-conf file,  Next: Mailing list,  Prev: Editing the Makefile and compiling,  Up: Top
+File: INSTALL.info,  Node: The ircd-conf file,  Next: Related resources,  Prev: Editing the Makefile and compiling,  Up: Top
 
 The ircd-conf file
 ******************
@@ -505,7 +505,7 @@ format as the "C" entries.
      So wildcard domains are a great help, but how to use them ?
 
      They can be defined in the N-line for a given connection, in place
-     of port number you write a magic number called wildcard count.
+     of "Domain Mask" you write a magic number called wildcard count.
 
      Wildcard count tells you HOW MANY PARTS of your server's name
      should be replaced by a wildcard. For example, your server's name
@@ -1250,50 +1250,60 @@ Version limitations
      is allowed.
 
 
-File: INSTALL.info,  Node: Mailing list,  Prev: The ircd-conf file,  Up: Top
+File: INSTALL.info,  Node: Related resources,  Prev: The ircd-conf file,  Up: Top
 
-Mailing list
-************
+Related resources
+*****************
 
-   A mailing list is dedicated to the people using ircd. If you have
-trouble running ircd, or wish to discuss the future, you can subscribe
-by sending an email to majordomo@stealth.net, with "subscribe
-ircd-users" in the body.
+`Mailing list'
+     A list is dedicated to the people using ircd. If you have trouble
+     running ircd, or wish to discuss the future, you can subscribe by
+     sending an email to , with "`subscribe ircd-users"' in the body.
+
+     If you just have a question and don't want to subscribe to the
+     list, mail to
+
+`FAQ'
+     It can be found on the WWW, at .
+
+`WWW 2.9'
+     Vesa Ruokonen has also put serveral pages related to the 2.9
+     servers on the WWW: .
 
 
 
 Tag Table:
 Node: Top123
-Node: Installing IRC-569
-Node: The config-h file1127
-Node: Define what type of UNIX your machine uses-1793
-Node: DEBUGMODE2193
-Node: SPATH CPATH MPATH LPATH PPATH TPATH2851
-Node: CACHED_MOTD4049
-Node: CHROOTDIR4519
-Node: ENABLE_SUMMON ENABLE_USERS4843
-Node: SHOW_INVISIBLE_LUSERS NO_DEFAULT_INVISIBLE5379
-Node: OPER_KILL OPER_REHASH OPER_RESTART LOCAL_KILL_ONLY6062
-Node: ZIP_LINKS ZIP_LEVEL6694
-Node: SLOW_ACCEPT7705
-Node: CLONE_CHECK8323
-Node: Other #define's8663
-Node: Editing the Makefile and compiling8988
-Node: The ircd-conf file9717
-Node: Server connections11311
-Node: Machine information19720
-Node: Client connections21842
-Node: Default local server (for local clients) `*OBSOLETED*'25360
-Node: Operator priviliges26269
-Node: Administrative info28424
-Node: Excluded accounts30460
-Node: Excluded machines33040
-Node: Connection Classes34344
-Node: Leaf connections38233
-Node: Service connections (Not Fully Implemented Yet)40347
-Node: Port connections42700
-Node: Hub connections44935
-Node: Version limitations46149
-Node: Mailing list47355
+Node: Installing IRC-574
+Node: The config-h file1132
+Node: Define what type of UNIX your machine uses-1798
+Node: DEBUGMODE2198
+Node: SPATH CPATH MPATH LPATH PPATH TPATH2856
+Node: CACHED_MOTD4054
+Node: CHROOTDIR4524
+Node: ENABLE_SUMMON ENABLE_USERS4848
+Node: SHOW_INVISIBLE_LUSERS NO_DEFAULT_INVISIBLE5384
+Node: OPER_KILL OPER_REHASH OPER_RESTART LOCAL_KILL_ONLY6067
+Node: ZIP_LINKS ZIP_LEVEL6699
+Node: SLOW_ACCEPT7710
+Node: CLONE_CHECK8328
+Node: Other #define's8668
+Node: Editing the Makefile and compiling8993
+Node: The ircd-conf file9722
+Node: Server connections11321
+Node: Machine information19732
+Node: Client connections21854
+Node: Default local server (for local clients) `*OBSOLETED*'25372
+Node: Operator priviliges26281
+Node: Administrative info28436
+Node: Excluded accounts30472
+Node: Excluded machines33052
+Node: Connection Classes34356
+Node: Leaf connections38245
+Node: Service connections (Not Fully Implemented Yet)40359
+Node: Port connections42712
+Node: Hub connections44947
+Node: Version limitations46161
+Node: Related resources47367
 
 End Tag Table

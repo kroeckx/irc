@@ -24,7 +24,7 @@ Nets/		- documentation about various IRC networks
 ircd.8		- man page for the server
 Authors		- irc contributors
 Juped/		- old/obsolete documentation files
-alt-irc-faq	- alt.irc faw
+alt-irc-faq	- alt.irc faq
 m4macros	- note on m4 macros for the server configuration file
 
 

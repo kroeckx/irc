@@ -430,8 +430,8 @@
         So wildcard domains are a great help, but how to use them ?
 
         They can be defined in the N-line for a given connection, in
-        place of port number you write a magic number called wildcard
-        count.
+        place of ``Domain Mask'' you write a magic number called
+        wildcard count.
 
         Wildcard count tells you HOW MANY PARTS of your server's name
         should be replaced by a wildcard. For example, your server's
@@ -1209,25 +1209,25 @@
         is allowed.
 
 
-  55..  MMaaiilliinngg lliisstt
-
-  A mailing list is dedicated to the people using ircd. If you have
-  trouble running ircd, or wish to discuss the future, you can subscribe
-  by sending an email to majordomo@stealth.net, with ``subscribe ircd-
-  users'' in the body.
+  55..  RReellaatteedd rreessoouurrcceess
 
 
+     MMaaiilliinngg lliisstt
+        A list is dedicated to the people using ircd. If you have
+        trouble running ircd, or wish to discuss the future, you can
+        subscribe by sending an email to majordomo@stealth.net, with
+        ``ssuubbssccrriibbee iirrccdd--uusseerrss'' in the body.
 
+        If you just have a question and don't want to subscribe to the
+        list, mail to ircd-users@stealth.net
 
+     FFAAQQ
+        It can be found on the WWW, at
+        <http://www.stealth.net/~kalt/irc/faq.html>.
 
-
-
-
-
-
-
-
-
+     WWWWWW 22..99
+        Vesa Ruokonen has also put serveral pages related to the 2.9
+        servers on the WWW:  <http://www.irc.org/~irc/server/>.
 
 
 

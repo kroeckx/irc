@@ -413,9 +413,8 @@ char	*comment;	/* Reason for the exit */
 			       sptr->auth, sptr->exitc);
 # endif
 # ifdef FNAME_USERLOG
-			sendto_flog(myctime(sptr->firsttime), NULL, on_for,
-				    sptr->user->username, sptr->user->host,
-				    sptr->auth, &sptr->exitc);
+			sendto_flog(sptr, NULL, on_for, sptr->user->username,
+				    sptr->user->host);
 # endif
 		    }
 		else if (sptr->exitc != EXITC_REF)
@@ -429,12 +428,10 @@ char	*comment;	/* Reason for the exit */
 				sptr->sockhost), sptr->auth, sptr->exitc);
 # endif
 # ifdef FNAME_CONNLOG
-			sendto_flog(myctime(sptr->firsttime), " Unknown ", 0,
-				    "<none>", 
+			sendto_flog(sptr, " Unknown ", 0, "<none>", 
 				    (IsUnixSocket(sptr)) ? me.sockhost :
 				    ((sptr->hostp) ? sptr->hostp->h_name :
-				     sptr->sockhost),
-				    sptr->auth, &sptr->exitc);
+				     sptr->sockhost));
 # endif
 		    }
 #endif

@@ -1458,9 +1458,9 @@ add_con_refuse:
 		sendto_flag(SCH_LOCAL, "Rejecting connection from %s[%s].",
 			    (acptr->hostp) ? acptr->hostp->h_name : "",
 			    acptr->sockhost);
-		sendto_flog(myctime(acptr->firsttime), " ?Clone? ", 0,
-			    "<none>", (acptr->hostp) ? acptr->hostp->h_name :
-			    acptr->sockhost, acptr->auth, &acptr->exitc);
+		sendto_flog(acptr, " ?Clone? ", 0, "<none>",
+			    (acptr->hostp) ? acptr->hostp->h_name :
+			    acptr->sockhost);
 		goto add_con_refuse;
 	    }
 #endif

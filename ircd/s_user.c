@@ -371,14 +371,12 @@ char	*nick, *username;
 				sptr->sockhost), sptr->auth, sptr->exitc);
 #endif		    
 #ifdef FNAME_CONNLOG
-			sendto_flog(myctime(sptr->firsttime), 
-				    (i == -5) ? " u@h max " :
+			sendto_flog(sptr, (i == -5) ? " u@h max " :
 				    (i == -4) ? " IP  max " : (i == -3) ? 
 				    " No more " : " No Auth ", 0, "<none>",
 				    (IsUnixSocket(sptr)) ? me.sockhost :
 				    ((sptr->hostp) ? sptr->hostp->h_name :
-				    sptr->sockhost), sptr->auth,
-				    &sptr->exitc);
+				    sptr->sockhost));
 #endif
 			return exit_client(cptr, sptr, &me,
 				(i == -5) ?
@@ -463,9 +461,8 @@ char	*nick, *username;
 			       sptr->user->host, sptr->auth, '-');
 #endif		    
 #ifdef FNAME_CONNLOG
-			sendto_flog(myctime(sptr->firsttime), " K lined ", 0,
-				    sptr->user->username, sptr->user->host,
-				    sptr->auth, "-");
+			sendto_flog(sptr, " K lined ", 0, sptr->user->username,
+				    sptr->user->host);
 #endif
 			return exit_client(cptr, sptr, &me, "K-lined");
 		    }
@@ -482,9 +479,8 @@ char	*nick, *username;
 			       sptr->user->host, sptr->username, '-');
 # endif		    
 # ifdef FNAME_CONNLOG
-			sendto_flog(myctime(sptr->firsttime), " R lined ", 0,
-				    sptr->user->username, sptr->user->host,
-				    sptr->auth, "-");
+			sendto_flog(sptr, " R lined ", 0, sptr->user->username,
+				    sptr->user->host);
 # endif
 			return exit_client(cptr, sptr, &me , "R-lined");
 		    }
@@ -962,7 +958,7 @@ int	notice;
 	Reg	char	*s;
 	aChannel *chptr;
 	char	*nick, *server, *p, *cmd, *host;
-	int	count = 0, nickcnt = 0;
+	int	count = 0, penalty = 0;
 
 	cmd = notice ? MSG_NOTICE : MSG_PRIVATE;
 
@@ -981,14 +977,13 @@ int	notice;
 	if (MyConnect(sptr))
 		parv[1] = canonize(parv[1]);
 	for (p = NULL, nick = strtoken(&p, parv[1], ","); nick;
-	     nick = strtoken(&p, NULL, ","), nickcnt++)
+	     nick = strtoken(&p, NULL, ","), penalty++)
 	    {
 		/*
-		** restrict destination list to MAXMSGDESTS recipients to
+		** restrict destination list to MAXPENALTY/2 recipients to
 		** solve SPAM problem --Yegg 
 		*/ 
-#define			MAXMSGDESTS 5
-		if (nickcnt >= MAXMSGDESTS) {
+		if (2*penalty >= MAXPENALTY) {
 		    if (!notice)
 			    sendto_one(sptr, err_str(ERR_TOOMANYTARGETS,
 						     parv[0]),
@@ -1132,7 +1127,7 @@ int	notice;
 		    }
 		sendto_one(sptr, err_str(ERR_NOSUCHNICK, parv[0]), nick);
 	    }
-    return nickcnt;
+    return penalty;
 }
 
 /*
@@ -1197,14 +1192,14 @@ Link *lp;
 
 
 /*
-** m_who
+** r_who
 **	parv[0] = sender prefix
 **	parv[1] = nickname mask list
 **	parv[2] = additional selection flag, only 'o' for now.
 */
-int	m_who(cptr, sptr, parc, parv)
+int	m_who(cptr, sptr, parc, parv, depth)
 aClient *cptr, *sptr;
-int	parc;
+int	parc, depth;
 char	*parv[];
 {
 	Reg	aClient *acptr;
@@ -1212,17 +1207,14 @@ char	*parv[];
 	Reg	Link	*lp;
 	aChannel *chptr;
 	aChannel *mychannel;
-	char	*channame = NULL, *s;
+	char	*channame = NULL, *s = NULL;
 	int	oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
 	int	member, penalty = 0;
 
 	if (!BadPtr(mask))
 	    {
 		if ((s = (char *)index(mask, ',')))
-		    {
-			parv[1] = ++s;
-			penalty = m_who(cptr, sptr, parc, parv);
-		    }
+			*s = '\0';
 		clean_channelname(mask);
 	    }
 
@@ -1340,6 +1332,12 @@ char	*parv[];
 	    }
 	sendto_one(sptr, rpl_str(RPL_ENDOFWHO, parv[0]),
 		   BadPtr(mask) ?  "*" : mask);
+	if (s)
+	    {
+		parv[1] = ++s;
+		if (penalty < MAXPENALTY)
+			penalty += m_who(cptr, sptr, parc, parv);
+	    }
 	return penalty;
 }
 

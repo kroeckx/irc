@@ -1,11 +1,14 @@
-Wed Mar 26 19:58:28 1997  Christophe Kalt
+Thu Mar 27 14:03:09 1997  Christophe Kalt
+
+	* h.h, send.c, s_bsd.c, s_user.c, s_serv.c: amount of transferred
+	data added to file logs.
 
 	* config.h.dist: define SVR4 if __svr4__ is there.
 
 	* packet.c: drop server sending an unknown command.
 
 	* s_user.c: changed m_who() for better performance (from Chris
-	Behrens).
+	Behrens), also put a limit on its number of arguments.
 
 	* h.h, struct.h, list.c: better IsMember (from Chris Behrens).
 

@@ -1039,12 +1039,24 @@ V:020902:*:*::
 is allowed.
 </descrip>
 
-<sect>Mailing list
+<sect>Related resources
 <p>
-A mailing list is dedicated to the people using ircd. If you
-have trouble running ircd, or wish to discuss the future,
-you can subscribe by sending an email to
-majordomo@stealth.net, with ``subscribe ircd-users'' in the
-body.
+<descrip>
+<tag/Mailing list/ A list is dedicated to the people using
+ircd. If you have trouble running ircd, or wish to discuss
+the future, you can subscribe by sending an email to
+<htmlurl url="mailto:majordomo@stealth.net"
+name="majordomo@stealth.net">, with ``<bf>subscribe
+ircd-users</bf>'' in the body.
+<p>
+If you just have a question and don't want to subscribe to
+the list, mail to <htmlurl url="mailto:ircd-users@stealth.net"
+name="ircd-users@stealth.net">
+<tag/FAQ/ It can be found on the WWW, at <url
+url="http://www.stealth.net/~kalt/irc/faq.html">.
+<tag/WWW 2.9/ Vesa Ruokonen has also put serveral pages
+related to the 2.9 servers on the WWW: <url
+url="http://www.irc.org/~irc/server/">.
+</descrip>
 
 </article>

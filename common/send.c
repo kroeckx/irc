@@ -985,8 +985,17 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 	return;
 }
 
-void	sendto_flog(ftime, msg, duration, username, hostname, ident, exitc)
-char	*ftime, *msg, *username, *hostname, *ident, *exitc;
+/*
+ * sendto_flog
+ *	cptr		used for firsttime, auth, exitc, send/received M/K
+ *	msg		replaces duration if duration is 0
+ *	duration	only used if non 0
+ *	username	can't get it from cptr
+ *	hostname	i.e.
+ */
+void	sendto_flog(cptr, msg, duration, username, hostname)
+aClient	*cptr;
+char	*msg, *username, *hostname;
 time_t	duration;
 {
 	char	linebuf[1024]; /* auth reply might be long.. */
@@ -1022,15 +1031,21 @@ time_t	duration;
 		(void)alarm(0);
 		if (duration)
 			(void)sprintf(linebuf,
-				     "%s (%3d:%02d:%02d): %s@%s [%s] %c\n",
-				     ftime, (int) (duration / 3600),
-				     (int) ((duration % 3600) / 60),
-				     (int) (duration % 60),
-				     username, hostname, ident, *exitc);
+	      "%s (%3d:%02d:%02d): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
+				      myctime(cptr->firsttime),
+				      (int) (duration / 3600),
+				      (int) ((duration % 3600) / 60),
+				      (int) (duration % 60),
+				      username, hostname, cptr->auth,
+				      cptr->exitc, cptr->sendM, cptr->sendK,
+				      cptr->receiveM, cptr->receiveK);
 		else
-			(void)sprintf(linebuf, "%s (%s): %s@%s [%s] %c\n",
-				      ftime, msg, username, hostname, ident,
-				      *exitc);
+			(void)sprintf(linebuf,
+			      "%s (%s): %s@%s [%s] %c %lu %luKb %lu %luKb\n",
+				      myctime(cptr->firsttime), msg, username,
+				      hostname, cptr->auth,
+                                      cptr->exitc, cptr->sendM, cptr->sendK,
+                                      cptr->receiveM, cptr->receiveK);
 		(void)alarm(3);
 		(void)write(logfile, linebuf, strlen(linebuf));
 		(void)alarm(0);

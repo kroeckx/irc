@@ -403,12 +403,14 @@ char	*parv[];
 		/* A server can only be introduced by another server. */
 		if (!IsServer(sptr))
 		    {
-	  		sendto_one(cptr, "ERROR :%s trying to introduce %s",
-				   sptr->name, parv[1]);
-			sendto_flag(SCH_ERROR,
-				    "%s trying to introduce %s from %s",
-				    sptr->name, host,
-				    get_client_name(cptr, TRUE));
+			sendto_flag(SCH_LOCAL,
+			    "Squitting %s brought by %s (introduced by %s)",
+				    host, get_client_name(cptr, FALSE),
+				    sptr->name);
+			sendto_one(cptr,
+				   ":%s SQUIT %s :(Introduced by %s from %s)",
+				   me.name, host, sptr->name,
+				   get_client_name(cptr, FALSE));
 	  		return 1;
 		    }
 		/*
