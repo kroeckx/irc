@@ -771,7 +771,7 @@ char	*argv[];
 		tmp->from = tmp;
 		SetMe(tmp);
 		(void)strcpy(tmp->name, "*");
-		(void)inetport(tmp, "*", 0);
+		(void)inetport(tmp, "", "*", 0);
 		local[0] = tmp;
 	    }
 */

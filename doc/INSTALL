@@ -406,24 +406,35 @@ Field: 1        2              3                4               5          6
    IRC needs to know a few things about your UNIX site, and the "M" command
    specifies this information for IRC.  The fomat of this command is:
 
-           M:<YOUR Host NAME>:xxx:<Geographic Location>
-   Field:  1         2         3           4
+           M:<YOUR Host NAME>:<YOUR Internet IP#>:<Geographic Location>:<Port>
+   Field:  1         2                3                     4              5
 
    Explanation:
 
       Field 1: "M" specifies a Machine description line
 
       Field 2: The name of YOUR host adding any Internet DOMAINNAME that 
-               might also be present.  
+               might also be present.  If this hostname can be resolved,
+               the IP# found will be used to for outgoing connections.
+               (This means all outgoing connections will be done from the
+               same IP#, even if your host has several IP#).
 
-      Field 3: -- NOT USED --: Set to Value NULL (No spaces at ALL!).
+      Field 3: If the machine on which you run the server has several IP
+	       addresses, you can define which IP# to use for outgoing
+	       connections.  This overrides field 2.
+	       See Also the "Port Connections" section.
     
-      Field 4: Geographic Location is used to say WHERE YOUR SEVRER is,
+      Field 4: Geographic Location is used to say WHERE YOUR SERVER is,
                and gives people in other parts of the world a good
                idea of where you are!  If your server is in the USA, it is
                usually best to say: <CITY> <STATE>, USA.  Like for Denver
                I say: "Denver Colorado, USA".  Finnish sites (like
                tolsun.oulu.fi generally say something like "Oulu, Finland".
+ 
+      Field 5: Defines the port on which your server will listen for udp
+               pings from other servers.  This should be the port were other
+               servers are set to autoconnect.  (Also see the port field
+               description in connect lines).
  
       Example:
                 M:tolsun.oulu.fi::Oulu, Finland
@@ -933,7 +944,9 @@ Field: 1        2             3   4     5
 
      Field 4
 	If the host on which the server runs has several IP addresses, you can
-	define for which IP address connections will be acepted.
+	define for which IP address connections will be accepted.  See also
+	MACHINE CONFIGURATION section to properly configure outgoing
+	connections.
 
      Field 5
 	The port number field tells the server which port number it should

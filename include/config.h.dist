@@ -408,6 +408,9 @@
 /*
  * Defining this will add an artificial 2 seconds delay for accepting
  * connections.  This is the OLD behaviour of the server.
+ *
+ * NOTE: this leads of a significant increase in CPU usage if you reject a
+ * client which keeps connecting.
  */
 #define	SLOW_ACCEPT
 
@@ -712,7 +715,8 @@ error ZIP_MINIMUM needs redefining.
 # define	SENDQ_ALWAYS
 #endif
 
-#if (defined(sun) && (defined(__SVR4) || defined(__svr4__))) || defined(SGI)
+#if (defined(sun) && (defined(__SVR4) || defined(__svr4__))) || defined(SGI) \
+	|| defined(AIX)
 # define _DO_POLL_
 #endif
 

@@ -1,8 +1,64 @@
+Wed Jan  8 12:35:03 1997  Christophe Kalt
+
+	* h.h, s_bsd.c, s_conf.c:
+
+		* port field in M configuration line is used again, now to
+		define on which port the server will listen for UDP pings.
+
+	* hash.c:
+
+		* restricted commands to opers (from Vesa).
+
+	* send.c:
+
+		* sendto_match_butone() had a broken behaviour, 
+		brought back the old (2.8.21) behaviour.	
+	
+	* s_bsd.c:
+
+		* fixed negociation of compression for outgoing
+		connections.
+
+		* moved the "rejected connection" notice to &LOCAL.
+
+		* SLOW_ACCEPT #ifdef's changed to #ifndef's to get what
+		one should expect from the define name !
+
+		* made inetport() more readable, and added check on empty
+		string parameter (from Vesa).
+
+		* highfd isn't defined when _DO_POLL_ is defined, so don't
+		use it in debug notices (from Vesa).
+
+		* break changed to continue because ??? (from Vesa).
+
+	* s_user.c:
+
+		* fixed KILL notice sent on nick collision (was using
+		ident reply for remote clients).
+
+		* allowed oper!user@host.foo to send global message/notice
+		to #*.foo
+
+	* s_serv.c, s_user.c, s_bsd.c, s_debug.c:
+	
+		* changed the PASS command semantic (from Vesa).
+
+Fri Jan  3 14:47:52 1997  Christophe Kalt
+
+	* s_bsd.c:
+
+		* completed virtual hosts support (M line).
+
+	* config.h.dist:
+
+		* AIX has poll(), use it.
+
 Mon Dec 30 15:08:20 1996  Christophe Kalt
 
 	* s_bsd.c, h.h:
 
-		* added support for virtual hosts.
+		* added support for virtual hosts (P line).
 
 Wed Dec 18 12:08:29 1996  Christophe Kalt
 
@@ -104,93 +160,3 @@ Tue Oct  1 22:29:31 1996  Christophe Kalt
 		* added #define ZIP_LINKS and s_zip.c.
 		* made configure look for the zlib (-lgz).
 		* implemented server-server zlib compression.
-/************************************************************************
- *   IRC - Internet Relay Chat, doc/ChangeLog
- *   Copyright (C) 1990, Mike Bolotski
- *
- *   This program is free software; you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation; either version 1, or (at your option)
- *   any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program; if not, write to the Free Software
- *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
-
-Tue Mar 22 17:32:33 1994  Helen T. Rose Davis  (hrose@rocza.kei.com)
-
-	* Re-rewrite of documentation to coincide with 2.8.17 release.
-
-Mon Mar 29 01:26:16 1993
-
-	* INTSALL	updated.
-	* m4macros	added.
-
-Fri Jan 22 22:49:20 1993
-
-	* INTSALL	updated.
-
-Thu Dec 17 19:41:19 1992  Darren Reed <avalon@coombs.anu.edu.au>
-
-	* general	Well, these docs were updated for 2.7, nobody
-			documented it - must be a general distaste for
-			documentation I'd say :)
-
-			Work on 2.8 documentation slowly creaping along.
-
-Mon Sep 02 17:12:41 1991  Darren Reed <avalon@coombs.anu.edu.au>
-
-	* Documentation brought upto date with new features to 2.6.2
-
-
-Mon Aug 26 16:51:01 1991  Helen Trillian Rose  (hrose@eff.org)
-
-	* Rewrite of documentation (again) to coincide with the 2.6.2
-	release. 
-
-Wed Oct 31 18:05:12 1990  Jarkko Oikarinen
-
-	* Added hrose@cs.bu.edu's patches to irc2.6
-	  - Documentation rewrites...
-	  - patches
-
-Fri Jun 29 18:54:40 1990  Armin Gruner (gruner@informatik.tu-muenchen.de)
-
-       * NETWORKING
-
-       Added some sites in Germany
-
-Sat Dec 16 15:56:41 1989  Mike Bolotski  (mikeb at coho.ee.ubc.ca)
-
-	* INSTALL
-
-	Modified the installation document as per Valdis's nitpicking.
-	Improved the grammer and speling of a lot of dokumentation.
-	Removed lots and lots of informal wording, eh? and especially
-	the long run on sentences that try to say a lot but really don't
-	and are present only to show the author's superiority, especially
-	when quoting from a prestigious work like Webster's New Collegiate
-	Dictionary, gosh, specifically the 1979 version (ISBN
-	0-87779-3580-1), which I guess I should run out and purchase
-	immediately, for otherwise I might be considered ignorant by
-	wise men who have written a great deal of code in VS/Pascal and
-	even IBM Assembler and still can't manage not to avoid including
-	.QUIT in every goddam mail message.
-
-
-	* HISTORY
-
-	Added a recent history of the version numbers and the new
-	patchlevel mechanism.
-
-
-	* BugList
-
-	Added a BugList file including the notation of bug numbers.

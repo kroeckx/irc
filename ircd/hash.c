@@ -811,7 +811,7 @@ char	*parv[];
 		aClient	*tmp;
 		int	max;
 
-		if (parc <= 2)
+		if (parc <= 2 || !IsAnOper(sptr))
 			return (0);
 		l = atoi(parv[2]) % _HASHSIZE;
 		if (parc > 3)
@@ -834,7 +834,7 @@ char	*parv[];
 		aChannel *tmp;
 		int	max;
 
-		if (parc <= 2)
+		if (parc <= 2 || !IsAnOper(sptr))
 			return (0);
 		l = atoi(parv[2]) % _CHANNELHASHSIZE;
 		if (parc > 3)
@@ -864,7 +864,7 @@ char	*parv[];
 #ifdef	DEBUGMODE
 	case 'z' :
 	    {
-		if (parc <= 2)
+		if (parc <= 2 || !IsAnOper(sptr))
 			return 0;
 		l = atoi(parv[2]);
 		if (l < 256)
@@ -875,7 +875,7 @@ char	*parv[];
 	    }
 	case 'Z' :
 	    {
-		if (parc <= 2)
+		if (parc <= 2 || !IsAnOper(sptr))
 			return 0;
 		l = atoi(parv[2]);
 		if (l < 256)

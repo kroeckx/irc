@@ -816,7 +816,7 @@ char	*parv[];
 				   get_client_name(cptr, FALSE));
 		sendto_one(cptr, ":%s KILL %s :%s (%s <- (%s@%s)%s)",
 			    ME, acptr->name, ME, acptr->from->name,
-			    acptr->auth,
+			    (acptr->user) ? acptr->user->username : "???",
 			    (acptr->user) ? acptr->user->host : "???",
 			    /* NOTE: Cannot use get_client_name twice
 			    ** here, it returns static string pointer:
@@ -1031,7 +1031,9 @@ int	notice;
 					   parv[0]), nick);
 				continue;
 			    }
-			if (matches(nick + 1, sptr->user->server))
+			if (matches(nick + 1, sptr->user->server) &&
+			    (*nick == '$' ||
+			     matches(nick + 1, sptr->user->host)))
 			    {
 				sendto_one(sptr, err_str(ERR_BADMASK,
 					   parv[0]), nick);
@@ -2196,6 +2198,8 @@ char	*parv[];
 **	parv[0] = sender prefix
 **	parv[1] = password
 **	parv[2] = version (server only)
+**	parv[3] = server options (server only)                              
+**	parv[4] = (optional) link options (server only)                  
 */
 int	m_pass(cptr, sptr, parc, parv)
 aClient *cptr, *sptr;
@@ -2209,8 +2213,20 @@ char	*parv[];
 		sendto_one(cptr, err_str(ERR_NEEDMOREPARAMS, parv[0]), "PASS");
 		return 1;
 	    }
-	if (parc > 2 && parv[2])
-		strncpyzt(cptr->info, parv[2], 12);
+       if (parc > 2 && parv[2])
+	   {
+               strncpyzt(cptr->info, parv[2], 15);                
+               if (parc > 3 && parv[3])
+		   {
+                       strcat(cptr->info, " ");                          
+                       strncat(cptr->info, parv[3], 20); /* hmm */   
+                       if (parc > 4 && parv[4])
+			   {                   
+                               strcat(cptr->info, " ");              
+                               strncat(cptr->info, parv[4], 5); /* hmm */
+			   }
+		   }
+	   }
 	strncpyzt(cptr->passwd, password, sizeof(cptr->passwd));
 	return 0;
     }

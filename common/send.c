@@ -816,7 +816,7 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 			continue;       /* that clients are not mine */
  		if (cptr == one)	/* must skip the origin !! */
 			continue;
-		if (IsServer(cptr) && what == MATCH_SERVER)
+		if (IsServer(cptr))
 		    {
 			for (user = usrtop; user; user = user->nextu)
 				if (IsRegisteredUser(acptr = user->bcptr) &&
@@ -825,20 +825,13 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 					break;
 			if (!acptr)
 				continue;
-			sendto_prefix_one(cptr, from, pattern,
-					  p1, p2, p3, p4, p5, p6, p7, p8);
 		    }
 		/* my client, does he match ? */
-		else 
-		    {
-		        if (IsRegisteredUser(cptr) && 
-			    match_it(cptr, mask, what))
-				sendto_prefix_one(cptr, from, pattern, p1,
-						  p2, p3, p4, p5, p6, p7, p8);
-			if (IsServer(cptr)) /* UGH! */
-				sendto_prefix_one(cptr, from, pattern, p1,
-						  p2, p3, p4, p5, p6, p7, p8);
-		    }
+		else if (!(IsRegisteredUser(cptr) && 
+			   match_it(cptr, mask, what)))
+			continue;
+		sendto_prefix_one(cptr, from, pattern,
+				  p1, p2, p3, p4, p5, p6, p7, p8);
 	    }
 	return;
 }

@@ -1034,6 +1034,7 @@ int	opt;
 			if (ME[0] == '\0' && aconf->host[0])
 				strncpyzt(ME, aconf->host,
 					  sizeof(ME));
+			setup_ping(aconf->port);
 		    }
 		(void)collapse(aconf->host);
 		(void)collapse(aconf->name);

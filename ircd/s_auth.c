@@ -121,10 +121,13 @@ Reg	aClient	*cptr;
 		(void)alarm((unsigned)0);
 	    }
 	else
+	    {
+		report_error("binding stream socket for auth request %s:%s",
+			     cptr);
 		Debug((DEBUG_ERROR,"auth(%x) bind failed on %s port %d - %d",
 		      cptr, inetntoa((char *)&us.sin_addr),
 		      ntohs(us.sin_port), errno));
-
+	    }
 
 	cptr->flags |= (FLAGS_WRAUTH|FLAGS_AUTH);
 	if (cptr->authfd > highest_fd)

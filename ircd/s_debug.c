@@ -26,6 +26,7 @@ Computing Center and Jarkko Oikarinen";
 #include "struct.h"
 /*
  * Option string.  Must be before #ifdef DEBUGMODE.
+ * spaces are not allowed.
  */
 char	serveropts[] = {
 #ifdef	SENDQ_ALWAYS
@@ -140,7 +141,7 @@ char	serveropts[] = {
 #ifdef MIRC_KLUDGE
 '$',
 #endif
-' ',
+'_',
 'V',
 #ifndef NoV28Links
 '0',

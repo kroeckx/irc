@@ -41,6 +41,8 @@ Computing Center and Jarkko Oikarinen";
 #include <fcntl.h>
 #include "h.h"
 
+extern  char    serveropts[];
+
 static	char	buf[BUFSIZE];
 
 /*
@@ -110,8 +112,6 @@ aClient *sptr, *cptr;
 int	parc;
 char	*parv[];
 {
-	extern	char	serveropts[];
-
 	if (hunt_server(cptr,sptr,":%s VERSION :%s",1,parc,parv)==HUNTED_ISME)
 	    {
 		sendto_one(sptr, rpl_str(RPL_VERSION, parv[0]),
@@ -251,15 +251,22 @@ char	*parv[];
 ** check_version (Vesa)
 **      ver = new server version string
 */
-int	check_version(ver)
-char	*ver;
+int	check_version(cptr)
+aClient	*cptr;
 {
-	Debug((DEBUG_INFO,"check_version: %s", ver));
-	if (!strncmp(ver, "0209", 4))
-		return SV_29;	/* We have something special here! */
-	if (!strncmp(ver, "021", 3))
-		return SV_29;	/* for future versions */
-	return SV_OLD;
+	int	version = SV_OLD;
+
+	Debug((DEBUG_INFO,"check_version: %s", cptr->info));
+	if (!strncmp(cptr->info, "0209", 4))
+		version = SV_29;	/* We have something special here! */
+	else if (!strncmp(cptr->info, "021", 3))
+		version = SV_29;	/* for future versions */
+
+	/* right now, I can't code anything good for this */
+	if (cptr->info[strlen(cptr->info)-1] == 'Z')
+                cptr->flags |= FLAGS_ZIPRQ;
+
+	return version;
 }
 
 /*
@@ -504,11 +511,7 @@ char	*parv[];
 	** status accordingly...
 	*/
 	/* hop = 1 really for local client, return it in m_server_estab() */
-	cptr->hopcount = check_version(cptr->info);
-#ifdef	ZIP_LINKS
-	if (cptr->info[strlen(cptr->info)-1] == 'Z')
-		cptr->flags |= FLAGS_ZIPRQ;
-#endif
+	cptr->hopcount = check_version(cptr);
 	strncpyzt(cptr->name, host, sizeof(cptr->name));
 	strncpyzt(cptr->info, info[0] ? info:ME, sizeof(cptr->info));
 
@@ -616,13 +619,12 @@ Reg	aClient	*cptr;
 	    {
 		if (bconf->passwd[0])
 #ifndef	ZIP_LINKS
-			sendto_one(cptr,"PASS %s %s", bconf->passwd,
-				   pass_version);
+			sendto_one(cptr, "PASS %s %s %s", bconf->passwd,
+				   pass_version, serveropts);
 #else
-			sendto_one(cptr,"PASS %s %s%s", bconf->passwd,
-				   pass_version,
-				   (bconf->status == CONF_ZCONNECT_SERVER)?
-				   "Z" : "");
+			sendto_one(cptr, "PASS %s %s %s %s", bconf->passwd,
+				   pass_version, serveropts,
+			   (bconf->status == CONF_ZCONNECT_SERVER) ? "Z" : "");
 #endif
 		/*
 		** Pass my info to the new server
