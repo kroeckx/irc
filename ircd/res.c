@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.8 2000/10/22 11:01:46 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.9 2000/12/08 21:19:55 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -744,6 +744,7 @@ HEADER	*hptr;
 			ans++;
 			break;
 		default :
+			cp += dlen;
 #ifdef DEBUG
 			Debug((DEBUG_INFO,"proc_answer: type:%d for:%s",
 			      type,hostbuf));
