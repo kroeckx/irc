@@ -27,7 +27,7 @@ Computing Center and Jarkko Oikarinen";
 #include "sys.h"
 
 
-#define	MAX_CALLS	512
+#define	MAX_ITERATIONS	512
 /*
 **  Compare if a given string (name) matches the given
 **  mask (which can contain wild cards: '*' - match any
@@ -48,11 +48,14 @@ char	*mask, *name;
 {
 	Reg	u_char	*m = (u_char *)mask, *n = (u_char *)name;
 	char	*ma = mask, *na = name;
-	int	wild = 0, q = 0, calls = MAX_CALLS;
+	int	wild = 0, q = 0, calls = 0;
 
-	while (calls >= 0)
+	while (1)
 	    {
-		calls--;
+#ifdef	MAX_ITERATIONS
+	        if (calls++ > MAX_ITERATIONS)
+			break;               
+#endif                                     
 
 		if (*m == '*')
 		   {

@@ -1,3 +1,19 @@
+Fri Feb 28 09:34:36 1997  Christophe Kalt  <kalt@millennium.stealth.net>
+
+	* s_err.c, s_serv.c: Added 2 more fields to RPL_TRACELINK.
+
+Thu Feb 27 14:50:37 1997  Christophe Kalt
+
+	* s_serv.c: /connect by servername didn't work for c lines (from Eumel)
+
+Wed Feb 26 16:48:36 1997  Christophe Kalt
+
+	* s_bsd.c: removed (old) redundant code concerning VIF.
+
+	* config.h.dist: CLONE_MAX and CLONE_PERIOD could be undefined.
+
+	* common.c: match() cleanup.
+
 Thu Feb 13 17:27:53 1997  Christophe Kalt
 
 	* res.c, res_init.c, res_mkquery.c, ircd.c, s_bsd.c: renamed
@@ -17,7 +33,7 @@ Thu Feb 13 17:27:53 1997  Christophe Kalt
 
 	* send.c: Added 2 parameters to sendto_serv_butone().
 
-	* s_err.c, s_server.c: Added one field to RPL_TRACELINK.
+	* s_err.c, s_serv.c: Added one field to RPL_TRACELINK.
 
 Sun Jan 26 20:02:34 EET 1997  Vesa Ruokonen  (ruokonen@aapo.it.lut.fi)
 

@@ -681,6 +681,8 @@ error ZIP_MINIMUM needs redefining.
 
 #if !defined(SLOW_ACCEPT) && !defined(CLONE_CHECK)
 # define	CLONE_CHECK
+# define	CLONE_MAX       2                                     
+# define	CLONE_PERIOD    10       
 #endif
 
 /*

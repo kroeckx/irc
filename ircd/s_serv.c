@@ -1665,7 +1665,8 @@ char	*parv[];
 	    }
 
 	for (aconf = conf; aconf; aconf = aconf->next)
-		if (aconf->status == CONF_CONNECT_SERVER &&
+		if ((aconf->status == CONF_CONNECT_SERVER ||
+		     aconf->status == CONF_ZCONNECT_SERVER) &&
 		    match(parv[1], aconf->name) == 0)
 		  break;
 	/* Checked first servernames, then try hostnames. */
@@ -1906,7 +1907,9 @@ char	*parv[];
 			   version, debugmode, tname, ac2ptr->from->name,
 			   ac2ptr->from->serv->version,
 			   (ac2ptr->from->flags & FLAGS_ZIP) ? "z" : "",
-			   timeofday - ac2ptr->from->firsttime);
+			   timeofday - ac2ptr->from->firsttime,
+			   (int)DBufLength(&ac2ptr->from->sendQ),
+			   (int)DBufLength(&sptr->from->sendQ));
 		return 3;
 	    }
 	case HUNTED_ISME:

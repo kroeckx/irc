@@ -314,7 +314,7 @@ int	port;
 
 	if (cptr->fd > highest_fd)
 		highest_fd = cptr->fd;
-	cptr->ip.s_addr = server.sin_addr.s_addr;
+	cptr->ip.s_addr = server.sin_addr.s_addr; /* broken on linux at least*/
 	cptr->port = port;
 	(void)listen(cptr->fd, LISTENQUEUE);
 	local[cptr->fd] = cptr;
@@ -1442,22 +1442,6 @@ add_con_refuse:
 		bcopy ((char *)&addr.sin_addr, (char *)&acptr->ip,
 			sizeof(struct in_addr));
 		acptr->port = ntohs(addr.sin_port);
-
-		/*
-		 * Check that this socket (client) is allowed to accept
-		 * connections from this IP#.
-		 */
-		for (s = (char *)&cptr->ip, t = (char *)&acptr->ip, len = 4;
-		     len > 0; len--, s++, t++)
-		    {
-			if (!*s)
-				continue;
-			if (*s != *t)
-				break;
-		    }
-
-		if (len)
-			goto add_con_refuse;
 
 		lin.flags = ASYNC_CLIENT;
 		lin.value.cptr = acptr;
