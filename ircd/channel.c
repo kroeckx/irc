@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.17 2001/05/06 23:09:20 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.18 2001/05/14 01:41:04 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -3211,9 +3211,10 @@ aChannel *chptr;
     if (chptr->users <= 5 && (now - chptr->history > DELAYCHASETIMELIMIT))
 	{
 	    /* few users, no recent split: this is really a small channel */
-	    char mbuf[MAXMODEPARAMS + 1], nbuf[3*(NICKLEN+1)+1];
+	    char mbuf[MAXMODEPARAMS + 1], nbuf[MAXMODEPARAMS*(NICKLEN+1)+1];
 	    int cnt;
 	    
+		mbuf[0] = nbuf[0] = '\0';
 	    lp = chptr->members;
 	    while (lp)
 		{
