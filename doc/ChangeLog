@@ -2,7 +2,8 @@
 
 2003-10-10  Piotr Kucharski
 
-	* channel.c/m_join(): buffer overflow (reported by Florian Weimer).
+	* channel.c/m_join(): buffer overflow (reported by cras, exploited ;>
+	  by DE opers (Rince, f2u, morrow)).
 	* s_user.c/m_nick(): check proper param count from server (backport).
 	* send.c/sendto_flog(): log SYSLOG_CONN/SYSLOG_USERS properly
 	  (reported by Francesco).
@@ -24,6 +25,10 @@
 	* s_bsd.c: some CYGWIN defines (backport).
 	* s_bsd.c: use IsServer() in c/n lookup for reconnect (backport).
 	* s_bsd.c/polludp(): sometimes garbage IP was shown (backport).
+	* res.c/do_query_number(), config.h.dist: SIXBONE_HACK.
+	* a_conf.c/conf_err(): exit iauth on config error (backport).
+	* s_user.c/m_oper(): services were getting reversed local/global
+	  oper status (backport).
 	
 2.10.3p3
 
