@@ -1,3 +1,10 @@
+1999-09-23  Piotr Kucharski
+
+	* channel.c/reop_channel(): do not reop local restricted clients
+	(patch from wnelson).
+
+	* s_bsd.c/summon(): let summon know about /dev/pts too (from pht).
+
 1999-09-05  Piotr Kucharski
 
 	* whowas.c/m_whowas(): fixed two bad behaviours (reported by viha)

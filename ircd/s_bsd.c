@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73 1999/07/23 17:15:14 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.1 1999/09/23 13:08:43 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2718,6 +2718,7 @@ char	*namebuf, *linebuf, *chname;
 	 */
 	if ((linebuf[0] != 't' || linebuf[1] != 't' || linebuf[2] != 'y')
 	    && (linebuf[0] != 'c' || linebuf[1] != 'o' || linebuf[2] != 'n')
+	    && (linebuf[0] != 'p' || linebuf[1] != 't' || linebuf[2] != 's')
 #ifdef HPUX
 	    && (linebuf[0] != 'p' || linebuf[1] != 't' || linebuf[2] != 'y' ||
 		linebuf[3] != '/')

@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.110 1999/08/15 20:58:43 kalt Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.1 1999/09/23 13:08:42 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -606,11 +606,6 @@ aClient	*mp;
 	add_user_to_channel(chptr, mp, CHFL_CHANOP);
 	chptr->mode.mode = smode;
 #endif
-	chptr = get_channel(mp, "&SAVE", CREATE);
-	strcpy(chptr->topic,
-	       "SERVER MESSAGES: save messages");
-	add_user_to_channel(chptr, mp, CHFL_CHANOP);
-	chptr->mode.mode = smode;
 	chptr = get_channel(mp, "&DEBUG", CREATE);
 	strcpy(chptr->topic, "SERVER MESSAGES: debug messages [you shouldn't be here! ;)]");
 	add_user_to_channel(chptr, mp, CHFL_CHANOP);
@@ -3205,14 +3200,14 @@ aChannel *chptr;
 			    chptr->reop = 0;
 			    return 0;
 			}
-		    if (MyConnect(lp->value.cptr))
+		    if (MyConnect(lp->value.cptr) && !IsRestricted(lp->value.cptr))
 			    op.value.cptr = lp->value.cptr;
 		    lp = lp->next;
 		}
 	    if (op.value.cptr == NULL &&
 		((now - chptr->reop) < LDELAYCHASETIMELIMIT))
 		    /*
-		    ** do nothing if no local users, 
+		    ** do nothing if no unrestricted local users, 
 		    ** unless the reop is really overdue.
 		    */
 		    return 0;
@@ -3241,11 +3236,14 @@ aChannel *chptr;
 			    cnt = 0;
 			    mbuf[0] = nbuf[0] = '\0';
 			}
-		    op.value.cptr = lp->value.cptr;
-		    change_chan_flag(&op, chptr);
-		    mbuf[cnt++] = 'o';
-		    strcat(nbuf, lp->value.cptr->name);
-		    strcat(nbuf, " ");
+		    if ((!(MyConnect(lp->value.cptr) && IsRestricted(lp->value.cptr)))
+			{
+			    op.value.cptr = lp->value.cptr;
+			    change_chan_flag(&op, chptr);
+			    mbuf[cnt++] = 'o';
+			    strcat(nbuf, lp->value.cptr->name);
+			    strcat(nbuf, " ");
+			}
 		    lp = lp->next;
 		}
 	    if (cnt)
@@ -3272,6 +3270,7 @@ aChannel *chptr;
 			    return 0;
 			}
 		    if (MyConnect(lp->value.cptr) &&
+			!IsRestricted(lp->value.cptr) &&
 			lp->value.cptr->user->last > idlelimit &&
 			(op.value.cptr == NULL ||
 			 lp->value.cptr->user->last>op.value.cptr->user->last))
