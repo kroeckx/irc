@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.6 2000/04/09 15:01:26 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.7 2000/05/09 12:13:48 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -192,7 +192,7 @@ int	port;
 	/*
 	 * do it this way because building ip# from separate values for each
 	 * byte requires endian knowledge or some nasty messing. Also means
-	 * easy conversion of "*" 0.0.0.0 or 134.* to 134.0.0.0 :-)
+	 * easy conversion of "*" to 0.0.0.0 or 134.* to 134.0.0.0 :-)
 	 */
 	(void)sscanf(ipmask, "%d.%d.%d.%d", &ad[0], &ad[1], &ad[2], &ad[3]);
 	(void)sprintf(ipname, "%d.%d.%d.%d", ad[0], ad[1], ad[2], ad[3]);
@@ -434,7 +434,7 @@ int rcvdsig;
 #if defined(USE_IAUTH)
 	static time_t last = 0;
 	static char first = 1;
-	int sp[2], fd;
+	int sp[2], fd, val;
 
 	if ((bootopt & BOOT_NOIAUTH) != 0)
 		return;
@@ -462,27 +462,44 @@ int rcvdsig;
 	adfd = sp[0];
 	set_non_blocking(sp[0], NULL);
 	set_non_blocking(sp[1], NULL); /* less to worry about in iauth */
+	val = IAUTH_BUFFER;
+	if (setsockopt(sp[0], SOL_SOCKET, SO_SNDBUF, (void *) &val,
+	    sizeof(val)) < 0)
+			sendto_flag(SCH_AUTH,
+			    "IAUTH_BUFFER too big for sp0 sndbuf, using default");
+	if (setsockopt(sp[1], SOL_SOCKET, SO_SNDBUF, (void *) &val,
+	    sizeof(val)) < 0)
+			sendto_flag(SCH_AUTH,
+			    "IAUTH_BUFFER too big for sp1 sndbuf, using default");
+	if (setsockopt(sp[0], SOL_SOCKET, SO_RCVBUF, (void *) &val,
+	    sizeof(val)) < 0)
+			sendto_flag(SCH_AUTH,
+			    "IAUTH_BUFFER too big for sp0 rcvbuf, using default");
+	if (setsockopt(sp[1], SOL_SOCKET, SO_RCVBUF, (void *) &val,
+	    sizeof(val)) < 0)
+			sendto_flag(SCH_AUTH,
+			    "IAUTH_BUFFER too big for sp1 rcvbuf, using default");
 	switch (vfork())
 	    {
-	case -1:
-		sendto_flag(SCH_ERROR, "vfork() failed!");
-		sendto_flag(SCH_AUTH, "Failed to restart iauth!");
-		close(sp[0]); close(sp[1]);
-		adfd = -1;
-		return;
-	case 0:
-		for (fd = 0; fd < MAXCONNECTIONS; fd++)
-			if (fd != sp[1])
-				(void)close(fd);
-		if (sp[1] != 0)
-		    {
-			(void)dup2(sp[1], 0);
+		case -1:
+			sendto_flag(SCH_ERROR, "vfork() failed!");
+			sendto_flag(SCH_AUTH, "Failed to restart iauth!");
+			close(sp[0]); close(sp[1]);
+			adfd = -1;
+			return;
+		case 0:
+			for (fd = 0; fd < MAXCONNECTIONS; fd++)
+				if (fd != sp[1])
+					(void)close(fd);
+			if (sp[1] != 0)
+			    {
+				(void)dup2(sp[1], 0);
+				close(sp[1]);
+			    }
+			if (execl(IAUTH_PATH, IAUTH, NULL) < 0)
+				_exit(-1); /* should really not happen.. */
+		default:
 			close(sp[1]);
-		    }
-		if (execl(IAUTH_PATH, IAUTH, NULL) < 0)
-			_exit(-1); /* should really not happen.. */
-	default:
-		close(sp[1]);
 	    }
 
 	if (first)
