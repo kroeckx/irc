@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.7 2004/05/09 19:51:29 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.8 2004/05/09 20:20:33 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -575,6 +575,14 @@ char	*comment;	/* Reason for the exit */
 	if (IsServer(sptr) && (cptr == sptr))
 		sendto_flag(SCH_SERVER, "Sending SQUIT %s (%s)",
 			    cptr->name, comment);
+	/* non-local server splitted and it matches one of our C-lines,
+	** and we have temporarily disabled AC -- restore it! --B. */
+	if (IsServer(sptr) && (cptr != sptr) &&
+		nextconnect == 0 && find_conf_name(sptr->name,
+		(CONF_CONNECT_SERVER|CONF_ZCONNECT_SERVER)))
+	{
+		nextconnect = timeofday + HANGONRETRYDELAY;
+	}
 	
 	exit_one_client(cptr, sptr, from, (*comment1) ? comment1 : comment);
 	return cptr == sptr ? FLUSH_BUFFER : 0;
