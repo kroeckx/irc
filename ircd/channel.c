@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.1 1999/09/23 13:08:42 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.2 1999/10/04 17:54:18 q Exp $";
 #endif
 
 #include "os.h"
@@ -3236,7 +3236,8 @@ aChannel *chptr;
 			    cnt = 0;
 			    mbuf[0] = nbuf[0] = '\0';
 			}
-		    if ((!(MyConnect(lp->value.cptr) && IsRestricted(lp->value.cptr)))
+		    if (!(MyConnect(lp->value.cptr) 
+			&& IsRestricted(lp->value.cptr)))
 			{
 			    op.value.cptr = lp->value.cptr;
 			    change_chan_flag(&op, chptr);
