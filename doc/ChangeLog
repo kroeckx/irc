@@ -1,3 +1,8 @@
+2001-07-07  Piotr Kucharski
+
+	* send.c/send_message(): once we adjusted pool size during
+	  netjoin, we did not add to queue parts of burst (from jv).
+
 2001-07-05  Piotr Kucharski
 
 	* s_conf.c/initconf.c: set default u@h limits to 1.1, not 0.

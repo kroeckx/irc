@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.9 2001/06/29 18:56:23 q Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.10 2001/07/07 13:19:59 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -167,10 +167,10 @@ int	len;
 	if (IsDead(to))
 		return 0; /* This socket has already been marked as dead */
 	if (DBufLength(&to->sendQ) > get_sendq(to))
-	    {
+	{
 # ifdef HUB
 		if (CBurst(to))
-		    {
+		{
 			aConfItem	*aconf = to->serv->nline;
 
 			poolsize -= MaxSendq(aconf->class) >> 1;
@@ -180,17 +180,19 @@ int	len;
 				    "New poolsize %d. (sendq adjusted)",
 				    poolsize);
 			istat.is_dbufmore++;
-		    }
-		else if (IsServer(to) || IsService(to))
-			sendto_flag(SCH_ERROR,
-				"Max SendQ limit exceeded for %s: %d > %d",
-			   	get_client_name(to, FALSE),
-				DBufLength(&to->sendQ), get_sendq(to));
-		if (!CBurst(to))
-		    {
+		}
+		else
+		{
+			if (IsServer(to) || IsService(to))
+			{
+				sendto_flag(SCH_ERROR,
+					"Max SendQ limit exceeded for %s: %d > %d",
+					get_client_name(to, FALSE),
+					DBufLength(&to->sendQ), get_sendq(to));
+			}
 			to->exitc = EXITC_SENDQ;
 			return dead_link(to, "Max Sendq exceeded");
-		    }
+		}
 # else /* HUB */
 		if (IsService(to) || IsServer(to))
 			sendto_flag(SCH_ERROR,
@@ -200,44 +202,43 @@ int	len;
 		to->exitc = EXITC_SENDQ;
 		return dead_link(to, "Max Sendq exceeded");
 # endif /* HUB */
-	    }
-	else
-	    {
+	}
 tryagain:
 # ifdef	ZIP_LINKS
-	        /*
-		** data is first stored in to->zip->outbuf until
-		** it's big enough to be compressed and stored in the sendq.
-		** send_queued is then responsible to never let the sendQ
-		** be empty and to->zip->outbuf not empty.
-		*/
-		if (to->flags & FLAGS_ZIP)
-			msg = zip_buffer(to, msg, &len, 0);
+	/*
+	** data is first stored in to->zip->outbuf until
+	** it's big enough to be compressed and stored in the sendq.
+	** send_queued is then responsible to never let the sendQ
+	** be empty and to->zip->outbuf not empty.
+	*/
+	if (to->flags & FLAGS_ZIP)
+		msg = zip_buffer(to, msg, &len, 0);
 
-		if (len && (i = dbuf_put(&to->sendQ, msg, len)) < 0)
+	if (len && (i = dbuf_put(&to->sendQ, msg, len)) < 0)
 # else 	/* ZIP_LINKS */
-		if ((i = dbuf_put(&to->sendQ, msg, len)) < 0)
+	if ((i = dbuf_put(&to->sendQ, msg, len)) < 0)
 # endif	/* ZIP_LINKS */
-			if (i == -2 && CBurst(to))
-			    {	/* poolsize was exceeded while connect burst */
-				aConfItem	*aconf = to->serv->nline;
+	{
+		if (i == -2 && CBurst(to))
+		    {	/* poolsize was exceeded while connect burst */
+			aConfItem	*aconf = to->serv->nline;
 
-				poolsize -= MaxSendq(aconf->class) >> 1;
-				IncSendq(aconf->class);
-				poolsize += MaxSendq(aconf->class) >> 1;
-				sendto_flag(SCH_NOTICE,
-					    "New poolsize %d. (reached)",
-					    poolsize);
-				istat.is_dbufmore++;
-				goto tryagain;
-			    }
-			else
-			    {
-				to->exitc = EXITC_MBUF;
-				return dead_link(to,
-					"Buffer allocation error for %s");
-			    }
-	    }
+			poolsize -= MaxSendq(aconf->class) >> 1;
+			IncSendq(aconf->class);
+			poolsize += MaxSendq(aconf->class) >> 1;
+			sendto_flag(SCH_NOTICE,
+				    "New poolsize %d. (reached)",
+				    poolsize);
+			istat.is_dbufmore++;
+			goto tryagain;
+		    }
+		else
+		    {
+			to->exitc = EXITC_MBUF;
+			return dead_link(to,
+				"Buffer allocation error for %s");
+		    }
+	}
 	/*
 	** Update statistics. The following is slightly incorrect
 	** because it counts messages even if queued, but bytes
