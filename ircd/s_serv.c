@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.3 2001/02/09 16:58:19 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.4 2001/02/10 23:29:09 q Exp $";
 #endif
 
 #include "os.h"
@@ -2024,6 +2024,7 @@ char	*parv[];
 	char	killer[HOSTLEN * 2 + USERLEN + 5];
 
 	strcpy(killer, get_client_name(sptr, TRUE));
+	SPRINTF(buf, "RESTART by %s", get_client_name(sptr, TRUE));
 	for (i = 0; i <= highest_fd; i++)
 	    {
 		if (!(acptr = local[i]))
@@ -2045,7 +2046,6 @@ char	*parv[];
 	    }
 	flush_connections(me.fd);
 
-	SPRINTF(buf, "RESTART by %s", get_client_name(sptr, TRUE));
 	restart(buf);
 	/*NOT REACHED*/
 	return 0;
