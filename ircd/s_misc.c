@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.2 2001/02/10 23:48:44 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.3 2001/05/04 19:54:27 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -321,6 +321,10 @@ char	*name;
 			acptr->flags |= FLAGS_HIDDEN;
 			j++;
 		}
+		else
+		{
+			acptr->flags &= ~FLAGS_HIDDEN;
+		}
 	}
 	return j;
 }
@@ -435,7 +439,7 @@ char	*comment;	/* Reason for the exit */
 
 		      if (sptr->auth != sptr->username)
 			  {
-			    istat.is_authmem -= sizeof(sptr->auth);
+			    istat.is_authmem -= strlen(sptr->auth) + 1;
 			    istat.is_auth -= 1;
 			    MyFree(sptr->auth);
 			    sptr->auth = sptr->username;
@@ -488,15 +492,14 @@ char	*comment;	/* Reason for the exit */
 				     && asptr->bcptr != sptr))
 					continue;
 				/*
-			        ** This version doesn't need QUITs to be
+				** This version doesn't need QUITs to be
 				** propagaged unless the remote server is
 				** hidden (by a hostmask)
 				*/
+				flags = FLAGS_SPLIT;
 				if (mark_blind_servers(NULL,
 						       asptr->bcptr->name))
-					flags |= FLAGS_SPLIT | FLAGS_HIDDEN;
-				else
-					flags |= FLAGS_SPLIT;
+					flags |= FLAGS_HIDDEN;
 				while (GotDependantClient(asptr->bcptr))
 				    {
 					acptr = asptr->bcptr->prev;
@@ -529,10 +532,9 @@ char	*comment;	/* Reason for the exit */
 		** generate QUITs locally when receiving a SQUIT
 		** check for hostmasking.
  		*/
+ 		flags = FLAGS_SPLIT;
  		if (mark_blind_servers(cptr, sptr->name))
- 			flags = FLAGS_SPLIT | FLAGS_HIDDEN;
- 		else
- 			flags = FLAGS_SPLIT;
+ 			flags |= FLAGS_HIDDEN;
 
 		if (IsServer(from))
 			/* this is a guess */
