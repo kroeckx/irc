@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.12 2001/02/28 21:04:02 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.13 2001/05/14 04:53:22 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -139,7 +139,7 @@ aClient *cptr;
 		m += 96;
 	}
 
-	j = m & 0x1F;	/* mumber not mutliple of 32 bits */
+	j = m & 0x1F;	/* number not mutliple of 32 bits */
 	m >>= 5;	/* number of 32 bits */
 
 	if (m && memcmp((void *)(addr.s6_addr), 
