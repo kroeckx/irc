@@ -371,7 +371,6 @@ int must_be_opered()
         tks_log("%s not found.", TKSERV_ACCESSFILE);
     }
 
-    free(access_uh);
     return(1);
 }
 
