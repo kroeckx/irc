@@ -187,6 +187,9 @@
 /* Define if you have the bzero function.  */
 #undef HAVE_BZERO
 
+/* Define if you have the getipnodebyname function.  */
+#undef HAVE_GETIPNODEBYNAME
+
 /* Define if you have the getrusage function.  */
 #undef HAVE_GETRUSAGE
 

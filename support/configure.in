@@ -811,6 +811,9 @@ dnl end of AC_CACHE_VAL
 		;;
 	esac
 
+  dnl RFC 2553 check
+  AC_CHECK_FUNCS(getipnodebyname)
+
   dnl /etc/resolv.conf check
   AC_MSG_CHECKING(for IPv6 name server addresses in resolv.conf ($irc_cv_path_resconf))
   if grep nameserver $irc_cv_path_resconf | grep ':' >/dev/null 2>&1; then
@@ -1451,7 +1454,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.2.2 1999/10/04 19:28:47 q Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.3 1999/11/03 21:51:54 kalt Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
