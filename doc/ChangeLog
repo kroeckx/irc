@@ -2,8 +2,11 @@
 
 	* mod_socks.c/socks_write(): don't bother checking socks4 on ipv6
 	  addresses, socks4 doesn't support it anyway.
+	* mod_socks.c/socks_write(): if v4only option is set, don't switch
+	  to socks5 check for ipv6
 	* s_serv.c/m_trace(): don't send info about unknown connections to
 	  clients who are not +w
+	* support.c/inetntop(): check for :FFFF: as well
 
 2001-05-14  Piotr Kucharski
 
