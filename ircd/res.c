@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.5 2000/05/29 19:34:14 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.6 2000/10/22 10:46:20 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -427,7 +427,9 @@ Reg	ResRQ	*rptr;
 	    }
 	Debug((DEBUG_DNS,"do_query_name(): %s ", hname));
 #ifdef INET6
-	return (query_name(hname, C_IN, T_AAAA, rptr));
+	query_name(hname, C_IN, T_AAAA, rptr);
+	query_name(hname, C_IN, T_A, rptr);
+	return 0;
 #else
 	return (query_name(hname, C_IN, T_A, rptr));
 #endif
@@ -964,8 +966,10 @@ getres_err:
 				rptr->retries = ircd_res.retry;
 				rptr->sends = 0;
 				rptr->resend = 1;
-#ifdef INET6
+#if 0
+/* #ifdef INET6 */
 /* Comment out this ifdef to get names like ::ffff:a.b.c.d */
+/* We always want to query for both IN A and IN AAAA */
 				if(rptr->type == T_AAAA)
 					query_name(rptr->name, C_IN, T_A, rptr);
 					Debug((DEBUG_DNS,"getres_err: didn't work with T_AAAA, now also trying with T_A for %s",rptr->name));
@@ -974,7 +978,8 @@ getres_err:
 			    }
 			else
 			    {
-#ifdef INET6
+#if 0
+/* #ifdef INET6 */
 /* Comment out this ifdef to get names like ::ffff:a.b.c.d */
 				if(rptr->type == T_AAAA)
 					query_name(rptr->name, C_IN, T_A, rptr);
