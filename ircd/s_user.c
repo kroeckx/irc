@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.10 2001/02/07 21:53:09 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.11 2001/02/08 15:31:31 q Exp $";
 #endif
 
 #include "os.h"
@@ -731,7 +731,7 @@ char	*parv[];
 	    {
 		if (sptr->user)
 		    {
-			user = sptr->username;
+			user = sptr->user->username;
 			host = sptr->user->host;
 		    }
 		else
@@ -947,14 +947,16 @@ char	*parv[];
 		    get_client_name(cptr, FALSE));
 	ircstp->is_kill++;
 	sendto_serv_butone(NULL, /* KILL old from outgoing servers */
-			   ":%s KILL %s :%s (%s(%s) <- %s)",
-			   ME, sptr->name, ME, acptr->from->name,
-			   acptr->name, get_client_name(cptr, FALSE));
+			   ":%s KILL %s :%s (%s@%s[%s](%s) <- %s@%s[%s])",
+			   ME, sptr->name, ME, acptr->user->username, 
+			   acptr->user->host, acptr->from->name, acptr->name,
+			   user, host, cptr->name);
 	ircstp->is_kill++;
 	sendto_serv_butone(NULL, /* Kill new from incoming link */
-		   ":%s KILL %s :%s (%s <- %s(%s))",
-		   ME, acptr->name, ME, acptr->from->name,
-		   get_client_name(cptr, FALSE), sptr->name);
+		   ":%s KILL %s :%s (%s@%s[%s] <- %s@%s[%s](%s))",
+		   ME, acptr->name, ME, acptr->user->username,
+		   acptr->user->host, acptr->from->name,
+		   user, host, cptr->name, sptr->name);
 	acptr->flags |= FLAGS_KILLED;
 	(void)exit_client(NULL, acptr, &me, "Nick collision(new)");
 	sptr->flags |= FLAGS_KILLED;
