@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.2 2001/05/01 16:10:48 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.3 2001/05/06 21:36:55 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -140,7 +140,7 @@ aClient	*cptr;
 {
 	if (cptr->info != DefInfo)
 		MyFree(cptr->info);
-	if (cptr->auth && *cptr->auth && cptr->auth != cptr->username)
+	if (MyConnect(cptr) && cptr->auth != cptr->username)
 	{
 	    sendto_flag(SCH_ERROR, "Please report to ircd-bug@irc.org about cptr->auth allocated but not free()d!");
 		istat.is_authmem -= strlen(cptr->auth) + 1;
