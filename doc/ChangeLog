@@ -1,3 +1,14 @@
+2000-05-16  Piotr Kucharski
+
+	* s_bsd.c/start_iauth(), config.h.dist: increase socket buffers
+      for ircd-iauth communication
+	* channel.c/send_user_joins(): use rindex to check for ':' in
+ 	  channel names
+	* hash.c/bigger_hash_table(): removed some unnecessary code
+	* hash.c/hash_find_*(): removed so called "performance optimization",
+	  which only seemed to eat cpu
+	* parse.c: require registration for using NJOIN
+
 2000-05-05  Kurt Roeckx
 
 	* a_conf.c/conf_read(): Check cfh properly
