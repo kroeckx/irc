@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.13 2001/05/14 04:53:22 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.14 2001/06/29 18:57:41 q Exp $";
 #endif
 
 #include "os.h"
@@ -97,7 +97,7 @@ aClient *cptr;
 	u_long	lmask;
 #ifdef	INET6
 	int	j;
-#endif;
+#endif
  
 	strncpyzt(dummy, mask, sizeof(dummy));
 	mask = dummy;
