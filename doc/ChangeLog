@@ -1,3 +1,9 @@
+2001-02-28	Piotr Kucharski
+
+	* send.c/sendto_flog(),logfiles_open(),logfiles_close(),
+	  s_conf.c/rehash(), ircd.c: Stop open-close logfiles ping-pong,
+	  reopen only on HUP signal.
+
 2001-02-27  Kurt Roeckx
 
 	* c_msg.c/m_join(): Copy the name of the channel just joined.
