@@ -1,3 +1,8 @@
+2001-05-13  Piotr Kucharski
+
+	* s_id.c/cache_chid(): an unfortunate typo making negative Cache
+	  size in stats
+
 2001-05-06  Piotr Kucharski
 
 	* list.c/free_client(): we check for local client, since ->auth
