@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.1 2000/01/01 19:09:40 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.2 2000/01/01 19:20:25 q Exp $";
 #endif
 
 #include "os.h"
@@ -1244,7 +1244,11 @@ Reg	aConfItem	*aconf;
 	** Do name lookup now on hostnames given and store the
 	** ip numbers in conf structure.
 	*/
+#ifndef	INET6
 	if (!isalpha(*s) && !isdigit(*s))
+#else
+	if (!isalpha(*s) && !isdigit(*s) && (*s != ':'))
+#endif
 		goto badlookup;
 
 	/*
@@ -1254,24 +1258,30 @@ Reg	aConfItem	*aconf;
 	ln.value.aconf = aconf;
 	ln.flags = ASYNC_CONF;
 
-	if (isdigit(*s))
 #ifdef INET6
-		if(!inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
-			bcopy(minus_one, aconf->ipnum.s6_addr, IN6ADDRSZ);
+	if(inet_pton(AF_INET6, s, aconf->ipnum.s6_addr))
+		;
 #else
+	if (isdigit(*s))
 		aconf->ipnum.s_addr = inetaddr(s);
 #endif
 	else if ((hp = gethost_byname(s, &ln)))
 		bcopy(hp->h_addr, (char *)&(aconf->ipnum),
 			sizeof(struct IN_ADDR));
+#ifdef	INET6
+	else
+	{
+		bcopy(minus_one, aconf->ipnum.s6_addr, IN6ADDRSZ);
+		goto badlookup;
+	}
 
-#ifdef INET6
-	if (AND16(aconf->ipnum.s6_addr) == 255)
 #else
 	if (aconf->ipnum.s_addr == -1)
-#endif
 		goto badlookup;
+#endif
+
 	return 0;
+
 badlookup:
 #ifdef INET6
 	if (AND16(aconf->ipnum.s6_addr) == 255)
