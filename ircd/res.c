@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.6 2000/10/22 10:46:20 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.7 2000/10/22 10:52:49 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -771,6 +771,7 @@ char	*lp;
 #endif
 	int	rc, a, max;
 	SOCK_LEN_TYPE len = sizeof(sin);
+	char	buffer[512];
 
 	(void)alarm((unsigned)4);
 #ifdef INET6
@@ -865,26 +866,19 @@ char	*lp;
 	    }
 	a = proc_answer(rptr, hptr, buf, buf+rc);
 	if (a == -1) {
-		sendto_flag(SCH_ERROR, "Bad hostname returned from %s for %s",
-#ifdef INET6
-			    inetntop(AF_INET, &sin.sin_addr, mydummy2,
-				      MYDUMMY_SIZE),
-			    inetntop(AF_INET6, rptr->he.h_addr.s6_addr,
-				      mydummy, MYDUMMY_SIZE));
+#ifdef	INET6
+		SPRINTF(buffer, "Bad hostname returned from %s for %s",
+			inetntop(AF_INET, &sin.sin_addr, mydummy2, 
+				MYDUMMY_SIZE),
+			inetntop(AF_INET6, rptr->he.h_addr.s6_addr,
+				mydummy, MYDUMMY_SIZE));
 #else
-			    inetntoa((char *)&sin.sin_addr),
-			    inetntoa((char *)&rptr->he.h_addr));
+		SPRINTF(buffer, "Bad hostname returned from %s for ", 
+			inetntoa((char *)&sin.sin_addr));
+		strcat(buffer, inetntoa((char *)&rptr->he.h_addr));
 #endif
-#ifdef INET6
-		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
-		       inet_ntop(AF_INET, &sin.sin_addr,mydummy2,MYDUMMY_SIZE),
-		       inet_ntop(AF_INET6, rptr->he.h_addr.s6_addr, mydummy,
-				 MYDUMMY_SIZE)));
-#else
-		Debug((DEBUG_DNS, "Bad hostname returned from %s for %s",
-		       inetntoa((char *)&sin.sin_addr),
-		       inetntoa((char *)&rptr->he.h_addr)));
-#endif
+		sendto_flag(SCH_ERROR, "%s", buffer);
+		Debug((DEBUG_DNS, "%s", buffer));
 	}
 #ifdef DEBUG
 	Debug((DEBUG_INFO,"get_res:Proc answer = %d",a));
