@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.24 2003/10/11 11:03:23 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.25 2004/02/25 15:14:25 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2539,6 +2539,7 @@ char	*parv[];
     {
 	Reg	aChannel *chptr;
 	char	*p = NULL, *name, *comment = "";
+	int	size;
 
 	if (parc < 2 || parv[1][0] == '\0')
 	    {
@@ -2547,6 +2548,20 @@ char	*parv[];
 	    }
 
 	*buf = '\0';
+
+	parv[1] = canonize(parv[1]);
+	comment = (BadPtr(parv[2])) ? "" : parv[2];
+	if (strlen(comment) > TOPICLEN)
+		comment[TOPICLEN] = '\0';
+
+	/*
+	** Broadcasted to other servers is ":nick PART #chan,#chans :comment",
+	** so we must make sure buf does not contain too many channels or later
+	** they get truncated! "10" comes from all fixed chars: ":", " PART "
+	** and ending "\r\n\0". We could subtract strlen(comment)+2 here too,
+	** but it's not something we care, is it? :->
+	*/
+	size = BUFSIZE - strlen(parv[0]) - 10;
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
@@ -2567,11 +2582,6 @@ char	*parv[];
 				   name);
 			continue;
 		    }
-		comment = (BadPtr(parv[2])) ? parv[0] : parv[2];
-		if (IsAnonymous(chptr) && (comment == parv[0]))
-			comment = "None";
-		if (strlen(comment) > (size_t) TOPICLEN)
-			comment[TOPICLEN] = '\0';
 
 		/*
 		**  Remove user from the old channel (if any)
@@ -2580,6 +2590,18 @@ char	*parv[];
 		    {	/* channel:*.mask */
 			if (*name != '&')
 			    {
+				/* We could've decreased size by 1 when
+				** calculating it, but I left it like that
+				** for the sake of clarity. --B. */
+				if (strlen(buf) + strlen(name) + 1
+					> size)
+				{
+					/* Anyway, if it would not fit in the
+					** buffer, send it right away. --B */
+					sendto_serv_butone(cptr, PartFmt,
+						parv[0], buf, comment);
+					*buf = '\0';
+				}
 				if (*buf)
 					(void)strcat(buf, ",");
 				(void)strcat(buf, name);
