@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6 1999/06/27 19:08:46 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.1 1999/09/05 18:27:42 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -400,11 +400,13 @@ char	*parv[];
 
 		if (up == NULL)
 		    {
-			if (strlen(parv[1]) > (size_t) NICKLEN)
-				parv[1][NICKLEN] = '\0';
+			if (strlen(nick) > (size_t) NICKLEN)
+				nick[NICKLEN] = '\0';
 			sendto_one(sptr, err_str(ERR_WASNOSUCHNICK, parv[0]),
-				   parv[1]);
+				   nick);
 		    }
+		else
+			up = NULL;
 
 		if (p)
 			p[-1] = ',';
