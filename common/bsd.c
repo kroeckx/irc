@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: bsd.c,v 1.3 1998/12/13 00:02:33 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: bsd.c,v 1.3.4.1 2001/02/07 11:50:27 q Exp $";
 #endif
 
 #include "os.h"
@@ -137,7 +137,7 @@ char	*str;
 	if (retval < 0) {
 		writeb[0]++;
 		Debug((DEBUG_ERROR,"write error (%s) to %s",
-			sys_errlist[errno], cptr->name));
+			strerror(errno), cptr->name));
 #ifndef	CLIENT_COMPILE
 		hold_server(cptr);
 #endif

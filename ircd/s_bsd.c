@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.10 2000/12/08 22:15:22 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.11 2001/02/07 11:50:27 q Exp $";
 #endif
 
 #include "os.h"
@@ -132,7 +132,7 @@ int	size;
 **	text	is a *format* string for outputting error. It must
 **		contain only two '%s', the first will be replaced
 **		by the sockhost from the cptr, and the latter will
-**		be taken from sys_errlist[errno].
+**		by strerror(errno).
 **
 **	cptr	if not NULL, is the *LOCAL* client associated with
 **		the error.

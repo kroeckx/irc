@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_debug.c,v 1.28.2.1 2000/09/28 18:37:54 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_debug.c,v 1.28.2.2 2001/02/07 11:50:28 q Exp $";
 #endif
 
 #include "os.h"
@@ -236,7 +236,7 @@ char	*nick;
 	if (getrusage(RUSAGE_SELF, &rus) == -1)
 	    {
 		sendto_one(cptr,":%s NOTICE %s :Getruseage error: %s.",
-			   me.name, nick, sys_errlist[errno]);
+			   me.name, nick, strerror(errno));
 		return;
 	    }
 	secs = rus.ru_utime.tv_sec + rus.ru_stime.tv_sec;
