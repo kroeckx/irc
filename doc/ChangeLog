@@ -1,3 +1,15 @@
+2000-09-28  Kurt Roeckx
+
+	* s_debug.c/debug(): Format string fixes.
+	* a_log.c/sendto_log(): Format string fixes.
+	* a_defines.h: Change #if INET6 to #ifdef INET6, like it should.
+	* mod_socks.c: Added support for socks check using ipv6.
+	* support.c/MyMalloc(): MyMalloc() was using a wrong ofset.
+	* send.c/sendto_flog(): Prevent a core if time was set back.
+	  Check msg, instead of duration.
+	* s_bsd.c/summon(): Made buffer bigger, could be overflowed.
+	* s_conf.c/match_ipmask(): Make a mask of /0 work using ipv4.
+
 2000-08-15  Piotr Kucharski
 
 	* s_user.c/m_oper(), s_serv.c/m_server_estab(), mkpasswd.c:
