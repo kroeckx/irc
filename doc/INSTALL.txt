@@ -1,6 +1,6 @@
   Installing IRC - The Internet Relay Chat Program
   SGML version by Christophe Kalt
-  $Id: INSTALL.txt,v 1.24 1998/04/05 00:15:56 kalt Exp $
+  $Id: INSTALL.txt,v 1.23.2.1 1998/06/12 23:53:56 kalt Exp $
 
   This document describes how to install, and configure IRC 2.9.5.
 
@@ -51,6 +51,9 @@
         tells ``configure'' not to look for the zlib.  Defining this
         will keep you from using server link compression.
 
+     ----eennaabbllee--iipp66
+        Enable IPv6 support (See notes below)
+
 
   11..22..  NNootteess ffoorr CCyyggwwiinn3322 uusseerrss
 
@@ -60,13 +63,33 @@
   the Cygwin32 library with the ``coolview'' patch from Sergey Okhapkin.
   (This patch should be rolled in the next beta)
 
+
   When compiling on such system, you want to make sure that you have
   carefully followed the Cygwin32 installation notes.  In particular,
   you will need to make sure that the following files exist:
   //bbiinn//ccpp..eexxee, //bbiinn//mmvv..eexxee, //bbiinn//rrmm..eexxee and //bbiinn//sshh..eexxee.
+
   Also, the IRC server needs a rreessoollvv..ccoonnff file in order to initialize
   the resolver.  This file can be anywhere (see configure options), and
   is typically in //eettcc on UNIX systems.
+
+
+  11..33..  NNootteess ccoonncceerrnniinngg IIPPvv66 ssuuppppoorrtt
+
+  This version of the IRC software has support for IPv6 systems.
+  However this is considered to be beta quality.  For this reason, it is
+  recommended that if you wish to run the server on an IPv6 system, you
+  have prior experience with this software.
+
+  The only part of the software that doesn't use IPv6 is the server
+  internal resolver.  It relies on the name servers defined in
+  ``/etc/resolv.conf'' to be IPv4 addresses.
+
+  This version was tested on the following IPv6 systems: Digital Unix,
+  Linux, NetBSD+INRIA.
+
+  Because IPv6 numeric addresses contains ``:'' characters, tthhee
+  sseeppaarraattoorr ffoorr tthhee sseerrvveerr ccoonnffiigguurraattiioonn ffiillee wwaass cchhaannggeedd ttoo ````%%''''.
 
 
   22..  TThhee ccoonnffiigg..hh ffiillee
@@ -106,6 +129,7 @@
   path is usually /usr/local/lib/ircd/ircd.conf. The format of this file
   will be discussed later.
 
+
   The LPATH #define should be set to ``/dev/null'' unless you plan to
   debug the program.  Note that the logfile grows very quickly.
 
@@ -128,7 +152,6 @@
   The server sends the ``motd'' to every client connecting.  Every time,
   it reads it from the disk.  This is quite intensive and can be
   undesirable for busy servers.
-
 
   Defining CACHED_MOTD will make the server store the ``motd'' in
   memory, and only read it again from the disk when rehashing if the
@@ -168,6 +191,9 @@
   privilidges does not have the power to cause untoward things to occur.
   To further curb the actions of guest operators, LOCAL_KILL_ONLY can be
   defined to only allow locally connected clients to be KILLed.
+
+
+
 
 
   22..99..  ZZIIPP__LLIINNKKSS,, ZZIIPP__LLEEVVEELL
@@ -236,7 +262,6 @@
   per the instructions in this section and install it in the location
   you specified in the config.h file.  There is a sample conf file
   called example.conf in the doc/ directory.
-
   Appendix A (See INSTALL.appendix) describes the differences between IP
   addresses and host names.  If you are unfamiliar with this, you should
   probably scan through it before proceeding.
@@ -368,6 +393,7 @@
 
      AA  This specifies an Admin record.
 
+
      YYoouurr NNaammee && LLooccaattiioonn
         Use this field to say tell your FULL NAME and where in the world
         your machine is.  Be sure to add your City, State/Province and
@@ -394,6 +420,7 @@
         A:Jeff Trim -  Denver Colorado, USA:INET jtrim@orion.cair.du.edu
         UUCP {hao,isis}!udenva!jtrim:Terve! Heippa!  Have you said hello
         in Finnish today?;)::
+
         Would look like this when printed out with the /admin command:
 
         Jeff Trim -  Denver Colorado, USA INET jtrim@orion.cair.du.edu
@@ -433,7 +460,6 @@
         to properly configure outgoing connections.
 
         P:192.168.1.194:::6664:
-
      IInntteerrnneett IIPP## MMaasskk
         This defines where connections may come from and be accepted.
         The IP mask uses either *'s or 0's as wildcards. The following
@@ -592,6 +618,7 @@
         the servers that is ``behind'' it, the server will disconnect
         the lower class one and schedule a ``new'' connection for the
         higher class server.
+
         Y:1:60:0:50:20000:2:5: (client class)
 
         In case of a client class, the fields are interpreted a bit
@@ -658,6 +685,7 @@
         server will require that the remote username returned by the
         ident server be the same as the one given before the ``@''.
         Wildcards are permitted.
+
         This field can be empty, it then has a special meaning.  See
         Below.
 
@@ -696,7 +724,6 @@
 
         Allow any clients from machines whose names end in ``.du.edu''
         to connect with no password.
-
         I:128.214.6.100::nic.funet.fi::1
 
         Allow clients from a machine with that IP number to connect.
@@ -724,6 +751,7 @@
         port 6667.
 
         I:135.11.35.*::*.net::1
+
         Allows clients from machines which host name matches ``*.net''
         or which IP address matches ``135.11.35.*'' to connect to the
         server.  If the host name does not match ``*.net'' then the IP
@@ -828,7 +856,6 @@
         either ``Y'' or ``N'' meaning `Yes Let them in'' or ``No don't
         let them in''.  If the first word begins with neither ``Y'' or
         ``N'' the default is to let the person on.
-
      FFoorrmmaatt
 
         R:<Target Host Name>:<Program>:<User>:::
@@ -895,7 +922,6 @@
         If you specify an IP address, IP mask, or an IP bitmask, it will
         match clients connecting from the matching addresses, no matter
         if they resolve or not.
-
         You can prefix an IP address, an IP mask, or IP bitmask by ``=''
         in which case only non resolving matching hosts will be banned.
 
@@ -922,6 +948,7 @@
      PPoorrtt
         The port on which the Kill line will be effective. 0 means all
         ports.
+
      EExxaammpplleess
         K:orion.cair.du.edu::jtrim:0:
 
@@ -951,7 +978,7 @@
         This disallows all users from hosts with enddomain ``oulu.fi''
         access to your server between 8 and 12am, 2 and 7pm. Users get
         kicked off if they're already signed on when the line becomes
-        active (they'll get a warning 5 minutes before).
+        active (they'll get a warning 5 minutes ago).
 
         K:192.11.35.*::*:0:
 
@@ -1120,6 +1147,7 @@
      This line says: expect a connection from host ``garfield.mit.edu'',
      and expect a login password of ``golden'', and expect the host to
      identify itself as ``garfield.mit.edu''.
+
      N:18.72.0.252::garfield.mit.edu::
 
      This line says: expect a Connection from host ``18.72.0.252'', and
@@ -1158,7 +1186,6 @@
         we take an example of such:
 
         *.de  - a domain name matching all machines in Germany.
-
         Wildcard domains are useful in that ALL SERVERS in Germany (or
         any other domain area) can be shown as one to the rest of the
         world. Imagine 100 servers in Germany, it would be incredible
@@ -1186,6 +1213,9 @@
         I advice you to not to use wildcard servers before you know for
         sure how they are used, they are mostly beneficial for backbones
         of countries and other large areas with common domain.
+
+
+
   44..1100..  DDeennyy aauuttoo--ccoonnnneeccttiioonnss
 
 
@@ -1286,6 +1316,8 @@
 
 
 
+
+
   44..1122..  LLeeaaff ccoonnnneeccttiioonnss
 
 
@@ -1316,7 +1348,6 @@
         be used within this field for matching purposes.  If this field
         is empty, it acts the same as if it were a single * (ie matches
         everything).
-
 
      SSeerrvveerr NNaammee
         The name of the server connected to you that for which you want
@@ -1449,7 +1480,6 @@
      CCllaassss
         The class field should refer to an existing class.
 
-
      NNootteess
         A service is not a very useful sort of client, it cannot join
         channels or issue certain commands although most are available
@@ -1514,8 +1544,6 @@
         secondary server.
 
 
-
-
   44..1177..  DDeeffaauulltt llooccaall sseerrvveerr ((ffoorr llooccaall cclliieennttss)) **OOBBSSOOLLEETTEEDD**
 
 
@@ -1552,7 +1580,14 @@
         ``ssuubbssccrriibbee iirrccdd--uusseerrss'' in the body.
 
         If you just have a question and don't want to subscribe to the
-        list, mail to ircd-users@stealth.net
+        list, mail to ircd-users@stealth.net.  Be sure to indicate which
+        version you are using.
+     DDeevveellooppmmeenntt
+        Technical discussions and development are carried on ircd-
+        dev@stealth.net.  People interested in very early testing,
+        and/or working on the source code are welcome.  This is done by
+        sending an email to majordomo@stealth.net, with ``ssuubbssccrriibbee
+        iirrccdd--ddeevv'' in the body.
 
      FFAAQQ
         It can be found on the WWW, at
@@ -1563,13 +1598,44 @@
         servers on the WWW:  <http://www.irc.org/~irc/server/>.
 
 
+  66..  RReeppoorrttiinngg aa bbuugg
+
+  If you encounter a bug in the software, here is how and where to
+  report it.
 
 
+  66..11..  HHooww ttoo rreeppoorrtt aa bbuugg
+
+  To save everyone time, make sure that your e-mail contains all the
+  information related to your problem.  In particular, we need to know:
+
+     PPaacckkaaggee vveerrssiioonn
+        The IRC software version you are using: please include the
+        output obtained by running ``irc -v'' for the client, and/or
+        ``ircd -v'' for the server.
+
+        Also, let us know if you have applied any patch to the package
+        or if it is the vanilla version.
+
+     OOSS Please, indicate which OS version you are running.
+
+     CCoonnffiigguurraattiioonn
+        If it is related to a configuration problem with the server,
+        include the relevant parts of the configuration file.
+
+     BBaacckkttrraaccee
+        If the bug results in a crash, please include the backtrace.
+        (This can be done, for example, by running ``gdb'' on the core
+        file, and typing ``where'').
+
+     FFiixx
+        If you have a fix, don't forget to include it.
 
 
+  66..22..  WWhheerree ttoo sseenndd aa bbuugg rreeppoorrtt
 
-
-
+  Reports should be sent to ircd-bugs@stealth.net.  Your report will be
+  reviewed and forwarded to the appropriate mailing list.
 
 
 
