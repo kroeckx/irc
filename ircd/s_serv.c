@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.8 2003/10/10 22:52:28 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.9 2004/02/25 15:32:54 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -209,6 +209,15 @@ char	*parv[];
 		sendto_one(sptr, err_str(ERR_NOPRIVILEGES, parv[0]));
 		return 1;
 	    }
+	if (MyPerson(sptr))
+	{
+		char bufn[HOSTLEN+7];
+
+		sprintf(bufn, " (by %s)", sptr->name);
+		if (strlen(comment) > TOPICLEN)
+			comment[TOPICLEN] = '\0';
+		strcat(comment, bufn);
+	}
 	if (!MyConnect(acptr) && (cptr != acptr->from))
 	    {
 		/*
