@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.1 2000/02/04 05:48:31 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.2 2000/09/28 18:47:52 q Exp $";
 #endif
 
 #include "os.h"
@@ -201,15 +201,26 @@ socks_write(cl, strver)
 u_int cl;
 char *strver;
 {
-    u_char query[13];    /* big enough to hold all queries */
+    u_char query[22];    /* big enough to hold all queries */
     int query_len = 13;  /* lenght of socks4 query */
+#ifndef	INET6
     u_int a, b, c, d;
+#else
+	struct in6_addr	addr;
+#endif
     
+#ifndef	INET6
     if (sscanf(cldata[cl].ourip, "%u.%u.%u.%u", &a,&b,&c,&d) != 4)
 	{
 	    sendto_log(ALOG_DSOCKS|ALOG_IRCD, LOG_ERR,
 		       "socks_write%s(%d): sscanf(\"%s\") failed", 
-		       strver, cl, cldata[cl].ourip);
+#else
+    if (inet_pton(AF_INET6, cldata[cl].ourip, (void *) addr.s6_addr) != 1)
+	{
+			sendto_log(ALOG_DSOCKS|ALOG_IRCD, LOG_ERR,
+			"socks_write%s(%d): inet_pton(\"%s\") failed",
+#endif
+			strver, cl, cldata[cl].ourip);
 	    close(cldata[cl].wfd);
 	    cldata[cl].wfd = 0;
 	    return -1;
@@ -219,7 +230,15 @@ char *strver;
 	    query[0] = 4; query[1] = 1;
 	    query[2] = ((cldata[cl].ourport & 0xff00) >> 8);
 	    query[3] = (cldata[cl].ourport & 0x00ff);
+#ifndef	INET6
 	    query[4] = a; query[5] = b; query[6] = c; query[7] = d;
+#else	
+	    /* socks v4 only supports IPv4, so it should be a ipv4 mapped
+	     * ipv6.
+	     * Just copy the ipv4 portion.
+	     */
+	    memcpy(query + 4, ((char *)addr.s6_addr) + 12, 4);
+#endif
 	    query[8] = 'u'; query[9] = 's'; query[10] = 'e'; query[11] = 'r';
 	    query[12] = 0;
 	}
@@ -229,11 +248,31 @@ char *strver;
 	    query_len = 3;
 	    if (cldata[cl].mod_status == ST_V5b)
 		{
+#ifndef	INET6
 		    query_len = 10;
 		    query[3] = 1;
 		    query[4] = a; query[5] = b; query[6] = c; query[7] = d;
 		    query[8] = ((cldata[cl].ourport & 0xff00) >>8);
 		    query[9] = (cldata[cl].ourport & 0x00ff);
+#else
+		    if (IN6_IS_ADDR_V4MAPPED(&addr))
+			{
+			    query_len = 10;
+			    query[3] = 1;	/* ipv4 address */
+			    memcpy(query + 4, ((char *)addr.s6_addr) +
+				12, 4);
+			    query[8] = ((cldata[cl].ourport & 0xff00) >>8);
+			    query[9] = (cldata[cl].ourport & 0x00ff);
+			}
+		    else
+			{
+			    query_len = 22;
+			    query[3] = 4;
+			    memcpy(query + 4, addr.s6_addr, 16);
+			    query[20] = ((cldata[cl].ourport & 0xff00) >>8);
+			    query[21] = (cldata[cl].ourport & 0x00ff);
+			}
+#endif
 		}
 	}
     
@@ -396,9 +435,6 @@ AnInstance *self;
     char tmpbuf[80], cbuf[32];
     static char txtbuf[80];
     
-#if defined(INET6)
-    return "IPv6 unsupported.";
-#endif
     if (self->opt == NULL)
 	    return "Aie! no option(s): nothing to be done!";
     

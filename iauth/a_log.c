@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_log.c,v 1.6 1999/02/21 00:33:45 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: a_log.c,v 1.6.2.1 2000/09/28 18:47:52 q Exp $";
 #endif
 
 #include "os.h"
@@ -81,7 +81,7 @@ vsendto_log(int flags, int slflag, char *pattern, va_list va)
 
 #if defined(USE_SYSLOG)
 	if (slflag)
-		syslog(slflag, logbuf+1);
+		syslog(slflag, "%s", logbuf+1);
 #endif
 
 	strcat(logbuf, "\n");
@@ -89,7 +89,7 @@ vsendto_log(int flags, int slflag, char *pattern, va_list va)
 #if defined(IAUTH_DEBUG)
 	if ((flags & ALOG_DALL) && (flags & debuglevel) && debug)
 	    {
-		fprintf(debug, logbuf+1);
+		fprintf(debug, "%s", logbuf+1);
 		fflush(debug);
 	    }
 #endif
