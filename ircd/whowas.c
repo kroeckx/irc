@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.2 2000/01/01 18:00:00 q Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.3 2000/12/01 21:20:00 q Exp $";
 #endif
 
 #include "os.h"
@@ -211,26 +211,37 @@ time_t	timelimit;
 	wp = wp2 = &was[ww_index];
 	timelimit = timeofday - timelimit;
 
-	do {
-		if (!mycmp(nick, wp->ww_nick) && wp->ww_logout >= timelimit)
-			break;
-		wp++;
-		if (wp == &was[ww_size])
-			i = 1, wp = was;
+	do
+	{
+		if (wp == was)
+		{
+			wp = was + ww_size;
+		}
+		wp--;
+		if (wp->ww_logout < timelimit)
+		{
+			/* no point in checking more, only old or unused 
+			 * entry's left. */
+			return NULL;
+		}
+		if (wp->ww_online == &me)
+		{
+			/* This one is offline */
+			continue;
+		}
+		if (wp->ww_online && !mycmp(nick, wp->ww_nick))
+		{
+			return wp->ww_online;
+		}
 	} while (wp != wp2);
 
-	if (wp != wp2 || !i)
-		if (wp->ww_online == &me)
-			return (NULL);
-		else
-			return (wp->ww_online);
 	return (NULL);
 }
 
 /*
 ** find_history
 **      Returns 1 if a user was using the given nickname within
-**   the timelimit. Returns 0, if none found...
+**   the timelimit and it's locked. Returns 0, if none found...
 */
 int	find_history(nick, timelimit)
 char  *nick;
@@ -247,29 +258,42 @@ time_t        timelimit;
 	timelimit = timeofday - timelimit;
 #endif
 	
-	do {
-		if (!mycmp(nick, wp->ww_nick) &&
-		    (wp->ww_logout >= timelimit) && (wp->ww_online == NULL))
-			break;
-		wp++;
-		if (wp == &was[ww_size])
-			i = 1, wp = was;
+	do
+	{
+		if (wp == was)
+		{
+			wp = was + ww_size;
+		}
+		wp--;
+		if (wp->ww_logout < timelimit)
+		{
+			return 0;
+		}
+		/* wp->ww_online == NULL means it's locked */
+		if ((!wp->ww_online) && (!mycmp(nick, wp->ww_nick)))
+		{
+			return 1;
+		}
 	} while (wp != wp2);
-	if ((wp != wp2 || !i) && (wp->ww_online == NULL))
-		return (1);
 
 	lp = lp2 = &locked[lk_index];
 	i = 0;
-	do {
-		if (!myncmp(nick, lp->nick, NICKLEN) &&
-		    (lp->logout >= timelimit))
-			break;
-		lp++;
-		if (lp == &locked[lk_size])
-			i = 1, lp = locked;
+	do
+	{
+		if (lp == locked)
+		{
+			lp = locked + lk_size;
+		}
+		lp--;
+		if (lp->logout < timelimit)
+		{
+			return 0;
+		}
+		if (!myncmp(nick, lp->nick, NICKLEN))
+		{
+			return 1;
+		}
 	} while (lp != lp2);
-	if (lp != lp2 || !i)
-		return (1);
 
 	return (0);
 }
