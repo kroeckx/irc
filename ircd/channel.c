@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.8 2000/10/22 10:36:07 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.9 2000/10/22 11:22:31 q Exp $";
 #endif
 
 #include "os.h"
@@ -1189,8 +1189,7 @@ char	*parv[], *mbuf, *pbuf;
 			    }
 			else if (whatt == MODE_DEL)
 			    {
-				if (ischop && (mycmp(mode->key, *parv) == 0 ||
-				     IsServer(cptr)))
+				if (ischop)
 				    {
 					lp = &chops[opcnt++];
 					lp->value.cp = mode->key;
