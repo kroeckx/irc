@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.28 2003/12/09 23:08:26 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.29 2004/02/25 16:33:21 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -100,6 +100,12 @@ char	*hname;
 int	size;
 {
 #ifdef RES_INIT
+	/* some return plain hostname with ending dot, whoops. */
+	if (hname[strlen(hname)-1] == '.')
+	{
+		hname[strlen(hname)-1] = '\0';
+		size++;
+	}
 	/* try to fix up unqualified names */
 	if (!index(hname, '.'))
 	    {
@@ -108,12 +114,12 @@ int	size;
 			Debug((DEBUG_DNS,"ircd_res_init()"));
 			ircd_res_init();
 		    }
+		/* "2" is dot and ending \0 */
 		if (ircd_res.defdname[0] &&
-			sizeof(hname) - 2 /* dot and ending \0 */ >= 
-			strlen(ircd_res.defdname) + strlen(hname))
+			strlen(ircd_res.defdname) + 2 <= size)
 		    {
-			(void)strncat(hname, ".", size-1);
-			(void)strncat(hname, ircd_res.defdname, size-2);
+			(void)strcat(hname, ".");
+			(void)strcat(hname, ircd_res.defdname);
 		    }
 	    }
 #endif
@@ -2849,9 +2855,7 @@ int	len;
 		return;
 	name[len] = '\0';
 
-	/* assume that a name containing '.' is a FQDN */
-	if (!index(name,'.'))
-		add_local_domain(name, len - strlen(name));
+	add_local_domain(name, len - strlen(name));
 
 	/*
 	** If hostname gives another name than cname, then check if there is
