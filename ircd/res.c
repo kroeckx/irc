@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.13 2003/10/11 13:25:14 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.14 2003/10/12 21:59:34 chopin Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -650,14 +650,22 @@ HEADER	*hptr;
 		len = strlen(hostbuf);
 		/* name server never returns with trailing '.' */
 		if (!index(hostbuf,'.') && (ircd_res.options & RES_DEFNAMES))
-		    {
-			(void)strcat(hostbuf, dot);
-			len++;
-			(void)strncat(hostbuf, ircd_res.defdname,
-				sizeof(hostbuf) - 1 - len);
-			len = MIN(len + strlen(ircd_res.defdname),
-				  sizeof(hostbuf) - 1);
-		    }
+		{
+			int tmplen = strlen(ircd_res.defdname);
+
+			if (len + 1 /* dot */ + tmplen + 1 /* \0 */
+				>= sizeof(hostbuf))
+			{
+				/* some SCH_ERROR perhaps? */
+				return -1;
+			}
+			if (len)
+			{
+				hostbuf[len++] = '.';
+			}
+			strcpy(hostbuf + len, ircd_res.defdname);
+			len += strlen(ircd_res.defdname);
+		}
 
 		/* Check that it's a possible reply to the request we send. */
 		if (rptr->type != type && type != T_CNAME)
