@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.4 2000/05/29 19:38:25 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.5 2000/09/28 21:45:49 q Exp $";
 #endif
 
 #include "os.h"
@@ -116,6 +116,8 @@ aClient *cptr;
 #ifndef	INET6
 	if (m < 0 || m > 32)
 		goto badmask;
+	if (!m)
+		return 0;       /* x.x.x.x/0 always matches */
 	lmask = htonl((u_long)0xffffffffL << (32 - m));
 	addr.s_addr = inetaddr(mask);
 	return ((addr.s_addr ^ cptr->ip.s_addr) & lmask) ? 1 : 0;
