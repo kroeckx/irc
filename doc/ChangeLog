@@ -1,3 +1,11 @@
+2001-05-05  Piotr Kucharski
+
+	* send.c/sendto_flog(): added syslog() support, fixed potential
+	  buffer overflow.
+	* s_user.c/ereject_client(),register_user(), s_bsd.c/add_connection(),
+	  s_misc.c/exit_client(): removed those syslog() calls, which are
+	  now in sendto_flog().
+
 2001-05-04  Piotr Kucharski
 
 	* s_misc.c/exit_client(),mark_blind_servers(): fixed squit routines
@@ -21,7 +29,7 @@
 
 2001-04-11  Piotr Kucharski
 
-	* s_misc.c: change sizeof(dynamic buffer) to strlen().
+	* s_misc.c: change sizeof(pointer) to strlen().
 
 2001-04-06  Piotr Kucharski
 
