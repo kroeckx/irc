@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.19 2001/05/05 23:05:10 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.20 2001/05/30 21:56:38 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1446,68 +1446,120 @@ aClient *cptr, *sptr;
 int	parc;
 char	*parv[];
 {
-	Link	*lp;
-	aChannel *chptr, *mychannel;
-	char	*channame = NULL;
+	aChannel *chptr;
 	int	oper = parc > 2 ? (*parv[2] == 'o' ): 0; /* Show OPERS only */
 	int	penalty = 0;
-	char	*p, *mask;
+	char	*p, *mask, *channame;
 
 	if (parc < 2)
-	    {
+	{
 		who_find(sptr, NULL, oper);
 		sendto_one(sptr, rpl_str(RPL_ENDOFWHO, parv[0]), "*");
-		return 5;
-	    }
+		/* it was very CPU intensive */
+		return MAXPENALTY;
+	}
 
-        for (p = NULL, mask = strtoken(&p, parv[1], ",");
-	     mask && penalty < MAXPENALTY;
-             mask = strtoken(&p, NULL, ","))
-	    { 
+	/* get rid of duplicates */
+	parv[1] = canonize(parv[1]);
+
+	for (p = NULL, mask = strtoken(&p, parv[1], ",");
+	    mask && penalty <= MAXPENALTY;
+		mask = strtoken(&p, NULL, ","))
+	{ 
 		channame = NULL;
-		mychannel = NullChn;
+		penalty += 1;
+
+		/* find channel user last joined, we might need it later */
+		if (sptr->user && sptr->user->channel)
+			channame = sptr->user->channel->value.chptr->chname;
+
+#if 0
+		/* I think it's useless --Beeth */
 		clean_channelname(mask);
-		if (sptr->user && (lp = sptr->user->channel))
-				mychannel = lp->value.chptr;
-		/*
-		**  Following code is some ugly hacking to preserve the
-		**  functions of the old implementation. (Also, people
-		**  will complain when they try to use masks like "12tes*"
-		**  and get people on channel 12 ;) --msa
-		*/
-		if (!mask || *mask == '\0') /* !mask always false? */
-			mask = NULL;
-		else if (mask[1] == '\0' && mask[0] == '*')
-		    {
-			mask = NULL;
-			if (mychannel)
-				channame = mychannel->chname;
-		    }
-		else if (mask[1] == '\0' && mask[0] == '0')
-			/* "WHO 0" for irc.el */
-			mask = NULL;
-		else
-			channame = mask;
+#endif
+
+		/* simplify mask */
 		(void)collapse(mask);
+
+		/*
+		** We can never have here !mask 
+		** or *mask == '\0', since it would be equal
+		** to parc == 1, that is 'WHO' and/or would not
+		** pass through above for loop.
+		*/
+		if (mask[1] == '\0' && mask[0] == '0')
+		{
+			/*
+			** 'WHO 0' - do who_find() later
+			*/
+			mask = NULL;
+			channame = NULL;
+		}
+		else if (mask[1] == '\0' && mask[0] == '*')
+		{
+			/*
+			** 'WHO *'
+			** If user was on any channel, list the one
+			** he joined last.
+			*/
+			mask = NULL;
+		}
+		else
+		{
+			/*
+			** Try if mask was channelname and if yes, do
+			** who_channel, else if mask was nick, do who_one.
+			** Else do horrible who_find()
+			*/
+			channame = mask;
+		}
 		
 		if (IsChannelName(channame))
-		    {
+		{
 			chptr = find_channel(channame, NULL);
 			if (chptr)
+			{
 				who_channel(sptr, chptr, oper);
-			penalty += 1;
-		    }
-		else 
-		    {
-			who_find(sptr, mask, oper);
-			if (mask && (int)strlen(mask) > 4)
-				penalty += 3;
+			}
 			else
-				penalty += 5;
-		    }
+			{
+				/*
+				** 'WHO #nonexistant'.
+				*/
+				penalty += 1;
+			}
+		}
+		else 
+		{
+			aClient	*acptr = NULL;
+
+			if (mask)
+			{
+				/*
+				** Here mask can be NULL. It doesn't matter,
+				** since find_client would return NULL.
+				** Just saving one function call. ;)
+				*/
+				acptr = find_client(mask, NULL);
+			}
+			if (acptr)
+			{
+				/* We found client, so send WHO for it */
+				who_one(sptr, acptr, NULL, NULL);
+			}
+			else
+			{
+				/*
+				** All nice chances lost above. 
+				** We must hog our server with that.
+				*/
+				who_find(sptr, mask, oper);
+				penalty += MAXPENALTY;
+			}
+		}
 		sendto_one(sptr, rpl_str(RPL_ENDOFWHO, parv[0]),
 			   BadPtr(mask) ?  "*" : mask);
-	    }
+	}
 	return penalty;
 }
 

@@ -1,3 +1,13 @@
+2001-05-30  Piotr Kucharski
+
+	* s_serv.c/m_who(): almost complete rewrite to reduce unnecessary
+	  showing all clients, hence to save CPU
+
+2001-05-16  Piotr Kucharski
+
+	* iauth.c/main(): read config before init_filelogs, which depends
+	  for some logs on debuglvl variable (from Q)
+
 2001-05-15  Piotr Kucharski
 
 	* mod_socks.c/socks_write(): don't bother checking socks4 on ipv6
