@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.16 2003/10/20 22:34:02 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.17 2004/05/09 19:59:00 chopin Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -120,6 +120,21 @@ int	op;
 		ret = resfd = socket(AF_INET, SOCK_DGRAM, 0);
 #endif
 		(void) SETSOCKOPT(ret, SOL_SOCKET, SO_BROADCAST, &on, on);
+
+		/* The following frame is a hack to allow resolving
+		 * in FreeBSD jail(). As it is harmless elsewhere, it is
+		 * not #ifdef-ed.
+		 * Note that currently IPv6 within jail() is not
+		 * supported by the FreeBSD.
+		 */
+		{
+			struct sockaddr_in res_addr;
+
+			memset(&res_addr, 0, sizeof(res_addr));
+			res_addr.sin_family = AF_INET;
+			res_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+			bind(resfd, (SAP) &res_addr, sizeof(res_addr));
+		}
 	    }
 #ifdef DEBUG
 	if (op & RES_INITDEBG);
