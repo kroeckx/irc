@@ -1,3 +1,8 @@
+2001-06-30  Kurt Roeckx
+
+	* s_bsd.c/add_connection: use fd instead of acptr->fd, which isn't set
+	  yet
+
 2001-06-29  Kurt Roeckx
 
 	* s_user.c/m_who(): Only call who_one() when we found a client.

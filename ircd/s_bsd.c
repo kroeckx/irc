@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.18 2001/05/14 04:01:08 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.19 2001/06/30 20:18:55 q Exp $";
 #endif
 
 #include "os.h"
@@ -1607,7 +1607,7 @@ add_con_refuse:
 			    (acptr->hostp) ? acptr->hostp->h_name :
 			    acptr->sockhost);
 		del_queries((char *)acptr);
-		(void)send(acptr->fd,
+		(void)send(fd,
 			   "ERROR :Too rapid connections from your host\r\n",
 			   46, 0);
 		goto add_con_refuse;
