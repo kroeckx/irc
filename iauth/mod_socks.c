@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25 1999/08/13 21:06:30 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.1 2000/02/04 05:48:31 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -330,7 +330,7 @@ char *strver;
 	{
 	    cldata[cl].mod_status = ST_V5b;
 	    cldata[cl].buflen=0;
-	    close(cldata[cl].rfd);
+	    cldata[cl].wfd = cldata[cl].rfd;
 	    cldata[cl].rfd = 0;
 	    again = 1;
 	}
@@ -363,7 +363,12 @@ char *strver;
 	}
     
     if (again == 1)
-	    return socks_start(cl);
+	{
+	    if (cldata[cl].mod_status == ST_V5b)
+		    return 0;
+	    else
+		    return socks_start(cl);
+	}
     else
 	{
 	    socks_add_cache(cl, state);
