@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_id.c,v 1.9.2.1 2001/02/08 12:54:49 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_id.c,v 1.9.2.2 2001/05/13 19:27:14 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -147,7 +147,7 @@ aChannel *chptr;
     chptr->nextch = idcache;
     idcache = chptr;
     istat.is_cchan++;
-    istat.is_cchanmem -= sizeof(aChannel) + strlen(chptr->chname);
+    istat.is_cchanmem += sizeof(aChannel) + strlen(chptr->chname);
 }
 
 /* check_chid: checks if a (short) channel name is in the cache
