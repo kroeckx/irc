@@ -1,7 +1,14 @@
+2000-05-29  Kurt Roeckx
+
+	* s_bsd.c/setup_ping(): typo which caused compile to fail using IPv6
+	* configure: removed warning about poll() with linux 2.0 and libc6
+	* res.c/proc_answer(): Added check for too long hostnames
+	* s_conf.c/find_bounce(): send to the fd instead of class
+
 2000-05-16  Piotr Kucharski
 
 	* s_bsd.c/start_iauth(), config.h.dist: increase socket buffers
-      for ircd-iauth communication
+	  for ircd-iauth communication
 	* channel.c/send_user_joins(): use rindex to check for ':' in
  	  channel names
 	* hash.c/bigger_hash_table(): removed some unnecessary code
