@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.8 2001/05/06 13:42:30 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.9 2003/10/11 17:13:03 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1188,6 +1188,15 @@ static	void	setup_signals()
 	(void)sigaddset(&act.sa_mask, SIGCHLD);
 	(void)sigaction(SIGCHLD, &act, NULL);
 # endif
+	
+# if defined(__FreeBSD__)	
+	/* Don't core after detaching from gdb on fbsd */
+
+	act.sa_handler = SIG_IGN;
+	act.sa_flags = 0;
+	(void)sigaddset(&act.sa_mask, SIGTRAP);
+	(void)sigaction(SIGTRAP,&act,NULL);
+# endif /* __FreeBSD__ */
 
 #else /* POSIX_SIGNALS */
 
@@ -1210,6 +1219,12 @@ static	void	setup_signals()
 	(void)signal(SIGUSR1, s_slave);
 	(void)signal(SIGCHLD, SIG_IGN);
 # endif
+	
+# if defined(__FreeBSD__)
+	/* don't core after detaching from gdb on fbsd */
+	(void)signal(SIGTRAP, SIG_IGN);
+# endif /* __FreeBSD__ */
+
 #endif /* POSIX_SIGNAL */
 
 #ifdef RESTARTING_SYSTEMCALLS
