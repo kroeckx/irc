@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.3 2000/02/03 17:57:00 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.4 2000/02/03 18:58:38 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1185,10 +1185,17 @@ aCache	*cachep;
 					(addrcount + 1) * sizeof(*ab));
 			cp->he.h_addr_list = base;
 #ifdef	DEBUG
+# ifdef	INET6
+			Debug((DEBUG_DNS,"u_l:add IP %s hal %x ac %d",
+				inetntop(AF_INET6, 
+				(char *)((struct in6_addr *)s)->s6_addr,
+				mydummy, MYDUMMY_SIZE),
+				cp->he.h_addr_list, addrcount));
+# else
 			Debug((DEBUG_DNS,"u_l:add IP %x hal %x ac %d",
-				ntohl(((struct IN_ADDR *)s)->S_ADDR),
-				cp->he.h_addr_list,
-				addrcount));
+				ntohl(((struct in_addr *)s)->s_addr),
+				cp->he.h_addr_list, addrcount));
+# endif
 #endif
 			for (i = addrcount; i; i--)
 			    {
