@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.1 2000/02/10 18:56:13 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.2 2000/08/15 16:07:23 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -727,6 +727,15 @@ Reg	aClient	*cptr;
 		    }
 		salt[2] = '\0';
 		encr = crypt(cptr->passwd, salt);
+		if (encr == NULL)
+		    {
+			ircstp->is_ref++;
+			sendto_one(cptr, "ERROR :No Access (crypt failed) %s",
+			  	inpath);
+			sendto_flag(SCH_ERROR,
+			    	"Access denied (crypt failed) %s", inpath);
+			return exit_client(cptr, cptr, &me, "Bad Password");
+		    }
 	    }
 	else
 		encr = "";
