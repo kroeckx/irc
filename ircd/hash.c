@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.2 2000/02/03 19:05:48 q Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.3 2000/02/10 18:38:42 q Exp $";
 #endif
 
 #include "os.h"
@@ -543,7 +543,7 @@ char	*server;
 aClient *cptr;
 {
 	Reg	aClient	*tmp, *prv = NULL;
-	Reg	char	*t;
+	Reg	char	*t, *s;
 	Reg	char	ch;
 	aHashEntry	*tmp3;
 	u_int	hashv, hv;
@@ -570,7 +570,7 @@ aClient *cptr;
 			return (tmp);
 		    }
 	    }
-	t = ((char *)server + strlen(server));
+	t = ((char *)server + strlen(server)) - 1;
 	/*
 	 * Whats happening in this next loop ? Well, it takes a name like
 	 * foo.bar.edu and proceeds to search for *.edu and then *.bar.edu.
@@ -579,10 +579,12 @@ aClient *cptr;
 	 */
 	for (;;)
 	    {
-		while (--t > server)
-			if (*t == '.')
-				break;
-		if (t == server || *--t == '*')
+		while (t > server && (*t != '.'))
+			t--;
+		if (t == server)
+			break;
+		t--;
+		if (*t == '*')
 			break;
 		ch = *t;
 		*t = '*';
