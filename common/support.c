@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.10.2.2 1998/06/09 19:07:30 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -58,7 +58,7 @@ char	*s;
 **			of separators
 **			argv 9/90
 **
-**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
+**	$Id: support.c,v 1.10.2.2 1998/06/09 19:07:30 kalt Exp $
 */
 
 char *strtoken(save, str, fs)
@@ -112,7 +112,7 @@ char *str, *fs;
 **	strerror - return an appropriate system error string to a given errno
 **
 **		   argv 11/90
-**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
+**	$Id: support.c,v 1.10.2.2 1998/06/09 19:07:30 kalt Exp $
 */
 
 char *strerror(err_no)
@@ -152,14 +152,27 @@ size_t the_size;
 		char cnt = 0, *cp = local_dummy, *op = out;
 
 		while (*cp)
-			if (*cp++ == ':')
+		    {
+			if (*cp == ':')
 				cnt += 1;
+			if (*cp++ == '.')
+			    {
+				cnt += 1;
+				break;
+			    }
+		    }
 		cp = local_dummy;
 		while (*cp)
 		    {
 			*op++ = *cp++;
 			if (*(cp-1) == ':' && *cp == ':')
 			    {
+				if ((cp-1) == local_dummy)
+				    {
+					op--;
+					*op++ = ':';
+				    }
+
 				*op++ = '0';
 				while (cnt++ < 7)
 				    {
@@ -168,6 +181,7 @@ size_t the_size;
 				    }
 			    }
 		    }
+		if (*(op-1)==':') *op++ = '0';
 		*op = '\0';
 		Debug((DEBUG_DNS,"Expanding `%s' -> `%s'", local_dummy,
 		       out));
@@ -187,7 +201,7 @@ size_t the_size;
 **			internet number (some ULTRIX don't have this)
 **			argv 11/90).
 **	inet_ntoa --	its broken on some Ultrix/Dynix too. -avalon
-**	$Id: support.c,v 1.10.2.1 1998/05/17 20:29:26 kalt Exp $
+**	$Id: support.c,v 1.10.2.2 1998/06/09 19:07:30 kalt Exp $
 */
 
 char	*inetntoa(in)
@@ -757,7 +771,7 @@ char	*i0, *i1, *i2, *i3, *i4, *i5, *i6, *i7, *i8, *i9, *i10, *i11;
 char *make_version()
 {
 	int ve, re, mi, dv, pl;
-	char ver[15];
+	char ver[20];
 
 	sscanf(PATCHLEVEL, "%2d%2d%2d%2d%2d", &ve, &re, &mi, &dv, &pl);
 	sprintf(ver, "%d.%d", ve, re);	/* version & revision */
@@ -767,6 +781,7 @@ char *make_version()
 		sprintf(ver + strlen(ver), "%c%d", DEVLEVEL, dv);
 	if (pl)	/* patchlevel */
 		sprintf(ver + strlen(ver), "p%d", pl);
+	strcat(ver, "+IPv6");
 	return mystrdup(ver);
 }
 
