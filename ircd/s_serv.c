@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.10 2004/02/25 15:51:04 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.11 2004/02/26 13:28:41 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1358,7 +1358,7 @@ char	*to;
 				   buf, cp->lseq, cp->lrecvd,
 				   cp->ping / (cp->recvd ? cp->recvd : 1),
 				   tmp->pref);
-			sendto_flag(SCH_DEBUG, "%s: %d", buf, cp->seq);
+			/* sendto_flag(SCH_DEBUG, "%s: %d", buf, cp->seq); */
 		    }
 	return;
 }
