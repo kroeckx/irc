@@ -2,12 +2,11 @@
 
 	* README, ircdwatch.8, INSTALL: Changed some forgotten references
 	  to @stealth.net to @irc.org
-	* hash.c/add_to_client_hash_table(): don't add unregistered clients
 	* s_bsd.c/setup_ping(): missing parentheses caused it to listen to
 	  all ip's instead of the selected.
 	* s_user.c/register_user(): removed some debug message
 	* channel.c/m_join(): call clean_channelname() faster.
-	* s_user.c/m_nick(): call m_user() before add_to_client_hash_table()
+	* hash.c/bigger_hash_table(): build client hast table from the old one.
 
 2000-02-10  Kurt Roeckx
 
