@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.20 2001/05/30 21:56:38 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.21 2001/06/29 18:45:25 q Exp $";
 #endif
 
 #include "os.h"
@@ -1541,6 +1541,10 @@ char	*parv[];
 				** Just saving one function call. ;)
 				*/
 				acptr = find_client(mask, NULL);
+				if (acptr && !IsClient(acptr))
+				{
+					acptr = NULL;
+				}
 			}
 			if (acptr)
 			{
