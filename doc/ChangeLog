@@ -1,3 +1,8 @@
+2001-05-14  Piotr Kucharski
+
+	* send.c/sendto_common_channels(): user ->clist, not ->members; big
+	  channels will benefit from it a lot (from jv).
+
 2001-05-13  Piotr Kucharski
 
 	* s_id.c/cache_chid(): an unfortunate typo making negative Cache
