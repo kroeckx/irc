@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.2 2000/12/08 22:15:21 q Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.3 2000/12/08 22:34:16 q Exp $";
 #endif
 
 #include "os.h"
@@ -238,8 +238,10 @@ size_t the_size;
 		    }
 		if (*(op-1)==':') *op++ = '0';
 		*op = '\0';
+#ifdef	CLIENT_COMPILE
 		Debug((DEBUG_DNS,"Expanding `%s' -> `%s'", local_dummy,
 		       out));
+#endif
 	    }
 	else
 		bcopy(local_dummy, out, 64);
