@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.6 1998/06/09 19:06:46 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.7 1998/06/11 15:24:03 kalt Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1160,8 +1160,13 @@ aCache	*cachep;
 	/*
 	 * Do the same again for IP#'s.
 	 */
+#ifdef INET6
 	for (s = (char *)rptr->he.h_addr.S_ADDR;
 	     ((struct IN_ADDR *)s)->S_ADDR; s += sizeof(struct IN_ADDR))
+#else
+	for (s = (char *)&rptr->he.h_addr.S_ADDR;
+	     ((struct IN_ADDR *)s)->S_ADDR; s += sizeof(struct IN_ADDR))
+#endif
 	    {
 #ifdef INET6
 		for (i = 0; (t = cp->he.h_addr_list[i]); i++)
