@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.2 2000/01/01 19:20:25 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.3 2000/02/10 18:59:20 q Exp $";
 #endif
 
 #include "os.h"
@@ -836,6 +836,69 @@ int	openconf()
 }
 
 /*
+** char *ipv6_convert(char *orig)
+** converts the original ip address to an standard form
+** returns a pointer to a string.
+*/
+
+#ifdef	INET6
+char	*ipv6_convert(orig)
+char	*orig;
+{
+	char	*s, *t, *buf = NULL;
+	int	i, j;
+	int	len = 1;	/* for the '\0' in case of no @ */
+	struct	in6_addr addr;
+	char	dummy[MYDUMMY_SIZE];
+
+	if ((s = strchr(orig, '@')))
+	    {
+		*s = '\0';
+		len = strlen(orig) + 2;	/* +2 for '@' and '\0' */
+		buf = (char *)MyMalloc(len);
+		(void *)strcpy(buf, orig);
+		buf[len - 2] = '@';
+		buf[len - 1] = '\0'; 
+		*s = '@';
+		orig = s + 1;
+	    }
+
+	if ((s = strchr(orig, '/')))
+	    {
+		*s = '\0';
+		s++;
+	    }
+
+	i = inet_pton(AF_INET6, orig, addr.s6_addr);
+
+	if (i > 0)
+	    {
+		t = inetntop(AF_INET6, addr.s6_addr, dummy, MYDUMMY_SIZE);
+	    }
+	
+	j = len - 1;
+	if (!((i > 0) && t))
+		t = orig;
+
+	len += strlen(t);
+	buf = (char *)MyRealloc(buf, len);
+	strcpy(buf + j, t);
+
+	if (s)
+	    {
+		*(s-1) = '/'; /* put the '/' back, not sure it's needed tho */ 
+		j = len;
+		len += strlen(s) + 1;
+		buf = (char *)MyRealloc(buf, len);
+		buf[j - 1] = '/';
+		strcpy(buf + j, s);
+	    }
+
+	return buf;
+}
+#endif
+
+/*
 ** initconf() 
 **    Read configuration file.
 **
@@ -1031,7 +1094,22 @@ int	opt;
 		    {
 			if ((tmp = getfield(NULL)) == NULL)
 				break;
+#ifdef	INET6
+			if (aconf->status & 
+				(CONF_CONNECT_SERVER|CONF_ZCONNECT_SERVER
+				|CONF_CLIENT|CONF_RCLIENT|CONF_KILL
+				|CONF_OTHERKILL|CONF_NOCONNECT_SERVER
+				|CONF_OPERATOR|CONF_LOCOP|CONF_LISTEN_PORT
+# ifdef R_LINES
+				|CONF_RESTRICT
+# endif
+				|CONF_SERVICE))
+				aconf->host = ipv6_convert(tmp);
+			else
+				DupString(aconf->host, tmp);
+#else
 			DupString(aconf->host, tmp);
+#endif
 			if ((tmp = getfield(NULL)) == NULL)
 				break;
 			DupString(aconf->passwd, tmp);
@@ -1244,11 +1322,7 @@ Reg	aConfItem	*aconf;
 	** Do name lookup now on hostnames given and store the
 	** ip numbers in conf structure.
 	*/
-#ifndef	INET6
 	if (!isalpha(*s) && !isdigit(*s))
-#else
-	if (!isalpha(*s) && !isdigit(*s) && (*s != ':'))
-#endif
 		goto badlookup;
 
 	/*
