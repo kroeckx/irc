@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4 1997/10/17 17:45:16 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.4.2.1 1998/04/05 02:40:20 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -46,34 +46,48 @@ aClient	*cptr;
 {
 	int	sock;
 	static	struct	hostent *hp;
-	static	struct	sockaddr_in server;
+	static	struct	SOCKADDR_IN server;
 
-	sock = socket(AF_INET, SOCK_STREAM, 0);
+	sock = socket(AFINET, SOCK_STREAM, 0);
 	if (sock < 0) {
 		perror("opening stream socket");
 		exit(1);
 	}
-	server.sin_family = AF_INET;
+	server.SIN_FAMILY = AFINET;
  
 	if (isdigit(*host))
+#ifdef INET6
+		inet_pton(AF_INET6,host,server.sin6_addr);
+#else
 		server.sin_addr.s_addr = inetaddr(host);
+#endif
 	else { 
+#ifdef INET6
+		res_init();
+		_res.options|=RES_USE_INET6;
 		hp = gethostbyname(host);
+#else
+		hp = gethostbyname(host);
+#endif
 		if (hp == 0) {
 			fprintf(stderr, "%s: unknown host\n", host);
 			exit(2);
 		}
-		bcopy(hp->h_addr, (char *)&server.sin_addr, hp->h_length);
+		bcopy(hp->h_addr, (char *)&server.SIN_ADDR, hp->h_length);
 	}
-	server.sin_port = htons(portnum);
+	server.SIN_PORT = htons(portnum);
 	if (connect(sock, (SAP)&server, sizeof(server)) == -1) {
 		perror("irc");
 	 	exit(1);
 	}
 
 	cptr->acpt = cptr;
-	cptr->port = server.sin_port;
+	cptr->port = server.SIN_PORT;
+#ifdef INET6
+	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, 16);
+#else
 	cptr->ip.s_addr = server.sin_addr.s_addr;
+#endif
 	return(sock);
 }
 

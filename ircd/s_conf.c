@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.28 1998/03/21 19:22:22 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.27.2.1 1998/04/05 02:40:28 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -89,10 +89,7 @@ aClient *cptr;
 {
         int i1, i2, i3, i4, m;
         u_long lmask, baseip;
-	char *at;
  
-	if (at = index(mask, '@'))
-		mask = at + 1;
         if (sscanf(mask, "%d.%d.%d.%d/%d", &i1, &i2, &i3, &i4, &m) != 5 ||
            m < 1 || m > 31) {
                sendto_flag(SCH_LOCAL, "Ignoring bad mask: %s", mask);
@@ -100,7 +97,12 @@ aClient *cptr;
         }
         lmask = htonl(0xfffffffful << (32 - m)); /* /24 -> 0xffffff00ul */
         baseip = htonl(i1 * 0x1000000 + i2 * 0x10000 + i3 * 0x100 + i4);
+#ifdef INET6
+	return 1;
+/*        return ((cptr->ip.s6_addr & lmask) == baseip) ? 0 : 1;*/
+#else
         return ((cptr->ip.s_addr & lmask) == baseip) ? 0 : 1;
+#endif
 }
 
 /*
@@ -587,7 +589,7 @@ int	statmask;
 			continue;
 		    }
 		*s = '@';
-		if (!bcmp((char *)&tmp->ipnum, ip, sizeof(struct in_addr)))
+		if (!bcmp((char *)&tmp->ipnum, ip, sizeof(struct IN_ADDR)))
 			return tmp;
 	    }
 	return NULL;
@@ -1192,17 +1194,29 @@ Reg	aConfItem	*aconf;
 	ln.flags = ASYNC_CONF;
 
 	if (isdigit(*s))
+#ifdef INET6
+		inet_pton(s, aconf->ipnum.s6_addr);
+#else
 		aconf->ipnum.s_addr = inetaddr(s);
+#endif
 	else if ((hp = gethost_byname(s, &ln)))
 		bcopy(hp->h_addr, (char *)&(aconf->ipnum),
-			sizeof(struct in_addr));
+			sizeof(struct IN_ADDR));
 
+#ifdef INET6
+	if (AND16(aconf->ipnum.s6_addr) == 255)
+#else
 	if (aconf->ipnum.s_addr == -1)
+#endif
 		goto badlookup;
 	return 0;
 badlookup:
+#ifdef INET6
+	if (AND16(aconf->ipnum.s6_addr) == 255)
+#else
 	if (aconf->ipnum.s_addr == -1)
-		bzero((char *)&aconf->ipnum, sizeof(struct in_addr));
+#endif
+		bzero((char *)&aconf->ipnum, sizeof(struct IN_ADDR));
 	Debug((DEBUG_ERROR,"Host/server name error: (%s) (%s)",
 		aconf->host, aconf->name));
 	return -1;
@@ -1545,7 +1559,11 @@ int	class, fd;
 				SPRINTF(rpl, rpl_str(RPL_BOUNCE,"unknown"),
 					aconf->name, aconf->port);
 				strcat(rpl, "\r\n");
+#ifdef INET6
+				sendto(class, rpl, strlen(rpl), 0, 0, 0);
+#else
 				send(class, rpl, strlen(rpl), 0);
+#endif
 				return;
 			    }
 			else

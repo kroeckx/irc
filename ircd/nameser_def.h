@@ -77,7 +77,7 @@
 
 /*
  *      @(#)nameser.h	8.1 (Berkeley) 6/2/93
- *	$Id: nameser_def.h,v 1.1 1997/09/03 17:45:52 kalt Exp $
+ *	$Id: nameser_def.h,v 1.1.2.1 1998/04/05 02:40:22 kalt Exp $
  */
 
 /*
@@ -87,6 +87,9 @@
  * compare for equality; rather, use it to determine whether your resolver
  * is new enough to contain a certain feature.
  */
+
+#ifndef	INET6
+/* let's assume for now that IPv6 system don't need ours -kalt */
 
 #define __BIND		19960801	/* interface version stamp */
 
@@ -328,3 +331,5 @@ typedef struct {
 	*t_cp   = t_l; \
 	(cp) += INT32SZ; \
 }
+
+#endif

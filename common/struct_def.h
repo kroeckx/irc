@@ -33,7 +33,7 @@ typedef	struct	Zdata	aZdata;
 typedef struct        MotdItem aMotd;
 #endif
 
-#define	HOSTLEN		63	/* Length of hostname.  Updated to         */
+#define	HOSTLEN		163	/* Length of hostname.  Updated to         */
 				/* comply with RFC1123                     */
 
 #define	NICKLEN		9	/* Necessary to put 9 here instead of 10
@@ -49,7 +49,7 @@ typedef struct        MotdItem aMotd;
 #define	KEYLEN		23
 #define	BUFSIZE		512		/* WARNING: *DONT* CHANGE THIS!!!! */
 #define	MAXRECIPIENTS 	20
-#define	MAXBANS		30
+#define	MAXBANS		20
 #define	MAXBANLENGTH	1024
 #define	BANLEN		(USERLEN + NICKLEN + HOSTLEN + 3)
 #define MAXPENALTY	10
@@ -157,7 +157,6 @@ typedef struct        MotdItem aMotd;
 #define	FLAGS_UNKCMD   0x200000	/* has sent an unknown command */
 #define	FLAGS_ZIP      0x400000 /* link is zipped */
 #define	FLAGS_ZIPRQ    0x800000 /* zip requested */
-#define	FLAGS_ZIPSTART 0x1000000 /* start of zip (ignore any CRLF) */
 
 #define	FLAGS_OPER       0x0001	/* Operator */
 #define	FLAGS_LOCOP      0x0002 /* Local operator -- SRB */
@@ -241,14 +240,14 @@ struct	CPing	{
 	u_long	ping;
 	u_long	seq;		/* # sent still in the "window" */
 	u_long	lseq;		/* sequence # of last sent */
-	u_long	recv;		/* # received still in the "window" */
-	u_long	lrecv;		/* # received */
+	u_long	recvd;		/* # received still in the "window" */
+	u_long	lrecvd;		/* # received */
 };
 
 struct	ConfItem	{
 	u_int	status;		/* If CONF_ILLEGAL, delete when no clients */
 	int	clients;	/* Number of *LOCAL* clients using this */
-	struct	in_addr ipnum;	/* ip number of host field */
+	struct	IN_ADDR ipnum;	/* ip number of host field */
 	char	*host;
 	char	*passwd;
 	char	*name;
@@ -441,7 +440,7 @@ struct Client	{
 	int	priority;	/* priority for selection as active */
 	u_short	ract;		/* no fear about this. */
 	u_short	port;		/* and the remote port# too :-) */
-	struct	in_addr	ip;	/* keep real ip# too */
+	struct	IN_ADDR	ip;	/* keep real ip# too */
 	struct	hostent	*hostp;
 	char	sockhost[HOSTLEN+1]; /* This is the host name from the socket
 				  ** and after which the connection was
@@ -458,7 +457,6 @@ struct Client	{
  * statistics structures
  */
 struct	stats {
-	u_short	is_bignet; /* see config.h */
 	u_int	is_cl;	/* number of client connections */
 	u_int	is_sv;	/* number of server connections */
 	u_int	is_ni;	/* connection but no idea who it was
@@ -569,7 +567,7 @@ struct Channel	{
 	int	users;		/* current membership total */
 	Link	*members;	/* channel members */
 	Link	*invites;	/* outstanding invitations */
-	Link	*mlist;		/* list of extended modes: +b/+e/+I */
+	Link	*banlist;
 	Link	*clist;		/* list of connections which are members */
 	time_t	history;
 	char	chname[1];
@@ -584,8 +582,6 @@ struct Channel	{
 #define	CHFL_CHANOP     0x0001 /* Channel operator */
 #define	CHFL_VOICE      0x0002 /* the power to speak */
 #define	CHFL_BAN	0x0004 /* ban channel flag */
-#define	CHFL_EXCEPTION	0x0008 /* exception channel flag */
-#define	CHFL_INVITE	0x0010 /* invite channel flag */
 
 /* Channel Visibility macros */
 
@@ -602,14 +598,11 @@ struct Channel	{
 #define	MODE_LIMIT	0x0400
 #define	MODE_ANONYMOUS	0x0800
 #define	MODE_QUIET	0x1000
-#define	MODE_EXCEPTION	0x2000
-#define	MODE_INVITE	0x4000
 #define MODE_FLAGS	0x1fff
 /*
  * mode flags which take another parameter (With PARAmeterS)
  */
-#define	MODE_WPARAS	(MODE_CHANOP|MODE_VOICE|MODE_BAN|MODE_KEY|MODE_LIMIT\
-			 |MODE_INVITE|MODE_EXCEPTION)
+#define	MODE_WPARAS	(MODE_CHANOP|MODE_VOICE|MODE_BAN|MODE_KEY|MODE_LIMIT)
 /*
  * Undefined here, these are used in conjunction with the above modes in
  * the source.
@@ -724,7 +717,6 @@ typedef	struct	{
 #define	SV_OLD		0x0000
 #define	SV_29		0x0001	/* useless, but preserved for coherence */
 #define	SV_NJOIN	0x0002	/* server understands the NJOIN command */
-#define	SV_NMODE	0x0004	/* server knows new MODEs (+e/+I) */
 
 /* used for sendto_flag */
 
@@ -775,7 +767,7 @@ typedef	struct	{
 #define	UTMP		"/etc/utmp"
 #define	COMMA		","
 
-#define	SAP	struct sockaddr *
+#define	SAP	struct SOCKADDR *
 
 /* IRC client structures */
 

@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.4 1997/09/03 17:45:56 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.4.2.1 1998/04/05 02:40:26 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -26,6 +26,8 @@ static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.4 1997/09/03 17:45:56 kalt Exp $";
 #define S_AUTH_C
 #include "s_externs.h"
 #undef S_AUTH_C
+
+char mydummy[256];
 
 /*
  * start_auth
@@ -40,7 +42,8 @@ void	start_auth(cptr)
 Reg	aClient	*cptr;
 {
 #ifndef	NO_IDENT
-	struct	sockaddr_in	us, them;
+	struct	SOCKADDR_IN	us, them;
+
 	SOCK_LEN_TYPE ulen, tlen;
 
 	Debug((DEBUG_NOTICE,"start_auth(%x) fd %d status %d",
@@ -71,32 +74,50 @@ Reg	aClient	*cptr;
 
 	/* get remote host peer - so that we get right interface -- jrg */
 	tlen = ulen = sizeof(us);
-	(void)getpeername(cptr->fd, (struct sockaddr *)&them, &tlen);
+	(void)getpeername(cptr->fd, (struct SOCKADDR *)&them, &tlen);
 
-	them.sin_port = htons(113);
-	them.sin_family = AF_INET;
+	them.SIN_PORT = htons(113);
+	them.SIN_FAMILY = AFINET;
 
 	/* We must bind the local end to the interface that they connected
 	   to: The local system might have more than one network address,
 	   and RFC931 check only sends port numbers: server takes IP addresses
 	   from query socket -- jrg */
-	(void)getsockname(cptr->fd, (struct sockaddr *)&us, &ulen);
-	us.sin_port = htons(0);  /* bind assigns us a port */
-	us.sin_family = AF_INET;
+	(void)getsockname(cptr->fd, (struct SOCKADDR *)&us, &ulen);
+	us.SIN_PORT = htons(0);  /* bind assigns us a port */
+	us.SIN_FAMILY = AFINET;
+#ifdef INET6
+	Debug((DEBUG_NOTICE,"auth(%x) from %s",
+	       cptr, inet_ntop(AF_INET6, (char *)&us.sin6_addr, mydummy, 16)));
+#else
 	Debug((DEBUG_NOTICE,"auth(%x) from %s",
 	       cptr, inetntoa((char *)&us.sin_addr)));
-	if (bind(cptr->authfd, (struct sockaddr *)&us, ulen) >= 0)
+#endif
+	if (bind(cptr->authfd, (struct SOCKADDR *)&us, ulen) >= 0)
 	    {
-		(void)getsockname(cptr->fd, (struct sockaddr *)&us, &ulen);
+		(void)getsockname(cptr->fd, (struct SOCKADDR *)&us, &ulen);
+#ifdef INET6
+		Debug((DEBUG_NOTICE,"auth(%x) to %s",
+			cptr, inet_ntop(AF_INET6, (char *)&them.sin6_addr,
+					mydummy, 16)));
+#else
 		Debug((DEBUG_NOTICE,"auth(%x) to %s",
 			cptr, inetntoa((char *)&them.sin_addr)));
+#endif
 		(void)alarm((unsigned)4);
-		if (connect(cptr->authfd, (struct sockaddr *)&them,
+		if (connect(cptr->authfd, (struct SOCKADDR *)&them,
 			    tlen) == -1 && errno != EINPROGRESS)
 		    {
+#ifdef INET6
+			Debug((DEBUG_ERROR,
+				"auth(%x) connect failed to %s - %d", cptr,
+				inet_ntop(AF_INET6, (char *)&them.sin6_addr,
+					  mydummy, 16), errno));
+#else
 			Debug((DEBUG_ERROR,
 				"auth(%x) connect failed to %s - %d", cptr,
 				inetntoa((char *)&them.sin_addr), errno));
+#endif
 			ircstp->is_abad++;
 			/*
 			 * No error report from this...
@@ -115,8 +136,13 @@ Reg	aClient	*cptr;
 		report_error("binding stream socket for auth request %s:%s",
 			     cptr);
 		Debug((DEBUG_ERROR,"auth(%x) bind failed on %s port %d - %d",
+#ifdef INET6
+		      cptr, inet_ntop(AF_INET6, (char *)&us.sin6_addr,
+		      mydummy, 16),
+#else
 		      cptr, inetntoa((char *)&us.sin_addr),
-		      ntohs(us.sin_port), errno));
+#endif
+		      ntohs(us.SIN_PORT), errno));
 	    }
 
 	cptr->flags |= (FLAGS_WRAUTH|FLAGS_AUTH);
@@ -138,15 +164,16 @@ Reg	aClient	*cptr;
 void	send_authports(cptr)
 aClient	*cptr;
 {
-	struct	sockaddr_in	us, them;
+	struct	SOCKADDR_IN	us, them;
+
 	char	authbuf[32];
 	SOCK_LEN_TYPE ulen, tlen;
 
 	Debug((DEBUG_NOTICE,"write_authports(%x) fd %d authfd %d stat %d",
 		cptr, cptr->fd, cptr->authfd, cptr->status));
 	tlen = ulen = sizeof(us);
-	if (getsockname(cptr->fd, (struct sockaddr *)&us, &ulen) ||
-	    getpeername(cptr->fd, (struct sockaddr *)&them, &tlen))
+	if (getsockname(cptr->fd, (struct SOCKADDR *)&us, &ulen) ||
+	    getpeername(cptr->fd, (struct SOCKADDR *)&them, &tlen))
 	    {
 #ifdef	USE_SYSLOG
 		syslog(LOG_ERR, "auth get{sock,peer}name error for %s:%m",
@@ -156,11 +183,17 @@ aClient	*cptr;
 	    }
 
 	SPRINTF(authbuf, "%u , %u\r\n",
-		(unsigned int)ntohs(them.sin_port),
-		(unsigned int)ntohs(us.sin_port));
+		(unsigned int)ntohs(them.SIN_PORT),
+		(unsigned int)ntohs(us.SIN_PORT));
 
+#ifdef INET6
+	Debug((DEBUG_SEND, "sending [%s] to auth port %s.113",
+		authbuf, inet_ntop,(AF_INET6, (char *)&them.sin6_addr,
+				    mydummy, 16)));
+#else
 	Debug((DEBUG_SEND, "sending [%s] to auth port %s.113",
 		authbuf, inetntoa((char *)&them.sin_addr)));
+#endif
 	if (write(cptr->authfd, authbuf, strlen(authbuf)) != strlen(authbuf))
 	    {
 authsenderr:

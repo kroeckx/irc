@@ -489,10 +489,18 @@ extern char *inet_ntoa __P((struct in_addr in));
 # undef IP_OPTIONS  /* Defined in /usr/include/netinet/in.h but doesn't work */
 #endif
 
+/*  h_errno portability problems.
+ */
+
+#ifdef _WIN32
+extern int w32_h_errno;  /* The "normal" h_errno is read only */
+#define h_errno w32_h_errno
+#endif
+
 /*  setlinebuf portability problems.
  */
 
-#if defined(HPUX) && !defined(SYSV) && !defined(SVR4) || defined(__CYGWIN32__)
+#if defined(HPUX) && !defined(SYSV) && !defined(SVR4) || defined(_WIN32)
 # define setlinebuf(x) (setvbuf((x), NULL, _IOLBF, BUFSIZ))
 #endif
 
@@ -678,4 +686,29 @@ extern int errno;
 
 #if ! H_ERRNO_DECLARED
 extern int h_errno;
+#endif
+
+/*  IPv4 or IPv6 structures?
+ */
+
+#ifdef INET6
+# define AND16(x) ((x)[0]&(x)[1]&(x)[2]&(x)[3]&(x)[4]&(x)[5]&(x)[6]&(x)[7]&(x)[8]&(x)[9]&(x)[10]&(x)[11]&(x)[12]&(x)[13]&(x)[14]&(x)[15])
+
+# define	AFINET		AF_INET6
+# define	SOCKADDR_IN	sockaddr_in6
+# define	SOCKADDR	sockaddr_in6
+# define	SIN_FAMILY	sin6_family
+# define	SIN_PORT	sin6_port
+# define	SIN_ADDR	sin6_addr
+# define	S_ADDR		s6_addr
+# define	IN_ADDR		in6_addr
+#else
+# define	AFINET		AF_INET
+# define	SOCKADDR_IN	sockaddr_in
+# define	SOCKADDR	sockaddr
+# define	SIN_FAMILY	sin_family
+# define	SIN_PORT	sin_port
+# define	SIN_ADDR	sin_addr
+# define	S_ADDR		s_addr
+# define	IN_ADDR		in_addr
 #endif

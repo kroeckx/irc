@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.17 1998/04/02 19:58:56 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.15.2.1 1998/04/05 02:40:30 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -76,9 +76,9 @@ time_t	clock;
 	if (minswest < 0)
 		minswest = -minswest;
 
-	(void)sprintf(buf, "%s %s %d %d -- %02d:%02d %c%02d:%02d",
+	(void)sprintf(buf, "%s %s %d 19%02d -- %02d:%02d %c%02d:%02d",
 		weekdays[lt->tm_wday], months[lt->tm_mon],lt->tm_mday,
-		lt->tm_year + 1900, lt->tm_hour, lt->tm_min,
+		lt->tm_year, lt->tm_hour, lt->tm_min,
 		plus, minswest/60, minswest%60);
 
 	return buf;
@@ -189,6 +189,9 @@ aClient	*sptr;
 **	to internal buffer (nbuf). *NEVER* use the returned pointer
 **	to modify what it points!!!
 */
+
+char mydummy[256];
+
 char	*get_client_name(sptr, showip)
 aClient *sptr;
 int	showip;
@@ -213,7 +216,13 @@ int	showip;
 					sptr->name, USERLEN,
 					(!(sptr->flags & FLAGS_GOTID)) ? "" :
 					sptr->auth,
+#ifdef INET6 
+					      inet_ntop(AF_INET6,
+							(char *)&sptr->ip,
+							mydummy, 16));
+#else
 					      inetntoa((char *)&sptr->ip));
+#endif
 			else
 			    {
 				if (mycmp(sptr->name, sptr->sockhost))
@@ -994,8 +1003,6 @@ char	*name;
 			   ME, RPL_STATSDEBUG, name, sp->is_lkmt,
 			   (u_int) (sp->is_lkt / sp->is_lkcnt), sp->is_lkMt,
 			   DELAYCHASETIMELIMIT);
-	sendto_one(cptr, ":%s %d %s :abuse protections %u", ME, RPL_STATSDEBUG,
-		   name, sp->is_bignet);
 	sendto_one(cptr, ":%s %d %s :Client - Server",
 		   ME, RPL_STATSDEBUG, name);
 	sendto_one(cptr, ":%s %d %s :connected %u %u",

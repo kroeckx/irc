@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.36 1998/04/02 19:58:57 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.32.2.1 1998/04/05 02:40:31 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -263,9 +263,8 @@ aClient	*cptr;
 			/* the NJOIN command appeared on 2.9.5 */
 			cptr->hopcount |= SV_NJOIN;
 	    }
-	else if (!strncmp(cptr->info, "021", 3) ||
-		 !strncmp(cptr->info, "020999", 6))
-		cptr->hopcount = SV_29|SV_NJOIN|SV_NMODE;
+	else if (!strncmp(cptr->info, "021", 3))
+		cptr->hopcount = SV_29|SV_NJOIN;
 	else
 		cptr->hopcount = SV_OLD;
 
@@ -885,7 +884,9 @@ Reg	aClient	*cptr;
 				   acptr->user->username,
 				   acptr->user->host, stok,
 				   (*buf) ? buf : "+", acptr->info);
+#ifdef	USE_NJOIN
 			if ((cptr->serv->version & SV_NJOIN) == 0)
+#endif
 				send_user_joins(cptr, acptr);
 		    }
 		else if (IsService(acptr) &&
@@ -912,8 +913,10 @@ Reg	aClient	*cptr;
 		for (chptr = channel; chptr; chptr = chptr->nextch)
 			if (chptr->users)
 			    {
+#ifdef	USE_NJOIN
 				if (cptr->serv->version & SV_NJOIN)
 					send_channel_members(cptr, chptr);
+#endif
 				send_channel_modes(cptr, chptr);
 			    }
 	    }
@@ -1277,8 +1280,8 @@ char	*to;
 			else
 				(void)strcpy(buf, tmp->name);
 			sendto_one(sptr, rpl_str(RPL_STATSPING, to),
-				   buf, cp->lseq, cp->lrecv,
-				   cp->ping / (cp->recv ? cp->recv : 1),
+				   buf, cp->lseq, cp->lrecvd,
+				   cp->ping / (cp->recvd ? cp->recvd : 1),
 				   tmp->pref);
 		    }
 	return;
@@ -1421,7 +1424,9 @@ char	*parv[];
 		report_configured_links(cptr,parv[0],CONF_QUARANTINED_SERVER);
 		break;
 	case 'R' : case 'r' : /* usage */
+#ifdef DEBUGMODE
 		send_usage(cptr, parv[0]);
+#endif
 		break;
 	case 'S' : case 's' : /* S lines */
 		report_configured_links(cptr, parv[0], CONF_SERVICE);
@@ -2366,8 +2371,6 @@ check_link(cptr)
 aClient	*cptr;
 {
     if (!IsServer(cptr))
-	    return 0;
-    if (!ircstp->is_bignet)
 	    return 0;
 
     ircstp->is_ckl++;
