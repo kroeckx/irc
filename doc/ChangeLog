@@ -1,3 +1,8 @@
+2001-05-31  Piotr Kucharski
+
+	* support.c/inetntop(): logic flaw in checking for
+	ipv6_is_addr_v4mapped (":ffff:" case).
+
 2001-05-30  Piotr Kucharski
 
 	* s_serv.c/m_who(): almost complete rewrite to reduce unnecessary
