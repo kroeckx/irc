@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.1 2000/02/10 19:10:25 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.2 2001/02/07 21:53:09 q Exp $";
 #endif
 
 #include "os.h"
@@ -79,7 +79,7 @@ static	Numeric	numeric_errors[] = {
 		{ 0, (char *)NULL },
 		{ 0, (char *)NULL },
 /* 431 */	{ ERR_NONICKNAMEGIVEN, ":No nickname given" },
-/* 432 */	{ ERR_ERRONEUSNICKNAME, "%s :Erroneous Nickname" },
+/* 432 */	{ ERR_ERRONEOUSNICKNAME, "%s :Erroneous Nickname" },
 /* 433 */	{ ERR_NICKNAMEINUSE, "%s :Nickname is already in use." },
 /* 434 */	{ ERR_SERVICENAMEINUSE, (char *)NULL },
 /* 435 */	{ ERR_SERVICECONFUSED, (char *)NULL },
