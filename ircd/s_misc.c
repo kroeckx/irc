@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.1 2000/01/01 18:10:25 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.2 2001/02/10 23:48:44 q Exp $";
 #endif
 
 #include "os.h"
@@ -359,7 +359,6 @@ char	*comment;	/* Reason for the exit */
 	Reg	aClient	*acptr;
 	Reg	aClient	*next;
 	Reg	aServer *asptr;
-	Reg	aService *asvptr;
 #if defined(FNAME_USERLOG) || defined(USE_SYSLOG) || defined(USE_SERVICES)
 	time_t	on_for;
 #endif
