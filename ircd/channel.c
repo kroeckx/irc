@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.7 2000/08/16 00:13:44 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.8 2000/10/22 10:36:07 q Exp $";
 #endif
 
 #include "os.h"
@@ -1372,7 +1372,7 @@ char	*parv[], *mbuf, *pbuf;
 				   cptr->name), "MODE +l");
 			break;
 		case 'i' : /* falls through for default case */
-			if (whatt == MODE_DEL)
+			if (whatt == MODE_DEL && ischop)
 				while ((lp = chptr->invites))
 					del_invite(lp->value.cptr, chptr);
 		default:
