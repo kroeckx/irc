@@ -1,3 +1,16 @@
+2001-05-04  Piotr Kucharski
+
+	* s_misc.c/exit_client(),mark_blind_servers(): fixed squit routines
+	  not to send QUITs, when SQUIT would do (fix from Jakub Vlasek)
+	* s_bsd.c/polludp(): show IP upon recvfrom error.
+
+2001-05-03  Piotr Kucharski
+
+	* channel.c/m_kick(): multiply channel kicks are now handled
+	  differently (one channel in a KICK sent), so that old servers
+	  can parse them well.
+	* ircd.c/main(): added chdir() before chroot().
+
 2001-05-01  Piotr Kucharski
 
 	* list.c/make_client(),s_auth.c/set_clean_username: revert change,
