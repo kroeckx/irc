@@ -679,6 +679,9 @@ int	sig;
 			if (!tmp2->clients)
 				free_conf(tmp2);
 		    }
+#ifdef CACHED_MOTD
+	read_motd(MOTD);
+#endif
 	rehashed = 1;
 	return ret;
 }

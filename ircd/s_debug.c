@@ -45,7 +45,7 @@ char	serveropts[] = {
 'D',
 #endif
 #ifdef	RANDOM_NDELAY
-'D',
+'d',
 #endif
 #ifdef	LOCOP_REHASH
 'e',
@@ -95,6 +95,9 @@ char	serveropts[] = {
 #endif
 #ifdef	BETTER_NDELAY
 'n',
+#endif
+#ifdef	KRYS
+'o',
 #endif
 #ifdef	CRYPT_OPER_PASSWORD
 'p',

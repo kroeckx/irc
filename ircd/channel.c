@@ -289,6 +289,11 @@ int	flags;
 			** servers that don't do channel delay) - krys
 			*/
 			bzero((char *)&chptr->mode, sizeof(Mode));
+#ifdef USE_SERVICES
+			check_services_butone(SERVICE_WANT_CHANNEL,
+					      NULL, &me, "CHANNEL %s %d",
+					      chptr->chname, chptr->users);
+#endif
 		    }
 
 		ptr = make_link();
@@ -356,6 +361,10 @@ aChannel *chptr;
 	    }
 	if (--chptr->users <= 0)
 		sub1_from_channel(chptr);
+#ifdef USE_SERVICES
+	check_services_butone(SERVICE_WANT_CHANNEL, NULL, &me, "CHANNEL %s %d",
+			      chptr->chname, chptr->users);
+#endif
 	istat.is_chanusers--;
 #ifdef NPATH            
         note_leave(sptr, chptr);
@@ -703,21 +712,26 @@ char	*parv[];
 					ircstp->is_fake++;
 				    }
 				else
+				    {
 					sendto_channel_butserv(chptr, sptr,
 						        ":%s MODE %s %s %s",
 							parv[0], name,
 							modebuf, parabuf);
+#ifdef USE_SERVICES
+					*modebuf = *parabuf = '\0';
+					modebuf[1] = '\0';
+					channel_modes(&me, modebuf, parabuf,
+						      chptr);
+				check_services_butone(SERVICE_WANT_MODE,
+						      NULL, sptr,
+						      "MODE %s %s",
+						      parv[0], name, modebuf);
+#endif
+				    }
 				sendto_match_servs(chptr, cptr,
 						   ":%s MODE %s %s %s",
 						   parv[0], name, modebuf,
 						   parabuf);
-#ifdef USE_SERVICES
-				check_services_butone(SERVICE_WANT_MODE,
-						      NULL, sptr,
-						      ":%s MODE %s %s %s",
-						      parv[0], name,
-						      modebuf, parabuf);
-#endif
 			   } /* if(modebuf) */
 		    } /* else(parc>2) */
 	    } /* for (parv1) */

@@ -1,3 +1,18 @@
+Fri Mar 21 19:53:36 1997  Christophe Kalt
+
+	* h.h, struct.h, ircd.c, s_conf.c, s_misc.c, s_serv.c,
+	config.h.dist: server can now cache the MOTD in memory (from Chris
+	Behrens)
+
+	* service.h, channel.c, s_serv.c, s_service.c, s_user.c: additions
+	for services.
+
+	* s_misc.c: added missing parameter for check_service_butone().
+
+	* INSTALL completed and converted to sgml
+
+	* s_serv.c: MyRealloc(NULL, size) isn't portable.
+
 Tue Mar 18 17:59:26 1997  Christophe Kalt
 
 	* 2.9.3b10

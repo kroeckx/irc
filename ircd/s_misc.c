@@ -833,7 +833,7 @@ char	*comment;
 			    }
 		    }
 #ifdef	USE_SERVICES
-		check_services_butone(SERVICE_WANT_SERVICE, NULL,
+		check_services_butone(SERVICE_WANT_SERVICE, NULL, NULL,
 				      ":%s QUIT :%s", sptr->name, comment);
 #endif
 		/* MyConnect(sptr) is always FALSE here */
@@ -980,3 +980,52 @@ char	*name;
 	sendto_one(cptr, ":%s %d %s :time connected %u %u",
 		   ME, RPL_STATSDEBUG, name, sp->is_cti, sp->is_sti);
 }
+
+#ifdef CACHED_MOTD
+void read_motd(filename)
+char *filename;
+{
+	int fd;
+	register aMotd *temp, *last;
+	struct stat Sb;
+	char line[80];
+	register char *tmp;
+	
+	if ((fd = open(MOTD, O_RDONLY)) == -1)
+		return;
+	if (fstat(fd, &Sb) == -1)
+	    {
+		close(fd);
+		return;
+	    }
+	for(;motd != NULL;motd=last)
+	    {
+		last = motd->next;
+		MyFree(motd->line);
+		MyFree(motd);
+	    }
+	motd_tm = *localtime(&sb.st_mtime);
+	(void)dgets(-1, NULL, 0); /* make sure buffer is at empty pos */
+	last = NULL;
+	while (dgets(fd, line, sizeof(line)-1) > 0)
+	    {
+		if ((tmp = strchr(line, '\n')) != NULL)
+			*tmp = (char) 0;
+		if ((tmp = strchr(line, '\r')) != NULL)
+			*tmp = (char) 0;
+		temp = (aMotd *)MyMalloc(sizeof(aMotd));
+		if (!temp)
+			outofmemory();
+		strcpy(temp->line = mystrdup(line);
+		temp->next = NULL;
+		       if (!motd)
+			motd = temp;
+		else
+			last->next = temp;
+		last = temp;
+	    }
+	(void)dgets(-1, NULL, 0); /* make sure buffer is at empty pos */
+	close(fd);
+}     
+#endif
+

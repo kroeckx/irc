@@ -64,6 +64,9 @@ typedef	struct	SMode	Mode;
 typedef	struct	fdarray	FdAry;
 typedef	struct	CPing	aCPing;
 typedef	struct	Zdata	aZdata;
+#ifdef CACHED_MOTD
+typedef struct        MotdItem aMotd;
+#endif
 
 #include "service.h"
 
@@ -355,6 +358,14 @@ struct Zdata {
 	char		outbuf[ZIP_MAXIMUM]; /* outgoing (unzipped) buffer */
 	int		incount;	/* size of inbuf content */
 	int		outcount;	/* size of outbuf content */
+};
+#endif
+
+#ifdef CACHED_MOTD
+struct  MotdItem
+{ 
+    char    *line;
+    struct  MotdItem *next;
 };
 #endif
 

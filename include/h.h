@@ -24,6 +24,12 @@
  * -avalon
  */
 
+#ifdef CACHED_MOTD
+extern aMotd *motd;
+extern struct tm motd_tm;
+extern void read_motd __P((char *));
+#endif
+
 extern	time_t	nextconnect, nextdnscheck, nextping, timeofday;
 extern	aClient	*client, me, *local[];
 extern	aChannel *channel;

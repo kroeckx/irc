@@ -114,6 +114,7 @@ aClient	*cptr;
 char	*fmt, *server;
 void	*p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 {
+	char nbuf[NICKLEN + USERLEN + HOSTLEN + 3] = "";
 	Reg	aClient	*acptr;
 	Reg	int	i;
 
@@ -128,7 +129,17 @@ void	*p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		*/
 		if ((acptr->service->wants & action)
 		    && (!server || !match(acptr->service->dist, server)))
-			sendto_one(acptr, fmt, p1, p2, p3, p4, p5, p6, p7, p8);
+			if ((acptr->service->wants & SERVICE_WANT_PREFIX) && 
+			    IsRegisteredUser(cptr))
+			    {
+				sprintf(nbuf, "%s!%s@%s", cptr->name,
+					cptr->user->username,cptr->user->host);
+				sendto_one(acptr, fmt, nbuf, p2, p3, p4, p5,
+					   p6, p7, p8);
+			    }
+			else
+				sendto_one(acptr, fmt, p1, p2, p3, p4, p5,
+					   p6, p7, p8);
 	    }
 	return;
 }
@@ -324,8 +335,8 @@ char	*parv[];
 
 #ifdef	USE_SERVICES
 	check_services_butone(SERVICE_WANT_SERVICE, NULL, sptr,
-				"SERVICE %s %s %s %d %d :%s", sptr->name,
-				server, dist, type, metric, info);
+			      "SERVICE %s %s %s %d %d :%s", sptr->name,
+			      server, dist, type, metric, info);
 #endif
 
 	for (i = fdas.highest; i >= 0; i--)

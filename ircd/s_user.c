@@ -579,7 +579,7 @@ char	*nick, *username;
 		istat.is_myclnt++;
 	    }
 #ifdef	USE_SERVICES
-	check_services_butone(SERVICE_WANT_NICK, user->server, sptr,
+	check_services_butone(SERVICE_WANT_NICK, user->server, NULL,
 			      "NICK %s :%d", nick, sptr->hopcount);
 	check_services_butone(SERVICE_WANT_USER, user->server, sptr,
 			      ":%s USER %s %s %s :%s", nick, user->username, 
@@ -992,7 +992,7 @@ int	notice;
 		    if (!notice)
 			    sendto_one(sptr, err_str(ERR_TOOMANYTARGETS,
 						     parv[0]),
-				       "Too many recipients", nick); 
+				       "Too many", nick); 
 		    continue;      
 		}   
 		/*

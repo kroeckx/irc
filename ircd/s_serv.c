@@ -513,7 +513,7 @@ char	*parv[];
 				   acptr->name, hop+1, stok, acptr->info);
 		    }
 #ifdef	USE_SERVICES
-		check_services_butone(SERVICE_WANT_SERVER, acptr->name, sptr,
+		check_services_butone(SERVICE_WANT_SERVER, acptr->name, acptr,
 					":%s SERVER %s %d :%s", parv[0],
 					acptr->name, hop+1, acptr->info);
 #endif
@@ -2064,14 +2064,36 @@ aClient *cptr, *sptr;
 int	parc;
 char	*parv[];
 {
+#ifdef	CACHED_MOTD
+	register aMotd *temp;
+	struct tm *tm;
+#else
 	int	fd;
 	char	line[80];
 	Reg	char	 *tmp;
 	struct	stat	sb;
 	struct	tm	*tm;
+#endif
 
 	if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
 		return 5;
+#ifdef CACHED_MOTD
+	tm = &motd_tm;
+	if (motd == NULL)
+	    {
+		sendto_one(sptr, err_str(ERR_NOMOTD, parv[0]));
+		return 1;
+	    }
+	sendto_one(sptr, rpl_str(RPL_MOTDSTART, parv[0]), ME);
+	sendto_one(sptr, ":%s %d %s :- %d/%d/%d %d:%02d", ME, RPL_MOTD,
+		   parv[0], tm->tm_mday, tm->tm_mon + 1, 1900 + tm->tm_year,
+		   tm->tm_hour, tm->tm_min);
+	temp = motd;
+	for(temp=motd;temp != NULL;temp = temp->next)
+		sendto_one(sptr, rpl_str(RPL_MOTD, parv[0]), temp->line);
+	sendto_one(sptr, rpl_str(RPL_ENDOFMOTD, parv[0]));
+	return 2;
+#else
 	/*
 	 * stop NFS hangs...most systems should be able to open a file in
 	 * 3 seconds. -avalon (curtesy of wumpus)
@@ -2103,7 +2125,8 @@ char	*parv[];
 	sendto_one(sptr, rpl_str(RPL_ENDOFMOTD, parv[0]));
 	(void)close(fd);
 	return 2;
-    }
+#endif	/* CACHED_MOTD */
+}
 
 /*
 ** m_close - added by Darren Reed Jul 13 1992.
@@ -2171,9 +2194,6 @@ char	*parv[];
 ** A better way might be to store in Server structure and use servp. -krys
 */
 
-/* The following has not been tested much, it seems to work, but
- * if you #define it and something bad happens, don't blame me. :-)
- */
 static char	**server_name = NULL;
 static int	server_max = 0, server_num = 0;
 
@@ -2219,8 +2239,12 @@ char *sname;
 	if (i == server_max)
 	  {
 	    /* server_name[] array is full, let's make it bigger! */
-	    server_name = (char **) MyRealloc((char *)server_name,
+	    if (server_name)
+		    server_name = (char **) MyRealloc((char *)server_name,
 					      sizeof(char *)*(server_max+=50));
+	    else
+		    server_name = (char **) MyMalloc((char *)server_name,
+					     sizeof(char *)*(server_max=50));
 	  }
 	server_name[server_num] = mystrdup(sname);
 	return server_num++;
