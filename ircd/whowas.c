@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.4 2000/12/01 21:29:39 q Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.5 2001/02/09 15:41:46 q Exp $";
 #endif
 
 #include "os.h"
@@ -38,22 +38,27 @@ int	ww_index = 0, ww_size = MAXCONNECTIONS*2;
 static	aLock	*locked;
 int	lk_index = 0, lk_size = MAXCONNECTIONS*2;
 
-static	void	grow_history()
+static	void	grow_whowas()
 {
 	int	osize = ww_size;
 
-	Debug((DEBUG_ERROR, "Whowas/grow_history ww:%d, lk:%d, #%d, %#x/%#x",
+	Debug((DEBUG_ERROR, "grow_whowas ww:%d, lk:%d, #%d, %#x/%#x",
 			    ww_size, lk_size, numclients, was, locked));
 	ww_size = (int)((float)numclients * 1.1);
 	was = (aName *)MyRealloc((char *)was, sizeof(*was) * ww_size);
 	bzero((char *)(was + osize), sizeof(*was) * (ww_size - osize));
-	lk_size = (int)((float)numclients * 1.1);
-	locked = (aLock *)MyRealloc((char *)locked, sizeof(*locked) * lk_size);
-	bzero((char *)(locked + osize), sizeof(*locked) * (lk_size - osize));
-	Debug((DEBUG_ERROR, "Whowas/grow_history %#x/%#x", was, locked));
+	Debug((DEBUG_ERROR, "grow_whowas %#x", was));
 	ircd_writetune(tunefile);
 }
 
+static	void	grow_locked()
+{
+	int	osize = lk_size;
+
+	lk_size = ww_size;
+	locked = (aLock *)MyRealloc((char *)locked, sizeof(*locked) * lk_size);
+	bzero((char *)(locked + osize), sizeof(*locked) * (lk_size - osize));
+}
 
 /*
 ** add_history
@@ -155,6 +160,10 @@ Reg	aClient	*cptr, *nodelay;
 			 */
 			strcpy(locked[lk_index].nick, np->ww_nick);
 			locked[lk_index++].logout = np->ww_logout;
+			if ((lk_index == lk_size) && (lk_size != ww_size))
+			{
+				grow_locked();
+			}
 			if (lk_index >= lk_size)
 				lk_index = 0;
 		    }
@@ -189,7 +198,7 @@ Reg	aClient	*cptr, *nodelay;
 
 	ww_index++;
 	if ((ww_index == ww_size) && (numclients > ww_size))
-		grow_history();
+		grow_whowas();
 	if (ww_index >= ww_size)
 		ww_index = 0;
 	return;
