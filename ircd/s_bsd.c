@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.13 2001/02/10 23:36:27 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.14 2001/03/04 19:21:57 q Exp $";
 #endif
 
 #include "os.h"
@@ -1606,15 +1606,9 @@ add_con_refuse:
 			    (acptr->hostp) ? acptr->hostp->h_name :
 			    acptr->sockhost);
 		del_queries((char *)acptr);
-# ifdef INET6
-		(void)sendto(acptr->fd,
-			     "ERROR :Too rapid connections from your host\r\n",
-			     46, 0, 0, 0);
-# else
 		(void)send(acptr->fd,
 			   "ERROR :Too rapid connections from your host\r\n",
 			   46, 0);
-# endif
 		goto add_con_refuse;
 	    }
 #endif
@@ -1741,14 +1735,8 @@ aClient *cptr;
 			sendto_flag(SCH_ERROR, "All connections in use. (%s)",
 				    get_client_name(cptr, TRUE));
 			find_bounce(NULL, 0, fdnew);
-#ifdef INET6
-			(void)sendto(fdnew,
-				     "ERROR :All connections in use\r\n",
-				     32, 0, 0, 0);
-#else
 			(void)send(fdnew, "ERROR :All connections in use\r\n",
 				   32, 0);
-#endif
 			(void)close(fdnew);
 			continue;
 		    }

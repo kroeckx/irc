@@ -1,3 +1,8 @@
+2001-03-04	Kurt Roeckx
+
+	* bsd.c, s_bsd.c: Remove some sendto()s for ipv6, and use send() like
+	  with ipv4.
+
 2001-03-02	Piotr Kucharski
 
 	* channel.c/m_kick(): 'KICK #chan1,#chan2 nick1,nick2' was not
