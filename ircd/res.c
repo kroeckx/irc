@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.11 2001/10/18 19:54:54 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.12 2003/10/11 01:13:04 chopin Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -430,6 +430,12 @@ int	type;
 
 	if (rptr && !index(hname, '.') && ircd_res.options & RES_DEFNAMES)
 	    {
+		if (sizeof(hname) - 1 /* ending \0 */ <
+			strlen(hname) + 1 /* dot */ + strlen(ircd_res.defdname))
+		{
+			/* or some other retval? */
+			return -1;
+		}
 		(void)strncat(hname, dot, sizeof(hname) - len - 1);
 		len++;
 		(void)strncat(hname, ircd_res.defdname, sizeof(hname) - len -1);
@@ -636,7 +642,6 @@ HEADER	*hptr;
 		cp += 4; /* INT32SZ */
 		dlen =  (int)ircd_getshort((u_char *)cp);
 		cp += 2; /* INT16SZ */
-		rptr->type = type;
 
 		len = strlen(hostbuf);
 		/* name server never returns with trailing '.' */
@@ -649,6 +654,16 @@ HEADER	*hptr;
 			len = MIN(len + strlen(ircd_res.defdname),
 				  sizeof(hostbuf) - 1);
 		    }
+
+		/* Check that it's a possible reply to the request we send. */
+		if (rptr->type != type && type != T_CNAME)
+		{
+			sendto_flag(SCH_ERROR, "Wrong reply type looking up %s."
+				"Got: %d, expected %d.", hostbuf,
+				type, rptr->type);
+			cp += dlen;
+			continue;
+		}
 
 		switch(type)
 		{
@@ -1720,8 +1735,38 @@ int len;
 	char	*s, c;
 
 	for (s = name; (c = *s) && len; s++, len--)
+#ifdef RESTRICT_HOSTNAMES
+	{
+		/* basic character set */
+		if (isascii(c) && isalnum(c))
+			continue;
+		
+		/* special case: hyphen */
+		if ((c == '-') &&	/* we accept '-', but only if... */
+		    (s != name) &&	/* not "-aaa.bbb"                */
+		    (s[-1] != '.') &&	/* not "aaa.-bbb"                */
+		    (len != 1) &&	/* not "aaa.bbb-"                */
+		    (s[1] != '.'))	/* not "aaa-.bbb"                */
+			continue;
+
+		/* start of a new component */
+		if ((c == '.') &&	/* we accept '.', but only if... */
+		    (s != name) &&	/* not ".aaa.bbb"                */
+		    (s[-1] != '.'))	/* not "aaa..bbb"                */
+			continue;
+
+#ifdef HOSTNAMES_UNDERSCORE
+		/* ignore underscore in certain circumstances */
+		if (c == '_')
+			continue;
+#endif /* HOSTNAMES_UNDERSCORE */
+
+		return -1;
+	}
+#else /* RESTRICT_HOSTNAMES */
 		if (isspace(c) || (c == 0x7) || (c == ':') ||
 		    (c == '*') || (c == '?'))
 			return -1;
+#endif /* RESTRICT_HOSTNAMES */
 	return 0;
 }
