@@ -1,3 +1,11 @@
+2001-06-29  Kurt Roeckx
+
+	* s_user.c/m_who(): Only call who_one() when we found a client.
+	* send.c: Removed a ; after an #endif
+	* s_conf.c: Removed a ; after an #endif
+	* s_debug.c/send_defines(): removed the space after LDCTL:
+	* channel.c/m_njoin(): Don't send MODE +O to clients.
+
 2001-05-31  Piotr Kucharski
 
 	* support.c/inetntop(): logic flaw in checking for
@@ -95,6 +103,11 @@
 	* s_auth.c: changing various sizeof(dynamic buffer) to strlen().
 	* list.c/make_client(),s_auth.c/set_clean_username: use strdup().
 	* a_conf.c/conf_read(): close iauth conf file.
+
+2001-04-01  Kurt Roeckx
+
+	* s_user.c/m_whois(): Fix a memory leak.
+	* channel.c/m_kick(): Fix a memory leak.
 
 2001-03-13  Piotr Kucharski
 
