@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.17 2003/10/11 09:58:08 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.18 2003/10/11 09:59:59 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1467,6 +1467,15 @@ char	**comment;
 	if (!strcmp(host, ip))
 		ip = NULL; /* we don't have a name for the ip# */
 	name = cptr->user->username;
+	if (IsRestricted(cptr) && name[0] == '+')
+	{
+		/*
+		** since we added '+' at the begining of valid
+		** ident response, remove it here for kline
+		** comparison --Beeth
+		*/
+		name++;
+	}
 	ident = cptr->auth;
 
 	if (strlen(host)  > (size_t) HOSTLEN ||
