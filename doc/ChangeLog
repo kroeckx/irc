@@ -1,3 +1,19 @@
+2004-02-25  Piotr Kucharski
+
+	All backported from 2.11 tree:
+	* channel.c/m_part(): buffer overflow resulting in network desync.
+	* channel.c/m_kick(): "KICK # me,other" caused desync on remote servers:
+          it was sent in two consecutive KICKs, first one removed client from
+          channel and second one thus failed. No more "NJOIN protocol error".
+	* s_user.c/m_quit(): enclose user quits within double quotes.
+	* s_serv.c/m_squit(): add "by whom" to squit comment.
+        * s_serv.c/m_stats(): cleanup of what to check_link (RPL_TRYAGAIN).
+        * s_serv.c: new function report_listeners() showing P:lines (IP, port)
+          and number of clients using it.
+        * s_serv.c: new stats (P) for report_listeners().
+	* s_user.c/m_pass(): don't copy PASS params to info when issued
+          after USER or SERVICE.
+
 2003-12-09  Piotr Kucharski
 
 	* s_conf.c/find_denied(): try find_client with server name (from C:),
