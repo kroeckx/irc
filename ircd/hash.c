@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.6 2000/04/09 21:07:29 q Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.7 2000/05/14 16:59:35 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -266,8 +266,6 @@ int	new;
 		chsize = 0;
 		channelTable = table;
 		for (chptr = channel; chptr; chptr = chptr->nextch)
-			chptr->hnextch = NULL;
-		for (chptr = channel; chptr; chptr = chptr->nextch)
 			(void)add_to_channel_hash_table(chptr->chname, chptr);
 		MyFree(otab);
 	    }
@@ -304,8 +302,6 @@ int	new;
 			    osize, new, svsize);
 		svsize = 0;
 		serverTable = table;
-		for (sptr = svrtop; sptr; sptr = sptr->nexts)
-			sptr->shnext = NULL;
 		for (sptr = svrtop; sptr; sptr = sptr->nexts)
 			(void)add_to_server_hash_table(sptr, sptr->bcptr);
 		MyFree(otab);
@@ -531,6 +527,7 @@ aClient	*cptr;
 			 * block of code is also used for channels and
 			 * servers for the same performance reasons.
 			 */
+			/* I think this is useless concern --Beeth
 			if (prv)
 			    {
 				aClient *tmp2;
@@ -540,6 +537,7 @@ aClient	*cptr;
 				prv->hnext = tmp->hnext;
 				tmp->hnext = tmp2;
 			    }
+			*/
 			return (tmp);
 		    }
 	clmiss++;
@@ -569,6 +567,7 @@ aClient *cptr;
 		if (hv == tmp->hashv && mycmp(server, tmp->name) == 0)
 		    {
 			clhits++;
+			/*
 			if (prv)
 			    {
 				aClient *tmp2;
@@ -578,6 +577,7 @@ aClient *cptr;
 				prv->hnext = tmp->hnext;
 				tmp->hnext = tmp2;
 			    }
+			*/
 			return (tmp);
 		    }
 	    }
@@ -632,6 +632,7 @@ aChannel *chptr;
 		if (hv == tmp->hashv && mycmp(name, tmp->chname) == 0)
 		    {
 			chhits++;
+			/*
 			if (prv)
 			    {
 				register aChannel *tmp2;
@@ -641,6 +642,7 @@ aChannel *chptr;
 				prv->hnextch = tmp->hnextch;
 				tmp->hnextch = tmp2;
 			    }
+			*/
 			return (tmp);
 		    }
 	chmiss++;
