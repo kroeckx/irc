@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21.2.4 2000/05/04 16:37:48 q Exp $";
+static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21.2.5 2001/04/07 00:51:48 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -366,6 +366,7 @@ char *cfile;
 
 			last = &((*last)->nexti);
 		    }
+		fclose(cfh);
 	    }
 
 	if (ident == NULL)

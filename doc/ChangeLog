@@ -3,6 +3,7 @@
 	* whowas.c/m_whowas(): don't send away info.
 	* s_auth.c: changing various sizeof(dynamic buffer) to strlen().
 	* list.c/make_client(),s_auth.c/set_clean_username: use strdup().
+	* a_conf.c/conf_read(): close iauth conf file.
 
 2001-03-13  Piotr Kucharski
 
