@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22 1999/07/11 22:09:59 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22.2.1 2000/08/15 22:17:16 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -223,6 +223,12 @@ parse_ircd()
 		DebugLog((ALOG_DSPY, 0, "parse_ircd(): got [%s]", buf));
 
 		cl = atoi(chp = buf);
+		if (cl >= MAXCONNECTIONS)
+		    {
+			sendto_log(ALOG_IRCD, LOG_CRIT,
+			   "Recompile iauth, (fatal %d>=%d)", cl, MAXCONNECTIONS);
+			exit(1);
+		    }
 		while (*chp++ != ' ');
 		switch (chp[0])
 		    {
@@ -315,7 +321,7 @@ parse_ircd()
 			if (!(cldata[cl].state & A_ACTIVE))
 			    {
 				/* this should really not happen */
-                                sendto_log(ALOG_IRCD, LOG_CRIT,
+				sendto_log(ALOG_IRCD, LOG_CRIT,
 					   "Entry %d [R] is not active!", cl);
 				break;
 			    }
@@ -323,23 +329,22 @@ parse_ircd()
 			if (cldata[ncl].state & A_ACTIVE)
 			    {
 				/* this is not supposed to happen!!! */
-                                sendto_log(ALOG_IRCD, LOG_CRIT,
-			   "Entry %d [R] is already active (fatal)!", ncl);
+				sendto_log(ALOG_IRCD, LOG_CRIT,
+				   "Entry %d [R] is already active (fatal)!", ncl);
 				exit(1);
 			    }
 			if (cldata[ncl].instance || cldata[ncl].rfd > 0 ||
 			    cldata[ncl].wfd > 0)
 			    {
 				sendto_log(ALOG_IRCD, LOG_CRIT,
-				   "Entry %d is already active! (fatal)",
-					   ncl);
+				   "Entry %d is already active! (fatal)", ncl);
 				exit(1);
 			    }
 			if (cldata[ncl].authuser)
 			    {
 				/* shouldn't be here - hmmpf */
 				sendto_log(ALOG_IRCD|ALOG_DIO, LOG_WARNING,
-					   "Unreleased data [%d]!", ncl);
+				   "Unreleased data [%d]!", ncl);
 				free(cldata[ncl].authuser);
 				cldata[ncl].authuser = NULL;
 			    }
