@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43 1999/07/02 16:38:21 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.1 2000/02/03 18:57:37 q Exp $";
 #endif
 
 #include "os.h"
@@ -331,8 +331,14 @@ read_iauth()
 			    start = end;
 			    continue;
 			}
+#ifndef	INET6
 		    sprintf(tbuf, "%c %d %s %u ", start[0], i,
 			    inetntoa((char *)&cptr->ip), cptr->port);
+#else
+		    sprintf(tbuf, "%c %d %s %u ", start[0], i,
+			    inetntop(AF_INET6, (char *)&cptr->ip, 
+			    mydummy, MYDUMMY_SIZE), cptr->port);
+#endif
 		    if (strncmp(tbuf, start, strlen(tbuf)))
 			{
 			    /* this is fairly common and can be ignored */
