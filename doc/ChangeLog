@@ -6,6 +6,7 @@
 	* ircd.c/ircd_readtune(): initialize buf with zeroes.
 	* ircd.c/main(),server_reboot(): make syslog stamp ircd messages
 	  only with basename(argv[0]) instead of argv[0].
+	* channel.c/m_njoin(): we must initialize p used in strtoken.
 
 2001-05-05  Piotr Kucharski
 
