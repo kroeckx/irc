@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.9 2000/12/08 21:19:55 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.10 2000/12/11 21:10:03 q Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -38,7 +38,7 @@ static	ResRQ	*last, *first;
 
 static	void	rem_cache __P((aCache *));
 static	void	rem_request __P((ResRQ *));
-static	int	do_query_name __P((Link *, char *, ResRQ *));
+static	int	do_query_name __P((Link *, char *, ResRQ *, int));
 static	int	do_query_number __P((Link *, struct IN_ADDR *, ResRQ *));
 static	void	resend_query __P((ResRQ *));
 static	int	proc_answer __P((ResRQ *, HEADER *, char *, char *));
@@ -362,9 +362,16 @@ int	id;
 	return NULL;
 }
 
-struct	hostent	*gethost_byname(name, lp)
+/*
+ * Get a host address of type type, by it's name.
+ * lp contains the client info.
+ * returns the host info if found in cache, or NULL when it doesn't
+ * know it yet.
+ */
+struct	hostent	*gethost_byname_type(name, lp, type)
 char	*name;
 Link	*lp;
+int	type;
 {
 	Reg	aCache	*cp;
 
@@ -373,8 +380,25 @@ Link	*lp;
 		return (struct hostent *)&(cp->he);
 	if (!lp)
 		return NULL;
-	(void)do_query_name(lp, name, NULL);
+	(void)do_query_name(lp, name, NULL, type);
 	return NULL;
+}
+
+/*
+ * Get a host address by it's name.
+ * For IPv6, this will first try T_AAAA, and if that fails tries T_A, 
+ * inside get_res().
+ * IPv4 is always T_A.
+ * It returns a pointer to the host info, or NULL if it didn't find
+ * it yet.
+ */
+struct	hostent	*gethost_byname(char *name, Link *lp)
+{
+#ifdef	INET6
+	return gethost_byname_type(name, lp, T_AAAA);
+#else
+	return gethost_byname_type(name, lp, T_A);
+#endif
 }
 
 struct	hostent	*gethost_byaddr(addr, lp)
@@ -392,10 +416,11 @@ Link	*lp;
 	return NULL;
 }
 
-static	int	do_query_name(lp, name, rptr)
+static	int	do_query_name(lp, name, rptr, type)
 Link	*lp;
 char	*name;
 Reg	ResRQ	*rptr;
+int	type;
 {
 	char	hname[HOSTLEN+1];
 	int	len;
@@ -417,22 +442,12 @@ Reg	ResRQ	*rptr;
 	if (!rptr)
 	    {
 		rptr = make_request(lp);
-#ifdef INET6
-		rptr->type = T_AAAA;
-#else
-		rptr->type = T_A;
-#endif
+		rptr->type = type;
 		rptr->name = (char *)MyMalloc(strlen(name) + 1);
 		(void)strcpy(rptr->name, name);
 	    }
 	Debug((DEBUG_DNS,"do_query_name(): %s ", hname));
-#ifdef INET6
-	query_name(hname, C_IN, T_AAAA, rptr);
-	query_name(hname, C_IN, T_A, rptr);
-	return 0;
-#else
-	return (query_name(hname, C_IN, T_A, rptr));
-#endif
+	return query_name(hname, C_IN, type, rptr);
 }
 
 /*
@@ -565,7 +580,7 @@ ResRQ	*rptr;
 	case T_AAAA:
 #endif
 	case T_A:
-		(void)do_query_name(NULL, rptr->name, rptr);
+		(void)do_query_name(NULL, rptr->name, rptr, rptr->type);
 		break;
 	default:
 		break;
@@ -887,6 +902,7 @@ char	*lp;
 	if (a > 0 && rptr->type == T_PTR)
 	    {
 		struct	hostent	*hp2 = NULL;
+		int	type;
 
 		if (BadPtr(rptr->he.h_name))	/* Kludge!	960907/Vesa */
 			goto getres_err;
@@ -906,7 +922,20 @@ char	*lp;
 		 * type we automatically gain the use of the cache with no
 		 * extra kludges.
 		 */
-		if ((hp2 = gethost_byname(rptr->he.h_name, &rptr->cinfo)))
+#ifdef	INET6
+		if (IN6_IS_ADDR_V4MAPPED(&rptr->he.h_addr))
+		{
+			type = T_A;
+		}
+		else
+		{
+			type = T_AAAA;
+		}
+#else
+		type = T_A;
+#endif
+		if ((hp2 = gethost_byname_type(rptr->he.h_name, &rptr->cinfo,
+				type)))
 			if (lp)
 				bcopy((char *)&rptr->cinfo, lp, sizeof(Link));
 		/*
@@ -961,8 +990,7 @@ getres_err:
 				rptr->retries = ircd_res.retry;
 				rptr->sends = 0;
 				rptr->resend = 1;
-#if 0
-/* #ifdef INET6 */
+#ifdef INET6
 /* Comment out this ifdef to get names like ::ffff:a.b.c.d */
 /* We always want to query for both IN A and IN AAAA */
 				if(rptr->type == T_AAAA)
@@ -973,8 +1001,7 @@ getres_err:
 			    }
 			else
 			    {
-#if 0
-/* #ifdef INET6 */
+#ifdef INET6
 /* Comment out this ifdef to get names like ::ffff:a.b.c.d */
 				if(rptr->type == T_AAAA)
 					query_name(rptr->name, C_IN, T_A, rptr);
