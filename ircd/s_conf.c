@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42 1999/05/01 21:29:13 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.1 2000/01/01 19:09:40 q Exp $";
 #endif
 
 #include "os.h"
@@ -83,30 +83,68 @@ int	mask;
 
 /*
  * Match address by #IP bitmask (10.11.12.128/27)
+ * Now should work for IPv6 too.
+ * returns -1 on error, 0 on match, 1 when NO match.
  */
 int    match_ipmask(mask, cptr)
 char   *mask;
 aClient *cptr;
 {
-        int i1, i2, i3, i4, m;
-        u_long lmask, baseip;
-	char *at;
+	int	m;
+	char	*p;
+	struct  IN_ADDR addr;
+	char	dummy[128];
+	u_long	lmask;
+#ifdef	INET6
+	int	j;
+#endif;
  
-	if (at = index(mask, '@'))
-		mask = at + 1;
-        if (sscanf(mask, "%d.%d.%d.%d/%d", &i1, &i2, &i3, &i4, &m) != 5 ||
-           m < 1 || m > 31) {
-               sendto_flag(SCH_LOCAL, "Ignoring bad mask: %s", mask);
-                return -1;
-        }
-        lmask = htonl((u_long)0xffffffffL << (32 - m)); /* /24->0xffffff00ul */
-        baseip = htonl(i1 * 0x1000000 + i2 * 0x10000 + i3 * 0x100 + i4);
-#ifdef INET6
-	return 1;
-/*        return ((cptr->ip.s6_addr & lmask) == baseip) ? 0 : 1;*/
+	strncpyzt(dummy, mask, sizeof(dummy));
+	mask = dummy;
+	if ((p = index(mask, '@')))
+	{
+		*p = '\0';
+		if (match(mask, cptr->username))
+			return 1;
+		mask = p + 1;
+	}
+	if (!(p = index(mask, '/')))
+		goto badmask;
+	*p = '\0';
+	
+	m = atoi(p + 1);
+#ifndef	INET6
+	if (m < 0 || m > 32)
+		goto badmask;
+	lmask = htonl((u_long)0xffffffffL << (32 - m));
+	addr.s_addr = inetaddr(mask);
+	return ((addr.s_addr ^ cptr->ip.s_addr) & lmask) ? 1 : 0;
 #else
-        return ((cptr->ip.s_addr & lmask) == baseip) ? 0 : 1;
+	if (m < 0 || m > 128)
+		goto badmask;
+
+	inet_pton(AF_INET6, mask, (void *)addr.s6_addr);
+
+	j = m & 0x1F;	/* mumber not mutliple of 32 bits */
+	m >>= 5;	/* number of 32 bits */
+
+	if (m && memcmp((void *)(addr.s6_addr), 
+		(void *)(cptr->ip.s6_addr), m << 2))
+		return 1;
+
+	if (j)
+	{
+		lmask = htonl((u_long)0xffffffffL << (32 - j));
+		if ((((u_int32_t *)(addr.s6_addr))[m] ^
+			((u_int32_t *)(cptr->ip.s6_addr))[m]) & lmask)
+			return 1;
+	}
+
+	return 0;
 #endif
+badmask:
+	sendto_flag(SCH_ERROR, "Ignoring bad mask: %s", mask);
+	return -1;
 }
 
 /*
