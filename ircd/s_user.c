@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.27 2004/02/25 15:20:58 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.28 2004/02/25 15:54:39 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2534,6 +2534,15 @@ char	*parv[];
 		sendto_one(cptr, err_str(ERR_NEEDMOREPARAMS, parv[0]), "PASS");
 		return 1;
 	    }
+	strncpyzt(cptr->passwd, password, sizeof(cptr->passwd));
+	if (cptr->user || cptr->service)
+	{
+		/* If we have one of these structures allocated, it means
+		** that PASS was issued after USER or SERVICE. No need to
+		** copy PASS parameters to info field, then. */
+		return 1;
+	}
+
 	/* Temporarily store PASS pwd *parameters* into info field */
 	if (parc > 2 && parv[2])
 	    {
@@ -2552,7 +2561,6 @@ char	*parv[];
 			MyFree(cptr->info);
 		cptr->info = mystrdup(buf);
 	    }
-	strncpyzt(cptr->passwd, password, sizeof(cptr->passwd));
 	return 1;
     }
 
