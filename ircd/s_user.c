@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.12 2001/02/09 11:35:34 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.13 2001/02/09 16:27:12 q Exp $";
 #endif
 
 #include "os.h"
@@ -2190,7 +2190,7 @@ char	*parv[];
 		acptr = find_server(origin, NULL);
 	if (!acptr || acptr != sptr)
 		origin = cptr->name;
-	if (!BadPtr(destination) && mycmp(destination, ME) != 0)
+	if (!BadPtr(destination) && match(destination, ME) != 0)
 	    {
 		if ((acptr = find_server(destination, NULL)))
 			sendto_one(acptr,":%s PING %s :%s", parv[0],
