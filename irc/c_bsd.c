@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.5 1998/12/13 00:02:35 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: c_bsd.c,v 1.5.4.1 1999/11/03 22:00:00 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -47,6 +47,9 @@ aClient	*cptr;
 	int	sock;
 	static	struct	hostent *hp;
 	static	struct	SOCKADDR_IN server;
+#ifdef HAVE_GETIPNODEBYNAME
+	int	error_num;
+#endif
 
 	sock = socket(AFINET, SOCK_STREAM, 0);
 	if (sock < 0) {
@@ -66,14 +69,24 @@ aClient	*cptr;
 #endif
 	else { 
 #ifdef INET6
+# ifndef HAVE_GETIPNODEBYNAME
 		res_init();
 		_res.options|=RES_USE_INET6;
+# endif
 #endif
+#ifndef HAVE_GETIPNODEBYNAME
 		hp = gethostbyname(host);
 		if (hp == 0) {
 			fprintf(stderr, "%s: unknown host\n", host);
 			exit(2);
 		}
+#else
+		hp = getipnodebyname(host, AF_INET6, AI_DEFAULT, &error_num);
+		if (error_num) {
+			fprintf(stderr, "%s: unknown host\n", host);
+			exit(2);
+		}
+#endif
 		bcopy(hp->h_addr, (char *)&server.SIN_ADDR, hp->h_length);
 	}
 	server.SIN_PORT = htons(portnum);
@@ -88,6 +101,9 @@ aClient	*cptr;
 	bcopy(server.sin6_addr.s6_addr, cptr->ip.s6_addr, IN6ADDRSZ);
 #else
 	cptr->ip.s_addr = server.sin_addr.s_addr;
+#endif
+#ifdef	HAVE_GETIPNODEBYNAME
+	freehostent(hp);
 #endif
 	return(sock);
 }

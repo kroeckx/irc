@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.1 1999/09/23 13:08:43 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.2 1999/11/03 22:00:00 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -2818,6 +2818,10 @@ int	len;
 	struct	hostent	*hp;
 	char	*cname = cptr->name;
 	aConfItem	*aconf;
+#ifdef HAVE_GETIPNODEBYNAME
+	int	error_num1, error_num2;
+	struct	hostent	*hp1, *hp2;
+#endif
 
 	/*
 	** Setup local socket structure to use for binding to.
@@ -2848,7 +2852,14 @@ int	len;
 	*/
 	if (BadPtr(cname))
 		return;
+#ifdef HAVE_GETIPNODEBYNAME
+	hp1 = getipnodebyname(cname, AF_INET6, AI_DEFAULT, &error_num1);
+	hp2 = getipnodebyname(name, AF_INET6, AI_DEFAULT, &error_num2);
+	if (! error_num1) hp=hp1; else hp=hp2;
+	if ((! error_num1) || (! error_num2)) 
+#else
 	if ((hp = gethostbyname(cname)) || (hp = gethostbyname(name)))
+#endif
 	    {
 		char	*hname;
 		int	i = 0;
@@ -2877,6 +2888,10 @@ int	len;
 		Debug((DEBUG_DEBUG,"local name is %s",
 				get_client_name(&me,TRUE)));
 	    }
+#ifdef HAVE_GETIPNODEBYNAME
+	freehostent(hp1);
+	freehostent(hp2);
+#endif
 	return;
 }
 
