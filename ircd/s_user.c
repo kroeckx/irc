@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.6 2000/04/09 21:05:27 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.7 2000/08/13 18:24:56 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2376,7 +2376,7 @@ char	*parv[];
 		       parv[0], sptr->user->username, sptr->user->host,
 		       sptr->auth, IsUnixSocket(sptr) ? sptr->sockhost :
 #ifdef INET6
-                       inet_ntop(AF_INET6, (char *)&sptr->ip), mydummy, MYDUMMY_SIZE);
+                       inet_ntop(AF_INET6, (char *)&sptr->ip, mydummy, MYDUMMY_SIZE));
 #else
                        inetntoa((char *)&sptr->ip));
 #endif
