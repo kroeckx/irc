@@ -1,3 +1,17 @@
+2001-10-18  Piotr Kucharski
+
+	* res.c/make_cache(): bug allowing to spoof hosts (from Q).
+	* a_defines.h, a_log_def.h: do not debug iauth by default (from jv).
+	* send.c/sendto_flog(): format string bug.
+	* send.c/send_message(): service exceeding sendq under some conditions
+	  entered endless loop of errors (thus coring ircd) (reported by Gael).
+	* send.c/send_message(): label 'tryagain' moved below zip_buffer,
+	  so we don't zip already zipped buffer (from Oleg Medinsky).
+	* s_user.c/m_umode(): clear local oper received from remote
+	  servers (fixes wrong oper count!) (from Oleg Medinsky).
+	* packet.c/dopacket(): me.receiveK wasn't updated properly (from jv).
+	* config.h.dist: define NOWRITEALARM by default, saves us calls.
+
 2.10.3p2
 
 2001-07-07  Piotr Kucharski
