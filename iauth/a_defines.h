@@ -21,7 +21,7 @@
     definitions used by the authentication process.
  */
 
-#define IAUTH_DEBUG	1
+#undef IAUTH_DEBUG
 
 #include "config.h"
 #include "patchlevel.h"
