@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: match.c,v 1.5 1999/02/05 22:00:25 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: match.c,v 1.5.2.1 2000/01/01 17:57:31 q Exp $";
 #endif
 
 #include "os.h"
@@ -172,6 +172,9 @@ char	*mask, *name;
 	char	*ma = mask, *na = name;
 	int	wild = 0, q = 0, calls = 0;
 
+	if (!*mask)
+		return 1;
+
 	while (1)
 	    {
 #ifdef	MAX_ITERATIONS
@@ -270,7 +273,7 @@ char	*pattern;
 
 
 /*
-**  Case insensitive comparison of two NULL terminated strings.
+**  Case insensitive comparison of two null terminated strings.
 **
 **	returns	 0, if s1 equal to s2
 **		<0, if s1 lexicographically less than s2
