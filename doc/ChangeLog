@@ -1,3 +1,7 @@
+2001-02-27  Kurt Roeckx
+
+	* c_msg.c/m_join(): Copy the name of the channel just joined.
+
 2001-02-26  Kurt Roeckx
 
 	* ircd.c/main(): Don't die when there is no listen port when called
