@@ -26,6 +26,8 @@ all install config configure:
 		echo "Configuration for ${rev} already exists"; \
 		echo "Please \"cd ${rev}\" first"; \
 	else \
+		@echo "The CONFIGARGS environment variable will be used as"; \
+		@echo "argument to GNU configure script."; \
 		echo "Configuring ${rev}"; \
 		mkdir -p ${rev}; \
 		cd ${rev}; \

@@ -394,6 +394,17 @@ Reg	aClient	*cptr;
 
 	if (cptr->serv)
 	    {
+		if (cptr->serv->userlist)
+#ifdef DEBUGMODE
+			dumpcore("%#x server %s %#x",
+				 cptr, cptr ? cptr->name : "<noname>",
+				 cptr->serv->userlist);
+#else
+			sendto_flag(SCH_ERROR, "* %#x server %s %#x *",
+				    cptr, cptr ? cptr->name : "<noname>",
+				    cptr->serv->userlist);
+#endif
+
 		/* has to be removed from the list of aServer structures */
 		if (cptr->serv->nexts)
 			cptr->serv->nexts->prevs = cptr->serv->prevs;

@@ -844,6 +844,12 @@ Reg	aClient	*cptr;
 			** These are only true when *BOTH* NICK and USER have
 			** been received. -avalon
 			*/
+			if (acptr->user->servp->userlist == NULL)
+				sendto_flag(SCH_ERROR,
+			    "ERROR: USER:%s without SERVER:%s(%d) (to %s)",
+					    acptr->name, acptr->user->server,
+					    acptr->user->servp->tok,
+					    cptr->name);
 			if (i != SV_OLD)
 			    {
 				if (*mlname == '*' &&

@@ -2643,8 +2643,10 @@ aConfItem	*aconf;
 	if (udpfd != -1)
 		return udpfd;
 	bzero((char *)&from, sizeof(from));
-	from.sin_addr.s_addr = aconf->passwd ? inet_addr(aconf->passwd) :
-					       htonl(INADDR_ANY); /* hmmpf */
+	if (aconf->passwd && isdigit(*aconf->passwd))
+	  from.sin_addr.s_addr = inet_addr(aconf->passwd);
+	else
+	  from.sin_addr.s_addr = htonl(INADDR_ANY); /* hmmpf */
 	from.sin_port = htons((u_short) aconf->port);
 	from.sin_family = AF_INET;
 

@@ -11,9 +11,23 @@ AC_CONFIG_HEADER(setup.h:include/setup.h.in)
 
 AC_PROG_CC
 AC_PROG_CPP
-AC_ISC_POSIX
 AC_AIX
+AC_ISC_POSIX
 AC_PROG_GCC_TRADITIONAL
+
+dnl SGI's compiler needs -cckr
+AC_MSG_CHECKING(for SGI's cc(1))
+AC_EGREP_CPP(yes, [#ifdef sgi
+yes
+#endif
+],
+if test x$CC = xcc; then
+  CFLAGS="-cckr $CFLAGS"
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi,
+AC_MSG_RESULT(no))
 
 AC_PATH_PROGS(SUM, sum cksum, true)
 

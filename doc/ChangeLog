@@ -1,4 +1,12 @@
-Thu Mar 27 14:03:09 1997  Christophe Kalt
+Wed Apr  2 15:25:54 1997  Christophe Kalt
+
+	* list.c, s_serv.c: added some error notices for users without server.
+
+	* s_bsd.c: fixed UDP port binding when no IP is given.
+
+	* configure.in: add -cckr on SGI when using cc(1)
+
+Thu Mar 27 19:03:09 1997  Christophe Kalt
 
 	* h.h, send.c, s_bsd.c, s_user.c, s_serv.c: amount of transferred
 	data added to file logs.

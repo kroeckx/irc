@@ -691,6 +691,10 @@ char	*sender;
 	    {
 		sendto_flag(SCH_LOCAL, "Squitting unknown %s brought by %s.",
 			    sender, get_client_name(cptr, FALSE));
+		/*
+		** The following one isn't such a good idea, it should be
+		** removed when we get out of beta.
+		*/
 		sendto_ops_butone(NULL, &me,
 			  ":%s WALLOPS :%s Sending SQUIT %s (Unknown from %s)",
 				  ME,ME, sender, get_client_name(cptr, FALSE));
