@@ -29,6 +29,8 @@
 	* a_conf.c/conf_err(): exit iauth on config error (backport).
 	* s_user.c/m_oper(): services were getting reversed local/global
 	  oper status (backport).
+	* ircd.c: core on gdb detach on FreeBSD (backport).
+	* s_auth.c/sendto_iauth(): iauth failing to restart (patch from Q).
 	
 2.10.3p3
 
