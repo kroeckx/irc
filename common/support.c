@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17 1999/06/25 15:36:16 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.1 2000/09/28 20:55:29 q Exp $";
 #endif
 
 #include "os.h"
@@ -465,7 +465,7 @@ size_t	x;
 	    }
 	bzero(ret, (int)x + SZ_EX);
 	bcopy((char *)&ret, ret, SZ_CH);
-	bcopy((char *)&x, ret + SZ_ST, SZ_ST);
+	bcopy((char *)&x, ret + SZ_CH, SZ_ST);
 	bcopy("VAVA", ret + SZ_CHST + (int)x, 4);
 	Debug((DEBUG_MALLOC, "MyMalloc(%ld) = %#x", x, ret + SZ_CHST));
 	for(i = 0, s = marray; *s && i < mindex; i++, s++)
