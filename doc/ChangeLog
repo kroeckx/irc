@@ -1,7 +1,9 @@
 2001-05-13  Piotr Kucharski
 
 	* s_id.c/cache_chid(): an unfortunate typo making negative Cache
-	  size in stats
+	  size in stats (from jv).
+	* s_bsd.c/read_message(), packet.c/dopacket(): if client exceeded
+	  sendq, say so, instead of "Dead Socket" (from jv).
 
 2001-05-06  Piotr Kucharski
 

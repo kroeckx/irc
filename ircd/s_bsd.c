@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.17 2001/05/06 21:57:40 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.18 2001/05/14 04:01:08 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2253,9 +2253,17 @@ int	ro;
 deadsocket:
 				if (TST_READ_EVENT(fd))
 					CLR_READ_EVENT(fd);
-				cptr->exitc = EXITC_ERROR;
-				(void)exit_client(cptr, cptr, &me,
-						  strerror(get_sockerr(cptr)));
+				if (cptr->exitc == EXITC_SENDQ)
+				{
+					(void)exit_client(cptr,cptr,&me,
+						"Max SendQ exceeded");
+				}
+				else
+				{
+					cptr->exitc = EXITC_ERROR;
+					(void)exit_client(cptr, cptr, &me,
+						strerror(get_sockerr(cptr)));
+				}
 				continue;
 			    }
 		    }

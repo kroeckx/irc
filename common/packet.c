@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: packet.c,v 1.8 1999/04/19 22:26:22 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: packet.c,v 1.8.2.1 2001/05/14 04:01:09 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -175,6 +175,8 @@ Reg	int	length;
 				if (cptr->exitc == EXITC_REG)
 					cptr->exitc = EXITC_DEAD;
 				return exit_client(cptr, cptr, &me,
+						   (cptr->exitc == EXITC_SENDQ) ?
+						   "Max SendQ exceeded" :
 						   "Dead Socket");
 			    }
 			/*
