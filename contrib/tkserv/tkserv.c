@@ -372,7 +372,11 @@ int must_be_opered()
 /* check whether origin is authorized to use the service */
 int is_authorized(char *pwd, char *host)
 {
-    FILE *fp;
+#ifdef CRYPTDES
+	char *pwdtmp;
+ 	char salt[3];
+#endif
+    	FILE *fp;
 
     /* if the access file exists, check for authorization */
     if ((fp = fopen(TKSERV_ACCESSFILE, "r")) != NULL)
@@ -401,6 +405,11 @@ int is_authorized(char *pwd, char *host)
             if (token)
 	    {
                 access_pwd = (char *) strdup(token);
+#ifdef CRYPTDES
+		salt[0] = access_pwd[0];
+		salt[1] = access_pwd[1];
+		salt[2] = '\0';
+#endif
 	    }
 
             token = (char *) strtok(NULL, " ");
@@ -425,7 +434,12 @@ int is_authorized(char *pwd, char *host)
             /* check uh, pass and TLD */
             if (!fnmatch(access_uh, uh, 0))
 	    {
+#ifdef CRYPTDES
+		pwdtmp = crypt(pwd, salt);
+		if (pwdtmp && !strcmp(pwdtmp, access_pwd))
+#else
                 if (!strcmp(pwd, access_pwd))
+#endif
 		{
                     if (!tlds)
 		    {
