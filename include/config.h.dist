@@ -399,6 +399,26 @@
 #undef BETTER_NDELAY
 #undef BETTER_CDELAY
 
+/*
+ * Defining this will enable the use of compressed server-server links.
+ * In order to have it work, you must have the zlib version 1.0 or higher.
+ */
+/* #define ZIP_LINKS */
+
+/*
+ * Defining this will add an artificial 2 seconds delay for accepting
+ * connections.  This is the OLD behaviour of the server.
+ */
+#define	SLOW_ACCEPT
+
+/*
+ * Defining this will make the server check for rapid connections from a single
+ * host and reject new connections from this host if the limit is reached.
+ *
+ * IMPORTANT: This **MUST** defined if SLOW_ACCEPT is NOT defined
+ */
+#define	CLONE_CHECK
+
 /* For broken mirc (win/pc) client. Enables old features:
  * 1) Send start-of-list numeric before LIST reply
  * 2) Revert combined "n JOIN #^Go" -> "n JOIN #" "MODE # o n"
@@ -512,12 +532,6 @@
  */
 #define NoV28Links
 
-/*
- * Defining this will enable the use of compressed server-server links.
- * In order to have it work, you must have the zlib version 1.0 or higher.
- */
-/* #define ZIP_LINKS */
-
 #ifdef ZIP_LINKS
 /*
  * the compression level used. (Suggested values: 3, 4, 5)
@@ -525,6 +539,15 @@
  * *very* large increase in CPU usage.
  */ 
 # define	ZIP_LEVEL	5
+#endif
+
+#ifdef	CLONE_CHECK
+/*
+ * If CLONE_CHECK has been defined, these control how the checks are performed,
+ * and how the alarm is triggered.
+ */
+# define	CLONE_MAX	2
+# define	CLONE_PERIOD	10
 #endif
 
 /* ------------------------- END CONFIGURATION SECTION -------------------- */
@@ -647,6 +670,10 @@ error CLIENT_FLOOD undefined
 # if	(ZIP_MINIMUM > ZIP_MAXIMUM)
 error ZIP_MINIMUM needs redefining.
 # endif
+#endif
+
+#if !defined(SLOW_ACCEPT) && !defined(CLONE_CHECK)
+# define	CLONE_CHECK
 #endif
 
 /*

@@ -155,6 +155,7 @@ aClient	*from;
 		cptr->sockhost[0] = '\0';
 		cptr->buffer[0] = '\0';
 		cptr->authfd = -1;
+		cptr->auth = cptr->username;
 		cptr->exitc = EXITC_UNDEF;
 #ifdef	ZIP_LINKS
 		cptr->zip = NULL;

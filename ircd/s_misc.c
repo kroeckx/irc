@@ -226,8 +226,8 @@ int	showip;
 				(void)sprintf(nbuf, "%s[%s@%s]",
 					sptr->name,
 					(!(sptr->flags & FLAGS_GOTID)) ? "" :
-					sptr->username,
-					inetntoa((char *)&sptr->ip));
+					sptr->auth,
+					      inetntoa((char *)&sptr->ip));
 			else
 			    {
 				if (mycmp(sptr->name, sptr->sockhost))
@@ -237,7 +237,7 @@ int	showip;
 					SPRINTF(nbuf, "%s[%s@%s]", sptr->name,
 						IsPerson(sptr) ?
 							sptr->user->username :
-							sptr->username,
+							sptr->auth,
 						sptr->sockhost);
 				else
 					return sptr->name;
@@ -262,7 +262,7 @@ aClient	*cptr;
 	else
 		(void)sprintf(nbuf, "%s[%-.*s@%-.*s]",
 			cptr->name, USERLEN,
-			(!(cptr->flags & FLAGS_GOTID)) ? "" : cptr->username,
+			(!(cptr->flags & FLAGS_GOTID)) ? "" : cptr->auth,
 			HOSTLEN, cptr->hostp->h_name);
 	return nbuf;
 }
@@ -409,12 +409,12 @@ char	*comment;	/* Reason for the exit */
 			       on_for / 3600, (on_for % 3600)/60,
 			       on_for % 60,
 			       sptr->user->username, sptr->user->host,
-			       sptr->username, sptr->exitc);
+			       sptr->auth, sptr->exitc);
 # endif
 # ifdef FNAME_USERLOG
 			sendto_flog(myctime(sptr->firsttime), NULL, on_for,
 				    sptr->user->username, sptr->user->host,
-				    sptr->username, &sptr->exitc);
+				    sptr->auth, &sptr->exitc);
 # endif
 		    }
 		else if (sptr->exitc != EXITC_REF)
@@ -425,7 +425,7 @@ char	*comment;	/* Reason for the exit */
 			       myctime(sptr->firsttime),
 			       (IsUnixSocket(sptr)) ? me.sockhost :
 			       ((sptr->hostp) ? sptr->hostp->h_name :
-				sptr->sockhost), sptr->username, sptr->exitc);
+				sptr->sockhost), sptr->auth, sptr->exitc);
 # endif
 # ifdef FNAME_CONNLOG
 			sendto_flog(myctime(sptr->firsttime), " Unknown ", 0,
@@ -433,7 +433,7 @@ char	*comment;	/* Reason for the exit */
 				    (IsUnixSocket(sptr)) ? me.sockhost :
 				    ((sptr->hostp) ? sptr->hostp->h_name :
 				     sptr->sockhost),
-				    sptr->username, &sptr->exitc);
+				    sptr->auth, &sptr->exitc);
 # endif
 		    }
 #endif
@@ -455,6 +455,12 @@ char	*comment;	/* Reason for the exit */
 		      else
 			sendto_one(sptr, "ERROR :Closing Link: %s (%s)",
 				   get_client_name(sptr,FALSE), comment);
+
+		      if (cptr->auth != cptr->username)
+			  {
+			      MyFree(cptr->auth);
+			      cptr->auth = cptr->username;
+			  }
 		    }
 		/*
 		** Currently only server connections can have

@@ -479,6 +479,7 @@ aClient	*mp;
 	mp->lasttime = mp->since = mp->firsttime = time(NULL);
 	mp->hopcount = 0;
 	mp->authfd = -1;
+	mp->auth = mp->username;
 	mp->confs = NULL;
 	mp->flags = 0;
 	mp->acpt = mp->from = mp;

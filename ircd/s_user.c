@@ -366,7 +366,7 @@ char	*nick, *username;
 			       " No more " : " No Auth ",
 			       (IsUnixSocket(sptr)) ? me.sockhost :
 			       ((sptr->hostp) ? sptr->hostp->h_name :
-				sptr->sockhost), sptr->username, sptr->exitc);
+				sptr->sockhost), sptr->auth, sptr->exitc);
 #endif		    
 #ifdef FNAME_CONNLOG
 			sendto_flog(myctime(sptr->firsttime), 
@@ -375,7 +375,7 @@ char	*nick, *username;
 				    " No more " : " No Auth ", 0, "<none>",
 				    (IsUnixSocket(sptr)) ? me.sockhost :
 				    ((sptr->hostp) ? sptr->hostp->h_name :
-				    sptr->sockhost), sptr->username,
+				    sptr->sockhost), sptr->auth,
 				    &sptr->exitc);
 #endif
 			return exit_client(cptr, sptr, &me,
@@ -456,12 +456,12 @@ char	*nick, *username;
 #if defined(USE_SYSLOG) && defined(SYSLOG_CONN)
 			syslog(LOG_NOTICE, "%s ( K lined ): %s@%s [%s] %c\n",
 			       myctime(sptr->firsttime), sptr->user->username,
-			       sptr->user->host, sptr->username, '-');
+			       sptr->user->host, sptr->auth, '-');
 #endif		    
 #ifdef FNAME_CONNLOG
 			sendto_flog(myctime(sptr->firsttime), " K lined ", 0,
 				    sptr->user->username, sptr->user->host,
-				    sptr->username, "-");
+				    sptr->auth, "-");
 #endif
 			return exit_client(cptr, sptr, &me, "K-lined");
 		    }
@@ -480,7 +480,7 @@ char	*nick, *username;
 # ifdef FNAME_CONNLOG
 			sendto_flog(myctime(sptr->firsttime), " R lined ", 0,
 				    sptr->user->username, sptr->user->host,
-				    sptr->username, "-");
+				    sptr->auth, "-");
 # endif
 			return exit_client(cptr, sptr, &me , "R-lined");
 		    }
@@ -814,7 +814,7 @@ char	*parv[];
 				   get_client_name(cptr, FALSE));
 		sendto_one(cptr, ":%s KILL %s :%s (%s <- (%s@%s)%s)",
 			    ME, acptr->name, ME, acptr->from->name,
-			    acptr->username,
+			    acptr->auth,
 			    (acptr->user) ? acptr->user->host : "???",
 			    /* NOTE: Cannot use get_client_name twice
 			    ** here, it returns static string pointer:

@@ -289,8 +289,8 @@ aClient *cptr;
 				if ((acptr = local[i]) && (cptr != acptr) &&
 				    !bcmp((char *)&cptr->ip,(char *)&acptr->ip,
 					  sizeof(cptr->ip))
-				    && !strncasecmp(acptr->username,
-						    cptr->username, USERLEN))
+				    && !strncasecmp(acptr->auth,
+						    cptr->auth, USERLEN))
 					cnt--;
 			if (cnt <= ConfConFreq(aconf))
 				return -5;      /* for error message */

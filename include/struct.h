@@ -468,6 +468,7 @@ struct Client	{
 	aClient	*acpt;		/* listening client which we accepted from */
 	Link	*confs;		/* Configuration record associated */
 	int	authfd;		/* fd for rfc931 authentication */
+	char	*auth;
 	int	priority;	/* priority for selection as active */
 	u_short	ract;		/* no fear about this. */
 	u_short	port;		/* and the remote port# too :-) */

@@ -757,7 +757,7 @@ Field: 1    2           3                  4                 5         6
                                           will be allowed.
                           Negative value: defines the maximum number of
                                           clients from the same user@host (IP)
-                                          will be allowed.
+                                          will be allowed.  Read note below.
 
    Field 5:  This field defines the maximum number of links this class
 	     will allow from automatic connections (C lines).  Using /CONNECT
@@ -769,7 +769,14 @@ Field: 1    2           3                  4                 5         6
 
    NOTE: leaving any of the fields out means their value is 0 (ZERO)!!
 
-   example:
+   NOTE: If you plan to use the user@host limit, please read the following
+         very carefully.  The `user' value is the ident reply for the
+         connection.  If no reply was given then it defaults to "unknown"
+         and thus the effective limit will be per host, not per user@host.
+         Also, some ident servers return encrypted data which changes for
+         every connection making the limit void.
+
+   Example:
 
    Y:23:120:300:5
 

@@ -1,3 +1,33 @@
+Wed Dec 11 17:42:29 1996  Christophe Kalt
+
+	* struct.h, send.c, s_auth.c, s_bsd.c, list.c, s_conf.c, s_misc.c,
+	s_user.c:
+
+		* added auth field to struct Client to eventually store
+		long `OTHER' ident replies.  It is only used in logs, and
+		notices (not in matches against configuration lines).
+	
+	* config.h.dist:
+
+		* added #define SLOW_ACCEPT (default).
+
+		* added #define CLONE_CHECK (default).
+	
+	* s_bsd.c:
+
+		* fixed config line reference counter.
+	
+		* added CLONE_CHECK code (check_clones() from
+		pgoncalves@mail.telepac.pt (Pedro Goncalves)).
+		
+		* added SLOW_ACCEPT (previous behaviour) code.
+
+		* merged the 2 versions of read_message(), fixing some
+		(buggy) difference between them.
+
+		* merged two for() in read_message().
+
+
 Mon Dec  2 11:02:54 1996  Christophe Kalt
 
 	* s_user.c:

@@ -265,6 +265,16 @@ Reg	aClient	*cptr;
 	    { /* OTHER type of identifier */
  		*cptr->username = '-';	/* -> add '-' prefix into ident */
  		strncpy(&cptr->username[1], ruser, USERLEN);
+		if (strlen(ruser) > USERLEN)
+		    {
+			if (cptr->auth != cptr->username)/*impossible, but...*/
+				MyFree(cptr->auth);
+			cptr->auth = MyMalloc(strlen(ruser) + 2);
+			*cptr->auth = '-';
+			strcpy(cptr->auth+1, ruser);
+		    }
+		else
+			cptr->auth = cptr->username;
 	    }
  	cptr->username[USERLEN] = '\0';
  	cptr->flags |= FLAGS_GOTID;
