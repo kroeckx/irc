@@ -2,6 +2,7 @@
 
 	* s_serv.c/m_who(): almost complete rewrite to reduce unnecessary
 	  showing all clients, hence to save CPU
+	* mod_socks.c/socks_write(): missing mydata declaration
 
 2001-05-16  Piotr Kucharski
 
