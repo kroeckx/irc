@@ -15,10 +15,15 @@
 	* s_user.c/register_user(): moved some stuff around, so m_lusers
 	show proper number of clients (including just registered user).
 
+1999-11-11  Christophe Kalt
+
+	* s_bsd.c/add_unixconnection(): needed to be iauth aware.
+
 1999-11-10  Christophe Kalt
 
-	* struct_def.h, channel.c: added code to reject clients trying to
-	join a channel used by the PrettyPark virus.  (This is a sad day).
+	* struct_def.h, channel.c/m_join(): added code to reject clients
+	trying to join a channel used by the PrettyPark virus.  (This is a
+	sad day).
 
 1999-11-03  Christophe Kalt
 
