@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.25 2004/02/25 15:14:25 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.26 2004/02/25 15:30:40 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2728,6 +2728,9 @@ char	*parv[];
 				remove_user_from_channel(who,chptr);
 				penalty += 2;
 				if (penalty >= MAXPENALTY && MyPerson(sptr))
+					break;
+				/* user kicked himself out */
+				if (MyPerson(sptr) && who == sptr)
 					break;
 			    }
 			else
