@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.16 2001/05/05 23:05:09 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.17 2001/05/06 21:57:40 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1582,6 +1582,7 @@ add_con_refuse:
 
 		lin.flags = ASYNC_CLIENT;
 		lin.value.cptr = acptr;
+		lin.next = NULL;
 #ifdef INET6
 		Debug((DEBUG_DNS, "lookup %s",
 		       inet_ntop(AF_INET6, (char *)&addr.sin6_addr,
