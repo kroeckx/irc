@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.2 1999/11/03 22:00:00 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.3 1999/12/21 01:29:37 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -1706,6 +1706,14 @@ int	fd;
 	add_client_to_list(acptr);
 	set_non_blocking(acptr->fd, acptr);
 	(void)set_sock_opts(acptr->fd, acptr);
+# if defined(USE_IAUTH)
+	/*
+	** iauth protocol and iauth itself should be extended to alllow
+	** dealing with this type of connection.
+	*/
+	sendto_iauth("%d O", acptr->fd);
+	SetDoneXAuth(acptr);
+# endif
 	return;
 }
 #endif
