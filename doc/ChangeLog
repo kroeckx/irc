@@ -4,6 +4,8 @@
 	  s_conf.c/rehash(), ircd.c: Stop open-close logfiles ping-pong,
 	  reopen only on HUP signal.
 	* s_user.c/m_whois(): show all parameters in ENDOFWHOIS reply
+	* ircd.c/send_pings(), s_conf.c, config.h.dist: another speedup
+	  by getting rid of rarely used code (here: timed klines)
 
 2001-02-27  Kurt Roeckx
 
