@@ -429,9 +429,6 @@ fi])
 if test "$irc_cv_select_poll" = "poll"; then
   AC_MSG_RESULT(poll)
   AC_DEFINE(USE_POLL)
-  if test ! "$irc_cv_linux" = "no"; then
-    AC_MSG_WARN([Aiiie.. This is linux.  poll() is known to be broken for some releases (2.0.x with libc6?).  You may want to edit setup.h to undefine USE_POLL])
-  fi
 else
   AC_MSG_RESULT(select)
 fi
@@ -1416,7 +1413,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46.2.5 2000/02/10 19:14:10 q Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.6 2000/05/29 19:30:39 q Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
