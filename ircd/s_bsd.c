@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.11 2001/02/07 11:50:27 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.12 2001/02/09 16:48:55 q Exp $";
 #endif
 
 #include "os.h"
@@ -1299,40 +1299,6 @@ aClient *cptr;
 		local[i] = NULL;
 		(void)close(i);
 
-		/*
-		 * fd remap to keep local[i] filled at the bottom.
-		 *	don't *ever* move descriptors for 
-		 *		+ log file
-		 *		+ sockets bound to listen() ports
-		 *	--Yegg
-		 */
-		if (i >= 0 && (j = highest_fd) > i)
-		    {
-			while (!local[j])
-				j--;
-			if (j > i && local[j] &&
-			    !(IsLog(local[j]) || IsMe(local[j])))
-			    {
-				if (dup2(j,i) == -1)
-					return;
-				local[i] = local[j];
-				local[i]->fd = i;
-				local[j] = NULL;
-				(void)close(j);
-				del_fd(j, &fdall);
-				add_fd(i, &fdall);
-				if (IsServer(local[i]) || IsMe(local[i]))
-				    {
-					del_fd(j, &fdas);
-					add_fd(i, &fdas);
-				    }
-				while (!local[highest_fd])
-					highest_fd--;
-#if defined(USE_IAUTH)
-				sendto_iauth("%d R %d", j, i);
-#endif
-			    }
-		    }
 		cptr->fd = -2;
 		DBufClear(&cptr->sendQ);
 		DBufClear(&cptr->recvQ);
