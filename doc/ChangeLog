@@ -1,18 +1,31 @@
 2004-02-25  Piotr Kucharski
 
 	All backported from 2.11 tree:
+	* channel.c/m_part(): canonize list of channels first; move comment
+	  out of strtoken loop; allow empty comment, don't force it to be
+	  user nick.
 	* channel.c/m_part(): buffer overflow resulting in network desync.
 	* channel.c/m_kick(): "KICK # me,other" caused desync on remote servers:
-          it was sent in two consecutive KICKs, first one removed client from
-          channel and second one thus failed. No more "NJOIN protocol error".
+	  it was sent in two consecutive KICKs, first one removed client from
+	  channel and second one thus failed. No more "NJOIN protocol error".
 	* s_user.c/m_quit(): enclose user quits within double quotes.
 	* s_serv.c/m_squit(): add "by whom" to squit comment.
-        * s_serv.c/m_stats(): cleanup of what to check_link (RPL_TRYAGAIN).
-        * s_serv.c: new function report_listeners() showing P:lines (IP, port)
-          and number of clients using it.
-        * s_serv.c: new stats (P) for report_listeners().
+	* s_serv.c/m_stats(): cleanup of what to check_link (RPL_TRYAGAIN).
+	* s_serv.c: new function report_listeners() showing P:lines (IP, port)
+	  and number of clients using it.
+	* s_serv.c: new stats (P) for report_listeners().
 	* s_user.c/m_pass(): don't copy PASS params to info when issued
-          after USER or SERVICE.
+	  after USER or SERVICE.
+	* parse.c, msg_def.h: add "POST" command being alias for "QUIT"
+	  to cut w3cache abuse (idea from ircu).
+	* s_bsd.c/add_local_domain(): fix localhost bug introduced in 2.10.3p5.
+	* s_bsd.c/add_local_domain(): remove ending dot from hname (so it
+	  won't assume later it already is fqdn).
+	* s_bsd.c/get_my_name(): dot check not needed, add_local_domain does it.
+	* channel.c/m_join(): do not return "Too many channels" when client
+	  tries to join channel he is already on.
+	* channel.c/m_join(): allowing to join +q channels regardless
+	  of MAXCHANNELSPERUSER.
 
 2003-12-09  Piotr Kucharski
 
