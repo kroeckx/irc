@@ -1,3 +1,23 @@
+2001-02-09  Kurt Roeckx
+
+	* s_user.c, s_conf.c, s_conf_ext.h: Make O-lines work with CIDR masks.
+	* config.h.dist: undefine ZIP_LINKS, if USE_ZLIB is undefined.
+	* struct_def.h: Use long long to keep stats.
+	* configure.in, Makefile.in: Don't assume we need the math lib.
+	* irc.c: refresh() was called while using termcap.
+	* config.guess, config.sub: Update to the latest version.
+	* whowas.c: Only grow the locked array when we added at the end of it.
+	* s_user.c/m_ping(): Make PING work with masked servers.
+	* s_bsd.c/close_connection(): Don't remap the fd's.
+	* s_serv.c/m_connect(): Fix a typo: irc.conf -> ircd.conf.
+
+2001-02-08  Kurt Roeckx
+
+	* send.c/sendto_channel_butserv(): Use the clist, instead of members.
+	* s_id.c/ltoid(): Build the right string.
+	* s_user.c/m_nick(): put user@host in comment for nick change
+	  collision.
+
 2001-02-07  Kurt Roeckx
 
 	* support.c/inetpton(): Do it different. (fixes a buffer overflow.)
