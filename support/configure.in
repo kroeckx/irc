@@ -740,7 +740,11 @@ if test "x$enable_ip6" != x; then
   AC_MSG_CHECKING([IPv6 system type])
   AC_CACHE_VAL(irc_cv_v6type, [
     if test -d /usr/inet6; then
-      irc_cv_v6type=linux
+	AC_EGREP_CPP(yes, [dnl
+#include </usr/inet6/include/netinet/in.h>
+#ifdef _INET6APPS_NETINET_IN_H
+yes
+#endif], irc_cv_v6type=linux)
     else
       AC_EGREP_CPP(yes, [dnl
 #include <netinet/in.h>
@@ -767,8 +771,21 @@ yes
 #ifdef _ZETA_MINAMI_INET6
 yes
 #endif], irc_cv_v6type=zeta)))))
-    fi])
+    fi
+
+  if test "x$irc_cv_v6type" = x; then
+     AC_TRY_COMPILE([#include <netinet/in.h>], [struct in6_addr addr], 
+	irc_cv_v6type=native, irc_cv_v6type=unknown)
+  fi
+
+dnl end of AC_CACHE_VAL
+  ])	
+
   AC_MSG_RESULT($irc_cv_v6type)
+
+  if test $irc_cv_v6type = unknown; then
+     AC_MSG_WARN([You have an unknown IPv6 system. You will probably need to change the Makefile manually, or #undef INET6 in setup.h])
+  fi
 
   dnl eventually update LIBS
   case $irc_cv_v6type in
@@ -1434,7 +1451,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.46 1999/08/13 17:18:23 kalt Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.2.1 1999/10/04 18:07:55 q Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
