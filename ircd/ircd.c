@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.7 2001/05/03 19:42:53 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: ircd.c,v 1.62.2.8 2001/05/06 13:42:30 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -188,7 +188,7 @@ void	server_reboot()
 #ifdef USE_SYSLOG
 		/* Have to reopen since it has been closed above */
 		
-		openlog(myargv[0], LOG_PID|LOG_NDELAY, LOG_FACILITY);
+		openlog(mybasename(myargv[0]), LOG_PID|LOG_NDELAY, LOG_FACILITY);
 		syslog(LOG_CRIT, "execv(%s,%s) failed: %m\n", IRCD_PATH,
 		       myargv[0]);
 		closelog();
@@ -875,7 +875,7 @@ char	*argv[];
 	logfiles_open();
 
 #ifdef USE_SYSLOG
-	openlog(myargv[0], LOG_PID|LOG_NDELAY, LOG_FACILITY);
+	openlog(mybasename(myargv[0]), LOG_PID|LOG_NDELAY, LOG_FACILITY);
 #endif
 	timeofday = time(NULL);
 	if (initconf(bootopt) == -1)
@@ -1261,7 +1261,7 @@ char *filename;
 	int fd, t_data[6];
 	char buf[100];
 
-	buf[0] = '\0';
+	memset(buf, 0, sizeof(buf));
 	if ((fd = open(filename, O_RDONLY)) != -1)
 	    {
 		read(fd, buf, 100);	/* no panic if this fails.. */
