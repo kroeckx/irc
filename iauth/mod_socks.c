@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.5 2001/05/15 10:50:53 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.6 2001/05/16 01:58:26 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -231,7 +231,21 @@ char *strver;
 	 * address is not ipv4 mapped in ipv6
 	 */
 	if (cldata[cl].mod_status == ST_V4 && !IN6_IS_ADDR_V4MAPPED(&addr))
-		cldata[cl].mod_status = ST_V5;
+	{
+		if (mydata->options & OPT_V4ONLY)
+		{
+			/* we cannot do work! */
+			sendto_log(ALOG_DSOCKS|ALOG_IRCD, LOG_WARNING,
+				"socks4 does not work on ipv6");
+			close(cldata[cl].wfd);
+			cldata[cl].wfd = 0;
+			return -1;
+		}
+		else
+		{
+			cldata[cl].mod_status = ST_V5;
+		}
+	}
 #endif
     if (cldata[cl].mod_status == ST_V4)
 	{
