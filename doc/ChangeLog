@@ -17,7 +17,7 @@
 	* s_user.c/m_pass(): don't copy PASS params to info when issued
 	  after USER or SERVICE.
 	* parse.c, msg_def.h: add "POST" command being alias for "QUIT"
-	  to cut w3cache abuse (idea from ircu).
+	  to cut http proxy abuse (idea from ircu).
 	* s_bsd.c/add_local_domain(): fix localhost bug introduced in 2.10.3p5.
 	* s_bsd.c/add_local_domain(): remove ending dot from hname (so it
 	  won't assume later it already is fqdn).

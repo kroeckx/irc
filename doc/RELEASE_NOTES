@@ -1,6 +1,16 @@
-# @(#)$Id: RELEASE_NOTES,v 1.34.2.2 2003/10/11 19:50:31 chopin Exp $
+# @(#)$Id: RELEASE_NOTES,v 1.34.2.3 2004/02/26 18:02:48 chopin Exp $
 
 This is version 2.10.3 of the IRC software.
+===============================================================================
+
+Important changes in 2.10.3p6 (since 2.10.3p4):
+        * new stats (P) for showing P:lines (IP, port) and number of 
+	  clients using it.
+	* new command POST being an alias for QUIT will not allow abuse
+	  from http proxies.
+	* clients have QUIT reasons enclosed within double quotes
+	* QUIT and PART have no default reason now.
+
 ===============================================================================
 
 Important changes in 2.10.3p4 (since 2.10.3p2):
