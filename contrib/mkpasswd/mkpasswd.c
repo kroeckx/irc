@@ -8,7 +8,7 @@
 #include <string.h>
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mkpasswd.c,v 1.1 1998/04/07 21:21:00 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: mkpasswd.c,v 1.1.4.1 2000/08/15 16:06:24 chopin Exp $";
 #endif
 
 extern char *getpass();
@@ -20,6 +20,7 @@ char *argv[];
   static char saltChars[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789./";
   char salt[3];
   char * plaintext;
+  char *encr;
   int i;
 
   if (argc < 2) {
@@ -32,13 +33,20 @@ char *argv[];
     salt[0] = argv[1][0];
     salt[1] = argv[1][1];
     salt[2] = '\0';
-    if ((strchr(saltChars, salt[0]) == NULL) || (strchr(saltChars, salt[1]) == NULL))
-      fprintf(stderr, "illegal salt %s\n", salt), exit(1);
+    if ((strchr(saltChars, salt[0]) == NULL) || 
+        (strchr(saltChars, salt[1]) == NULL))
+      fprintf(stderr, "illegal salt %s\n", salt);
+      exit(1);
   }
 
   plaintext = getpass("plaintext: ");
 
-  printf("%s\n", crypt(plaintext, salt));
+  encr = (char *)crypt(plaintext, salt);
+  if (encr == NULL) {
+    fprintf(stderr, "crypt returned NULL");
+    exit(1);
+  }
+  printf("%s\n", encr);
   return 0;
 }
 
