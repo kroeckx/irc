@@ -1,6 +1,6 @@
 #! /bin/sh
 
-# From configure.in Id: configure.in,v 1.46 1999/08/13 17:18:23 kalt Exp 
+# From configure.in Id: configure.in,v 1.46.2.1 1999/10/04 18:07:55 q Exp 
 
 # Guess values for system-dependent variables and create Makefiles.
 # Generated automatically using autoconf version 2.13 
@@ -1549,7 +1549,7 @@ EOF
 
 fi
 
-for ac_hdr in stdio.h stdlib.h sys/types.h sys/bitypes.h stddef.h stdarg.h unistd.h ctype.h memory.h ncurses.h curses.h cursesX.h term.h sgtty.h errno.h sys/errno.h sys/syscall.h pwd.h math.h utmp.h fcntl.h signal.h sys/ioctl.h sys/file.h sys/filio.h sys/socket.h sys/stat.h sys/resource.h sys/select.h sys/poll.h stropts.h netdb.h netinet/in.h sys/un.h arpa/inet.h sys/param.h syslog.h sys/syslog.h string.h strings.h sys/time.h time.h sys/times.h netinet/in_systm.h netinfo/ni.h resolv.h arpa/nameser.h
+for ac_hdr in stdio.h stdlib.h sys/types.h sys/bitypes.h stddef.h stdarg.h unistd.h ctype.h memory.h ncurses.h ncurses/ncurses.h curses.h cursesX.h term.h sgtty.h errno.h sys/errno.h sys/syscall.h pwd.h math.h utmp.h fcntl.h signal.h sys/ioctl.h sys/file.h sys/filio.h sys/socket.h sys/stat.h sys/resource.h sys/select.h sys/poll.h stropts.h netdb.h netinet/in.h sys/un.h arpa/inet.h sys/param.h syslog.h sys/syslog.h string.h strings.h sys/time.h time.h sys/times.h netinet/in_systm.h netinfo/ni.h resolv.h arpa/nameser.h
 do
 ac_safe=`echo "$ac_hdr" | sed 'y%./+-%__p_%'`
 echo $ac_n "checking for $ac_hdr""... $ac_c" 1>&6

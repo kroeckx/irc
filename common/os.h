@@ -483,10 +483,12 @@ extern char *inet_ntoa __P((struct in_addr in));
 # if USE_CURSESX && HAVE_CURSESX_H
 #  include <cursesX.h>
 # endif
-# if (USE_NCURSES || USE_CURSES) && HAVE_CURSES_H
+# if (USE_NCURSES || USE_CURSES)
 #  if HAVE_NCURSES_H
 #   include <ncurses.h>
-#  else
+#  elif HAVE_NCURSES_NCURSES_H
+#   include <ncurses/ncurses.h>
+#  elif HAVE_CURSES_H
 #   include <curses.h>
 #  endif
 # endif
