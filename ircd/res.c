@@ -24,7 +24,7 @@
 #undef RES_C
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.10 2000/12/11 21:10:03 q Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.21.2.11 2001/10/18 19:54:54 chopin Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1380,6 +1380,7 @@ ResRQ	*rptr;
 	*/
 	if (!rptr->he.h_name || !WHOSTENTP(rptr->he.h_addr.S_ADDR))
 		return NULL;
+#if 0
 	/*
 	** Make cache entry.  First check to see if the cache already exists
 	** and if so, return a pointer to it.
@@ -1392,6 +1393,7 @@ ResRQ	*rptr;
 				(char *)&(rptr->he.h_addr_list[i].S_ADDR))))
 #endif
 			return cp;
+#endif
 
 	/*
 	** a matching entry wasnt found in the cache so go and make one up.
