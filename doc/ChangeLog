@@ -1,3 +1,8 @@
+1999-10-03  Christophe Kalt
+
+	* a_conf.c: OpenBSD doesn't have RTLD_NOW, only RTLD_LAZY (as
+	reported by Phil Pennock).
+
 1999-09-23  Piotr Kucharski
 
 	* channel.c/reop_channel(): do not reop local restricted clients

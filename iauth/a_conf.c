@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21 1999/07/11 22:11:33 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: a_conf.c,v 1.21.2.1 1999/10/04 12:42:59 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -162,7 +162,11 @@ char *cfile;
 					continue;
 				    }
 				*ch++ = '\0';
+# if defined(RTLD_NOW)
 				mod_handle = dlopen(ch, RTLD_NOW);
+# else
+				mod_handle = dlopen(ch, RTLD_LAZY);
+# endif
 				if (mod_handle == NULL)
 				    {
 					conf_err(lnnb, dlerror(), cfile);
