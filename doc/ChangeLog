@@ -1,3 +1,12 @@
+2.10.3p3
+
+2001-01-19  Piotr Kucharski
+
+	* s_misc.c,s_debug.c: changed %d or %u to %lu in various places.
+	* s_serv.c/m_stats(): allow unlimited stats c for opers.
+	* config.h.dist: define NOWRITEALARM by default, saves us calls.
+	* mkpasswd: new version from Walter Campbell.
+
 2001-10-18  Piotr Kucharski
 
 	* res.c/make_cache(): bug allowing to spoof hosts (from Q).
@@ -10,7 +19,6 @@
 	* s_user.c/m_umode(): clear local oper received from remote
 	  servers (fixes wrong oper count!) (from Oleg Medinsky).
 	* packet.c/dopacket(): me.receiveK wasn't updated properly (from jv).
-	* config.h.dist: define NOWRITEALARM by default, saves us calls.
 
 2.10.3p2
 
