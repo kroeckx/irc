@@ -586,3 +586,9 @@ error FD_SETSIZE must be bigger than MAXCONNECTIONS
 #if defined(R_LINES_OFTEN) && !defined(TIMEDKLINES)
 error TIMEDKLINES must be defined for R_LINES_OFTEN to work (are you sure you need them?)
 #endif
+
+/*
+** You should not want to change this. ;)
+*/
+#define	NOWRITEALARM	1
+
