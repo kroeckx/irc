@@ -1,3 +1,7 @@
+1999-10-30  Kurt Roeckx
+
+	* irc.c/main(): me.info was not allocated big enough (off by 1)
+
 1999-10-04  Kurt Roeckx
 
 	* channel.c/reop_channel(): removed a '(' that was there too much
