@@ -1,3 +1,8 @@
+Sun Apr 12 22:24:36 1998  Christophe Kalt  <kalt@millennium.stealth.net>
+
+	* configure.in, s_debug.c: vsyslog() isn't necessarely available
+	even if USE_STDARG is defined. (Digital Unix)
+
 Sat Apr  4 21:13:14 1998  Christophe Kalt  <kalt@millennium.stealth.net>
 
 	* c_version_ext.h, c_version.c, irc.c, swear.c: Digital Unix 4.0B
