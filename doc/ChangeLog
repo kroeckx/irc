@@ -1,8 +1,41 @@
+2000-02-10  Kurt Roeckx
+
+	* hash.c/hash_find_server(): prevent creation of illegal pointers
+	* channel.c/m_join(): called exit_client with correct value's
+	  for a local client
+	* s_bsd.c/report_error(): calling it with cptr == NULL would cause
+	  a core dump.
+	* s_serv.c/m_stats(): cleanup of stats l
+	* s_conf.c: Allow compressed notation in the config file, and
+	  convert it to non-compressed when reading it
+	* s_user.c/m_nick(): Extra penalty on nick-change if you can't
+	  speak on a channel
+	* s_err.c: Changed RPL_LUSERME to say how many users he has, it
+	  said incorrectly that it where clients before.
+	* configure: Try to do better checking for IPv6 capable systems
+
 2000-02-04  Piotr Kucharski
 
 	* mod_socks.c/socks_read(): when using "careful" option, iauth
 	should not close connection before checking ST_V5b (from
 	KIKUCHI Takahiro)
+
+2000-02-03  Kurt Roeckx
+
+	* Makefile.in: Added $(LDFLAGS) and $(LIBS) for ircdwatch
+	* os.h, res.c, s_bsd.c: Removed all s6_laddr's because it's not 
+	  portable
+	* res.c, s_auth.c: added missing calls for inetntop, was using
+	  ipv4 functions while it should be ipv6.
+	* hash.c: check store to be non-NULL
+
+2000-01-03  Kurt Roeckx
+
+	* ircd.c/io_loop(): removed annoying debug message
+	* res.c/update_list(): don't use addrcount in for loop
+	* s_user.c/register_user(): don't cp the username if it's the same
+	* a_conf.c/conf_read(): fixed missing some initialisation when ident
+	  wasn't loaded
 
 2000-01-01  Kurt Roeckx
 
