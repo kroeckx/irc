@@ -1041,8 +1041,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "       %s <Unix domain socket>\n", argv[0]);
 
         exit(1);
-    }
-    else if (argc != 3)
+    } 
+    else if (!is_unix && argc != 3)
     {
         fprintf(stderr, "Usage: %s <server> <port>\n", argv[0]);
         fprintf(stderr, "       %s <Unix domain socket>\n", argv[0]);
@@ -1088,44 +1088,43 @@ int main(int argc, char *argv[])
 
             exit(1);
         }
-    }
+    } else {
+	    memset(&localaddr, 0, sizeof(struct sockaddr_in));
+	    localaddr.sin_family = AF_INET;
+	    localaddr.sin_addr   = LocalHostAddr;
+	    localaddr.sin_port   = 0;
+	    
+	    if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)))
+	    {
+		perror("bind");
+		close(fd);
 
-    memset(&localaddr, 0, sizeof(struct sockaddr_in));
-    localaddr.sin_family = AF_INET;
-    localaddr.sin_addr   = LocalHostAddr;
-    localaddr.sin_port   = 0;
-    
-    if (bind(fd, (struct sockaddr *) &localaddr, sizeof(localaddr)))
-    {
-        perror("bind");
-        close(fd);
+		exit(1);
+	    }
 
-        exit(1);
-    }
+	    memset(&server, 0, sizeof(struct sockaddr_in));
+	    memset(&LocalHostAddr, 0, sizeof(LocalHostAddr));
 
-    memset(&server, 0, sizeof(struct sockaddr_in));
-    memset(&LocalHostAddr, 0, sizeof(LocalHostAddr));
+	    if (!(hp = gethostbyname(host)))
+	    {
+		perror("resolv");
+		close(fd);
 
-    if (!(hp = gethostbyname(host)))
-    {
-        perror("resolv");
-        close(fd);
+		exit(1);
+	    }
 
-        exit(1);
-    }
+	    memmove(&(server.sin_addr), hp->h_addr, hp->h_length);
+	    memmove((void *) &LocalHostAddr, hp->h_addr, sizeof(LocalHostAddr));
+	    server.sin_family = AF_INET;
+	    server.sin_port   = htons(atoi(port));
 
-    memmove(&(server.sin_addr), hp->h_addr, hp->h_length);
-    memmove((void *) &LocalHostAddr, hp->h_addr, sizeof(LocalHostAddr));
-    server.sin_family = AF_INET;
-    server.sin_port   = htons(atoi(port));
+	    if (connect(fd, (struct sockaddr *) &server, sizeof(server)) == -1)
+	    {
+		perror("connect");
 
-    if (connect(fd, (struct sockaddr *) &server, sizeof(server)) == -1)
-    {
-        perror("connect");
-
-        exit(1);
-    }
-
+		exit(1);
+	    }
+    } 
     /* register the service with SERVICE_WANT_NOTICE */
     sendto_server("PASS %s\n", TKSERV_PASSWORD);
     sendto_server("SERVICE %s localhost %s 33554432 0 :%s\n", TKSERV_NAME, TKSERV_DIST, TKSERV_DESC);
