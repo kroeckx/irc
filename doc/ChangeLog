@@ -1,152 +1,21 @@
+2.11.0p1  
+
 2005-02-15  Piotr Kucharski
 
-	* s_conf.c/initconf(): use fdopen again.
+	All backported from 2.11.0 branch:
+	* mod_webproxy.c/proxy_init(): off-by-one config parse error.
+	* channel.c/check_channelmask(): empty mask matches any, just in case
+	  ':' is last char in channel name (problem reported by pigreco).
+	* channel.c/m_join(): tiny bug, JOIN 0,#chan did not join #chan.
+	* channel.c/reop_channel(): return 1 only when we did reop.
 	* fileio.c, fileio.h: new files imported from ircd-ratbox, for use
 	  instead of buggy FILE functions on Sun.
 	* config_read.c: redefine fopen() to ratbox fbopen() etc. when being
 	  compiled on Sun.
 	* s_user.c/m_oper(): honour LOGFILES_ALWAYS_CREATE for oper log too.
 	* chkconf.c/initconf(): ignore tabs and spaces in flags field.
-	* channel.c/reop_channel(): return 1 only when we did reop.
-
-2005-02-11  Piotr Kucharski
-
-	* s_conf.c/initconf(): do not use buggy fdopen.
-
-2005-02-10  Piotr Kucharski
-
-	* config.h.dist, s_bsd.c, s_debug.c, s_err.c, s_serv.c, s_user.c:
-	  changed some define names to avoid confusion.
-	* channel.c/set_mode(): remove not sending +R to old servers.
-	* channel.c/m_join(), m_njoin(), m_kick(): remove calls to 
-	  sendto_match_servs_notv() (and buffers around them).
-	* send.c: ifdef-out unused pieces of code (sendto*_servs_notv).
-
-2005-02-09  Piotr Kucharski
-
-	* channel.c/m_join(): get rid of ^G hack; simplify, as we don't get
-	  JOIN from other servers.
-	* channel.c/m_join(): tiny bug, JOIN 0,#chan did not join #chan.
-	* s_serv.c/get_version(): anything below 2.11.0b12 is too old.
-	* s_serv.c/m_squit(): SV_OLDSQUIT is gone.
-	* s_serv.c/m_server_estab(): drop too old servers.
-
-2005-02-08  Piotr Kucharski
-
-	* struct_def.h: removed ST_UID and ST_NOTUID.
-	* parse.c, send.c, channel.c, s_misc.c, s_send.c, s_serv.c, s_user.c,
-	  s_service.c: changed ST_UID to IsServer, changed ST_NOTUID to false.
-	* send.c, send_ext.h: removed unneeded sendto_match_butone_old().
-	* s_user.c/m_message(): removed sendto_match_butone_old().
-	* channel.c/send_channel_modes(): no need for special case for +R.
-	* s_misc.c/mark_blind_servers(), exit_client(), exit_one_client(),
-	  s_serv.c/m_squit(), send_server(), m_server(), m_server_estab(),
-	  m_eob(), s_service/m_service(), s_user.c/register_user(): removed
-	  always matching conditions and never matching conditions and code.
-	* parse.c/find_sender(), s_id.c/sid_valid(), s_serv.c/m_server(),
-	  m_server_estab(), m_trace(): sid cannot have '$' anymore.
-	* s_user.c/m_kill(): no "old" servers, no sendto_serv_notv() using.
-
-2005-02-07  Piotr Kucharski
-
-	* struct_def.h: removed HasUID macro.
-	* channel.c, hash.c, s_bsd.c, s_misc.c, s_serv.c, s_service.c, s_user.c:
-	  change HasUID to (x)->user.
-
-2005-02-06  Piotr Kucharski
-
-	* channel.c/set_mode(): allow -r on all channels.
-
-2005-02-04  Piotr Kucharski
-
-	* struct_def.h et al: change ONICKLEN to LOCALNICKLEN, which is allowed
-	  from local clients.
-	* config.h.dist: default LOCALNICKLEN 12.
-	* common_def.h: removed isscandinavian() macro.
-	* s_user.c/do_nick_name(): removed isscandinavian() checks, []{}\|
-	  are again in use for nicks.
-	* channel.c: removed convert_scandinavian(), []{}\| are again in
-	  use for channel names.
-	* match.c: ~ (tilde) is valid for nicks now.
-	* s_user.c/do_nick_name(): no need for special case of ~ from servers.
-	* channel.c/set_mode(): allow +R from all chanops.
-
-2005-01-30  Piotr Kucharski
-
+	* tkserv.c, tkconf.h.dist: allow undefining TKSERV_ADMIN_OTHER.
 	* configure.in, configure: suncc adds space in front thus breaking grep.
-	* s_bsd.c/free_server(): there should be cptr->name, not cptr.
-	* s_serv.c/m_server_estab(): move clearing of burst state to m_eoback().
-	* class_def.h: add bsendq (burst sendq).
-	* s_err.c, class.c/report_classes(): show bsendq in STATSYLINE.
-	* class_ext.h, class.c/get_sendq(): return bsendq or sendq depending on
-	  new param "bursting".
-	* send.c/send_message(), channel.c/m_list(): update get_sendq() call.
-	* class.c/add_class(): new param bsendq (empty equal sendq)
-	* send.c/initconf(): parse sendq.bsendq in conf.
-	* send.c/send_message(): remove ignoring sendq exceeding during burst
-	  as we now have burst sendq.
-	* s_serv.c, s_serv_ext.h: remove do_emulated_eob().
-	* s_user.c/m_pong(), s_numeric.c/do_numeric(): remove do_emulated_eob()
-	  calls.
-	* s_serv.c/m_server_estab(): don't PING anymore (EOB emulation).
-
-2005-01-30  Piotr Kucharski, Kurt Roeckx
-
-	* struct_def.h: removed stok, tok, ltok.
-	* parse.c, parse_ext.h: removed find_tokserver().
-	* hash.c,hash_def.h,hash_ext.h: removed SERVERSIZE (using SIDSIZE
-	  on its own), removed serverTable hash, removed hash_find_stoken(),
-	  clear_server_hash_table(), add_to_server_hash_table(),
-	  del_from_server_hash_table(), functions and updated inithashtables(),
-	  bigger_hash_table(), show_hash_bucket().
-	* ircd.c/ircd_writetune(), ircd_readtune(): store and retrieve _SIDSIZE
-	  instead of _SERVERSIZE.
-	* list.c: removed used_tokens[] bit table.
-	* list.c/make_server(): removed tokens.
-	* s_misc.c/exit_one_client(): del_from_server_hash_table() call removed.
-	* s_serv.c/m_server_estab(): removed sending old syntax SERVICE.
-	* s_serv.c/m_server(), m_server_estab(): add_to_server_hash_table() call
-	  removed.
-	* s_serv.c/m_squit(), send_server(), m_server(), m_server_estab(),
-	  m_smask(), m_eob(): removed sending, parsing and receiving tokens (use
-	  sids, if possible) and compatibility sids.
-	* s_serv.c/m_smask(), m_server(): make_server() cannot fail due to lack
-	  of tokens, removed if-failure code.
-	* service_def.h: removed SERVICE_WANT_TOKEN, added SERVICE_WANT_SID.
-	* s_service.c/sendnum_toone(), m_service(), m_servset(): removed tokens
-	  and 2.10 protocol.
-	* s_user.c/register_user(): NICK introducing new client is no longer
-	  used between servers.
-	* s_user.c/m_user(): find_tokserver() call removed.
-
-2005-01-27  Piotr Kucharski
-
-	* mod_webproxy.c/proxy_init(): off-by-one config parse error.
-
-2005-01-03  Kurt Roeckx
-
-	* ircd.c/check_pings(): Initialise the reason variable.  It could be
-	  used uninitialised when TIMEDKLINES is not defined.
-	* configure, setup.h.in, os.h: Make configure detect the arguments of
-	  accept() and use the 3rd argument for SOCK_LEN_TYPE, which should be
-	  socklen_t in most cases.
-	* mode_pipe.c/pipe_start(): Properly terminate the call to execlp()
-	  with a (char *)NULL.
-	* os.h, support.c, support_ext.h, a_io.c, nameser_def.h, res.c,
-	  s_bsd.c: Don't use macro variables as #if VAR but use #ifdef VAR
-	  or #if defined(VAR)
-	* s_bsd.c, s_bsd_ext.h, send.c, mkpasswd.c, iauth.c, chkconf.c,
-	  class.c, hash.c, ircd.c, list.c, res.c, res_init.c: Give all
-	  definitions and declarations of function a proper prototype:
-	  add void as parameter if none is used.
-	* parse.c/find_target(): When using $SID, it checked the wrong
-	  variable which was always NULL, resulting in it never finding 
-	  those servers.
-
-2005-01-02  Kurt Roeckx
-
-	* configure.in/configure: Use AC_CHECK_LIB to check if pow needs -lm.
-	* config.guess/config.sub: Update to latest versions.
 
 2.11.0
 
@@ -3656,7 +3525,7 @@
 	* s_serv.c: changed m_trace() to only show unknowns to opers and
 	local clients.
 
-	* a_io.c: fd remap processing bugfix (from kurt@roeckx.be).
+	* a_io.c: fd remap processing bugfix (from Q@ping.be).
 
 	* s_bsd.c: fixed ircd/iauth problem with servers ircd connects to.
 

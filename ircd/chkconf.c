@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: chkconf.c,v 1.44 2005/02/15 19:21:44 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: chkconf.c,v 1.42.2.1 2005/02/15 21:36:46 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -142,7 +142,7 @@ int	main(int argc, char *argv[])
  * configuration file from.  This may either be th4 file direct or one end
  * of a pipe from m4.
  */
-static	int	openconf(void)
+static	int	openconf()
 {
 #ifdef	M4_PREPROC
 	int	pi[2];
@@ -187,7 +187,7 @@ static	int	openconf(void)
 }
 
 /* show config as ircd would see it before starting to parse it */
-static	void	showconf(void)
+static	void	showconf()
 {
 #if defined(CONFIG_DIRECTIVE_INCLUDE)
 	aConfig *p, *p2;
@@ -255,7 +255,7 @@ static	void	showconf(void)
 **            NULL if config is invalid (some mandatory fields missing)
 */
 
-static	aConfItem 	*initconf(void)
+static	aConfItem 	*initconf()
 {
 	int	fd;
 	char	*tmp, *tmp3 = NULL, *s;
@@ -525,10 +525,8 @@ static	aConfItem 	*initconf(void)
 				case 'N':
 				case 'M':
 				case 'F':
-					break;
 				case ' ':
 				case '\t':
-					/* so there's no weird warnings */
 					break;
 				default:
 					config_error(CF_WARN, CK_FILE, CK_LINE,
@@ -565,10 +563,8 @@ static	aConfItem 	*initconf(void)
 				case 'p':
 				case 'P':
 				case 't':
-					break;
 				case ' ':
 				case '\t':
-					/* so there's no weird warnings */
 					break;
 				default:
 					config_error(CF_WARN, CK_FILE, CK_LINE,
@@ -1100,7 +1096,7 @@ static int simulateM4Include(struct wordcount *filelist, int nr, char *filename,
 #endif
 
 #ifndef CONFIG_DIRECTIVE_INCLUDE
-static void	mywc(void)
+static void	mywc()
 {
 	int	fd, dh, nr = 0;
 	char	line[512];

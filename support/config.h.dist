@@ -86,21 +86,21 @@
 
 #ifdef USERS_RFC1459
 /*
- * If defined, outputs who/finger alike output from ircd box.
+ * Enables local USERS, which gives who/finger alike output from ircd box.
  * Note that some boxes no longer have /etc/utmp. When undefined, it will
  * return ERR_USERSDISABLED numeric. 
  * Consider its security implications before defining.
  */
-#undef	USERS_SHOWS_UTMP
+#undef	ENABLE_USERS
 #endif
 
-/* DEFAULT_INVISIBLE
+/* NO_DEFAULT_INVISIBLE
  *
- * When defined, your users will automatically be attributed with user
+ * When defined, your users will not automatically be attributed with user
  * mode "i" (i == invisible). Invisibility means people dont showup in
  * WHO or NAMES unless they are on the same channel as you.
  */
-#undef	DEFAULT_INVISIBLE
+#define	NO_DEFAULT_INVISIBLE
 
 /*
  * Define this if you want to have TKLINE and UNTKLINE commands
@@ -565,6 +565,12 @@
 */
 #undef DISABLE_NICK0_REGISTRATION
 
+/*
+** Undefine this if you do not want to see notices about exceeded maxsendq
+** during burst.
+*/
+#define MAXSENDQ_NOTICES
+
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /* You shouldn't change anything below this line, unless absolutely needed. */
 
@@ -686,12 +692,6 @@
 #define LISTENER_DELAY 1
 #define LISTENER_MAXACCEPT 10
 #endif
-
-/*
-** If you don't feel your users should use too long nicknames, you can
-** restrict length of their dnicks here.
-*/
-#define LOCALNICKLEN 12
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
