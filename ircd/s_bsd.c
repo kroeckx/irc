@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.4 2000/02/03 17:57:00 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.5 2000/02/10 18:52:32 q Exp $";
 #endif
 
 #include "os.h"
@@ -157,7 +157,7 @@ aClient *cptr;
 	 * gamble anyway.
 	 */
 #ifdef	SO_ERROR
-	if (!IsMe(cptr) && cptr->fd >= 0)
+	if (cptr && !IsMe(cptr) && cptr->fd >= 0)
 		if (!GETSOCKOPT(cptr->fd, SOL_SOCKET, SO_ERROR, &err, &len))
 			if (err)
 				errtmp = err;
