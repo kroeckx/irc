@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.20 2003/12/09 23:03:48 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.21 2004/05/09 19:32:40 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -94,6 +94,7 @@ aClient *cptr;
 	char	*p;
 	struct  IN_ADDR addr;
 	char	dummy[128];
+	char	omask = mask;
 	u_long	lmask;
 #ifdef	INET6
 	int	j;
@@ -157,7 +158,7 @@ aClient *cptr;
 	return 0;
 #endif
 badmask:
-	sendto_flag(SCH_ERROR, "Ignoring bad mask: %s", mask);
+	sendto_flag(SCH_ERROR, "Ignoring bad mask: %s", omask);
 	return -1;
 }
 
