@@ -383,6 +383,12 @@
  */
 #define	CLONE_CHECK
 
+/*
+ * Because ip6.arpa is still not delegated for the 6bone (3ffe::/16)
+ * this options allows you to still resolve it using ip6.int.
+ */
+#define SIXBONE_HACK
+
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
