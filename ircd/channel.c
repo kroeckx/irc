@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.15 2001/05/03 19:41:19 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.16 2001/05/03 20:00:23 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2575,13 +2575,13 @@ char	*parv[];
 	if (strlen(comment) > (size_t) TOPICLEN)
 		comment[TOPICLEN] = '\0';
 
-    /* strlen(":parv[0] KICK ") */
+	/* strlen(":parv[0] KICK ") */
 	mlen = 7 + strlen(parv[0]);
 
 	for (; (name = strtoken(&p, parv[1], ",")); parv[1] = NULL)
 	    {
 		*nickbuf = '\0';
-		if (penalty++ >= MAXPENALTY && MyPerson(sptr))
+		if (penalty >= MAXPENALTY && MyPerson(sptr))
 			break;
 		chptr = get_channel(sptr, name, !CREATE);
 		if (!chptr)
@@ -2589,17 +2589,19 @@ char	*parv[];
 			if (MyPerson(sptr))
 				sendto_one(sptr,
 					   err_str(ERR_NOSUCHCHANNEL, parv[0]),
-				   	   name);
+					   name);
+			penalty += 2;
 			continue;
 		    }
 		if (check_channelmask(sptr, cptr, name))
 			continue;
-                if (!UseModes(name))
-                    {
-                        sendto_one(sptr, err_str(ERR_NOCHANMODES, parv[0]),
+		if (!UseModes(name))
+		    {
+			sendto_one(sptr, err_str(ERR_NOCHANMODES, parv[0]),
 				   name);
-                        continue;
-                    }
+			penalty += 2;
+			continue;
+		    }
 		if (!IsServer(sptr) && !is_chan_op(sptr, chptr))
 		    {
 			if (!IsMember(sptr, chptr))
@@ -2608,6 +2610,7 @@ char	*parv[];
 			else
 				sendto_one(sptr, err_str(ERR_CHANOPRIVSNEEDED,
 					    parv[0]), chptr->chname);
+			penalty += 2;
 			continue;
 		    }
 
