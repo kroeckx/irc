@@ -78,8 +78,8 @@ A:Boston University CS Department:Main Client Server:Helen Rose <hrose@cs.bu.edu
 #
 # The fields are as follows::
 # P:UNIX socket file:*:*:port number
-# for example, an internet domain socket on port 6665: 
-P::::6665:
+# for example, an internet domain socket on port 6667:
+P::::6667:
 #
 # This line is an example of a UNIX domain socket in /tmp
 P:/tmp/.ircd:*:*:6666:

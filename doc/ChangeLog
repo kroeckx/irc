@@ -1,4 +1,36 @@
-Fri Feb 28 09:34:36 1997  Christophe Kalt  <kalt@millennium.stealth.net>
+Tue Mar 18 17:59:26 1997  Christophe Kalt
+
+	* 2.9.3b10
+	
+	* channel.c, hash.c, res.c, s_serv.c, s_service.c, s_user.c,
+	whowas.c: penalties tuned again. (added Volker Paulsen's anti SPAM
+	hack).
+	
+	* s_err.c, s_serv.c: minor changes to RPL_STATS*
+
+	* s_bsd.c: authclnts[] was not always initialized.
+	
+	* ircd.c: buffer in ircd_readtune() lacked initialization.
+	
+	* s_service.c: fixed buffer overflow.
+
+	* send.c, support.c: # of arguments cleanup.
+	
+	* list.c, res.c, s_service.c: casts to suppress warnings.
+
+	* h.h, dbuf.c: bufalloc, dbufblocks, poolsize now
+	unsigned. (some checks might be needed, poolsize can really get
+	big).
+
+	* s_misc.c: removed duplicate code in exit_client().
+
+	* parse.c:
+ 	
+		* Added more notices when generating SQUITs for unknown
+		servers.
+		* removed bogus else.
+
+Fri Feb 28 09:34:36 1997  Christophe Kalt
 
 	* s_err.c, s_serv.c: Added 2 more fields to RPL_TRACELINK.
 

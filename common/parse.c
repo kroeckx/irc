@@ -364,7 +364,7 @@ char	*buffer, *bufend;
 				from = find_server(sender, (aClient *)NULL);
 #ifndef	CLIENT_COMPILE
 			/* Is there svc@server prefix ever? -Vesa */
-			else if (!from && index(sender, '@'))
+			if (!from && index(sender, '@'))
 				from = find_service(sender, (aClient *)NULL);
 			if (!from)
 				from = find_mask(sender, (aClient *) NULL);
@@ -683,20 +683,28 @@ char	*sender;
 	if (!IsServer(cptr))
 		return;
 	/*
-	 * Do kill if it came from a server because it means there is a ghost
-	 * user on the other server which needs to be removed. -avalon
-	 * it can simply be caused by lag (among other things), so just
-	 * drop it if it is not a server. -krys
-	 */
-	sendto_flag(SCH_LOCAL, "Dropping unknown %s brought by %s.",
-		    sender, get_client_name(cptr, FALSE));
-	/*
 	 * squit if it is a server because it means something is really
 	 * wrong.
 	 */
 	if (index(sender, '.') /* <- buggy, it could be a service! */
 	    && !index(sender, '@')) /* better.. */
+	    {
+		sendto_flag(SCH_LOCAL, "Squitting unknown %s brought by %s.",
+			    sender, get_client_name(cptr, FALSE));
+		sendto_ops_butone(NULL, &me,
+			  ":%s WALLOPS :%s Sending SQUIT %s (Unknown from %s)",
+				  ME,ME, sender, get_client_name(cptr, FALSE));
 		sendto_one(cptr, ":%s SQUIT %s :(Unknown from %s)",
 			   me.name, sender, get_client_name(cptr, FALSE));
+	    }
+	else
+	/*
+	 * Do kill if it came from a server because it means there is a ghost
+	 * user on the other server which needs to be removed. -avalon
+	 * it can simply be caused by lag (among other things), so just
+	 * drop it if it is not a server. -krys
+	 */
+		sendto_flag(SCH_LOCAL, "Dropping unknown %s brought by %s.",
+			    sender, get_client_name(cptr, FALSE));
 }
 #endif

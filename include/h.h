@@ -92,7 +92,8 @@ extern	int	dgets __P((int, char *, int));
 extern	void	ircsprintf __P(());
 extern	char	*inetntoa __P((char *)), *mystrdup __P((char *));
 
-extern	int	dbufalloc, dbufblocks, debuglevel, errno, h_errno, poolsize;
+extern	u_int	dbufalloc, dbufblocks, poolsize;
+extern	int	debuglevel, errno, h_errno;
 extern	int	highest_fd, debuglevel, portnum, debugtty, maxusersperchannel;
 extern	int	readcalls, udpfd, resfd;
 extern	aClient	*add_connection __P((aClient *, int));
@@ -236,6 +237,7 @@ extern	struct	hostent	*gethost_byname __P((char *, Link *));
 extern	void	flush_cache __P(());
 extern	u_long	cres_mem __P((aClient *, char *));
 extern	int	init_resolver __P((int));
+extern	int	ircd_res_init __P(());
 extern	time_t	timeout_query_list __P((time_t));
 extern	time_t	expire_cache __P((time_t));
 extern	void    del_queries __P((char *));

@@ -43,8 +43,11 @@ IRCDMODE = 711
 #
 IRCDDIR = $(prefix)/lib/irc
 
-#L/home/ch1/avalon/lib -lefence
 IRCLIBS=-lcurses -ltermcap $(LIBS)
+
+# The following are from the time when autoconf wasn't used.
+# They are pretty useless but can be a good source of inspiration if you
+# have trouble compiling.
 #
 # use the following on MIPS:
 #CFLAGS= -systype bsd43 -DSYSTYPE_BSD43 $(INCLUDEDIR)

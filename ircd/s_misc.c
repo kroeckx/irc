@@ -691,37 +691,15 @@ char	*comment;
 			    (match(my_name_for_link(ME, aconf->port),
 				     sptr->name) == 0))
 				continue;
-			/*
-			** SQUIT going "upstream". This is the remote
-			** squit still hunting for the target. Use prefixed
-			** form. "from" will be either the oper that issued
-			** the squit or some server along the path that
-			** didn't have this fix installed. --msa
-			*/
-			if (sptr->from == acptr)
-			    {
-				sendto_one(acptr, ":%s SQUIT %s :%s",
-					   from->name, sptr->name, comment);
+			sendto_one(acptr, ":%s SQUIT %s :%s",
+				   from->name, sptr->name, comment);
 #ifdef	USE_SERVICES
-				check_services_butone(SERVICE_WANT_SQUIT, 
-						      sptr->name, sptr,
-						      ":%s SQUIT %s :%s",
-						      from->name,
-						      sptr->name, comment);
+			check_services_butone(SERVICE_WANT_SQUIT, 
+					      sptr->name, sptr,
+					      ":%s SQUIT %s :%s",
+					      from->name,
+					      sptr->name, comment);
 #endif
-			    }
-			else
-			    {
-				sendto_one(acptr, ":%s SQUIT %s :%s",
-					   from->name, sptr->name, comment);
-#ifdef	USE_SERVICES
-				check_services_butone(SERVICE_WANT_SQUIT, 
-						      sptr->name, sptr,
-						      ":%s SQUIT %s :%s",
-						      from->name, sptr->name,
-						      comment);
-#endif
-			    }
 		    }
 		(void) del_from_server_hash_table(sptr->serv, cptr ? cptr :
 						  sptr->from);

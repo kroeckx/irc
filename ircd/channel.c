@@ -1997,7 +1997,7 @@ char	*parv[];
 
 	if (parc > 1 &&
 	    hunt_server(cptr, sptr, ":%s LIST %s %s", 2, parc, parv))
-		return 3;
+		return 10;
 #ifdef MIRC_KLUDGE
         sendto_one(sptr, rpl_str(RPL_LISTSTART, parv[0]));
 #endif
@@ -2061,7 +2061,7 @@ char	*parv[];
 
 	if (parc > 1 &&
 	    hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
-		return 3;
+		return 10;
 
 	mlen = strlen(ME) + 10;
 	if (!BadPtr(para))

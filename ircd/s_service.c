@@ -72,7 +72,7 @@ aClient	*cptr;
 		if (serv->servp)
 			free_server(serv->servp, cptr);
 
-		MyFree(serv);
+		MyFree((char *)serv);
 		cptr->service = NULL;
 	    }
 }
@@ -271,7 +271,7 @@ char	*parv[];
 			return exit_client(cptr, sptr, &me, "Name too long");
 		    }
 
-		(void)strcpy(sptr->name, parv[1]);
+		strncpyzt(sptr->name, parv[1], sizeof(sptr->name));
 		if (!(aconf = find_conf_service(sptr, type, NULL)))
 		    {
 			sendto_one(sptr,
@@ -368,7 +368,7 @@ char	*parv[];
 				   acptr->name, sp->server, sp->dist,
 				   sp->type, acptr->hopcount, acptr->info);
 	sendto_one(sptr, rpl_str(RPL_SERVLISTEND, parv[0]), mask, type);
-	return 1;
+	return 2;
 }
 
 
@@ -423,5 +423,5 @@ char	*parv[];
 			   parv[0], acptr->name, parv[2]);
 	else
 		sendto_one(sptr, err_str(ERR_NOSUCHSERVICE, parv[0]), parv[1]);
-	return 1;
+	return 2;
 }

@@ -1418,7 +1418,6 @@ int	fd;
 		get_sockhost(acptr, cptr->sockhost);
 	else
 	    {
-		Reg	char	*s, *t;
 		struct	sockaddr_in addr;
 		int	len = sizeof(struct sockaddr_in);
 
@@ -1761,6 +1760,10 @@ FdAry	*fdp;
 #endif	/* _DO_POLL_ */
 		auth = 0;
 
+#ifdef	_DO_POLL_
+		if ( auth == 0 )
+			bzero((char *) &authclnts, sizeof( authclnts ));
+#endif
 		for (i = fdp->highest; i >= 0; i--)
 		    {
 			if (!(cptr = local[fd = fdp->fd[i]]) ||
@@ -1771,11 +1774,6 @@ FdAry	*fdp;
 				get_client_name(cptr,TRUE)));
 			if (DoingAuth(cptr))
 			    {
-#ifdef	_DO_POLL_
-				if ( auth == 0 )
-					bzero((char *) &authclnts,
-					      sizeof( authclnts ));
-#endif
 				auth++;
 				SET_READ_EVENT(cptr->authfd);
 				Debug((DEBUG_NOTICE,"auth on %x %d", cptr,

@@ -574,7 +574,7 @@ aConfItem *aconf;
 	if (aconf->passwd)
 		bzero(aconf->passwd, strlen(aconf->passwd));
 	if (aconf->ping)
-		MyFree(aconf->ping);
+		MyFree((char *)aconf->ping);
 	MyFree(aconf->passwd);
 	MyFree(aconf->name);
 	MyFree((char *)aconf);

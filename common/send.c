@@ -550,10 +550,10 @@ static	aClient	anon = { NULL, NULL, NULL, &ausr, NULL, NULL, 0, 0,/*flags*/
 
 /*VARARGS*/
 void	sendto_channel_butone(one, from, chptr, pattern,
-			      p1, p2, p3, p4, p5, p6, p7, p8)
+			      p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 aClient *one, *from;
 aChannel *chptr;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	Link	*lp;
 	Reg	aClient *acptr, *lfrm = from;
@@ -568,8 +568,8 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 
 	if (one != from && MyConnect(from) && IsRegisteredUser(from))
 		sendto_prefix_one(from, from, pattern, p1, p2, p3, p4,
-				  p5, p6, p7, p8);
-	len1 = sendprep(pattern, p1, p2, p3, p4, p5, p6, p7, p8);
+				  p5, p6, p7, p8, p9, p10, p11);
+	len1 = sendprep(pattern, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11);
 
 	for (lp = chptr->clist; lp; lp = lp->next)
 	    {
@@ -580,7 +580,8 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		    {
 			if (!len2)
 				len2 = sendpreprep(acptr, lfrm, pattern, p1,
-						   p2, p3, p4, p5, p6, p7, p8);
+						   p2, p3, p4, p5, p6, p7, p8,
+						   p9, p10, p11);
 			if (acptr != from)
 				(void)send_message(acptr, psendbuf, len2);
 		    }
@@ -598,9 +599,9 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  * Send a message to all connected servers except the client 'one'.
  */
 /*VARARGS*/
-void	sendto_serv_butone(one, pattern, p1, p2, p3, p4, p5, p6, p7,p8,p9,p10)
+void	sendto_serv_butone(one, pattern, p1, p2, p3, p4,p5,p6,p7,p8,p9,p10,p11)
 aClient *one;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i, len=0;
 	Reg	aClient *cptr;
@@ -610,17 +611,17 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
 		    (!one || cptr != one->from) && !IsMe(cptr)) {
 			if (!len)
 				len = sendprep(pattern, p1, p2, p3, p4, p5,
-					       p6, p7, p8, p9, p10);
+					       p6, p7, p8, p9, p10, p11);
 			(void)send_message(cptr, sendbuf, len);
 	}
 	return;
 }
 
 #ifndef NoV28Links
-void	sendto_serv_v(one, ver, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_serv_v(one, ver, pattern, p1, p2, p3, p4,p5,p6,p7,p8,p9,p10,p11)
 aClient *one;
 int	ver;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i, len=0;
 	Reg	aClient *cptr;
@@ -631,7 +632,7 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		    cptr->serv->version == ver) {
 			if (!len)
 				len = sendprep(pattern, p1, p2, p3, p4, p5,
-					       p6, p7, p8);
+					       p6, p7, p8, p9, p10, p11);
 			(void)send_message(cptr, sendbuf, len);
 	}
 	return;
@@ -645,9 +646,9 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  * in same channel with user.
  */
 /*VARARGS*/
-void	sendto_common_channels(user, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_common_channels(user,pattern,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11)
 aClient *user;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i;
 	Reg	aClient *cptr;
@@ -657,7 +658,7 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 	if (MyConnect(user))
 	    {
 		len = sendpreprep(user, user, pattern,
-				  p1, p2, p3, p4, p5, p6, p7, p8);
+				  p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,p11);
 		(void)send_message(user, psendbuf, len);
 	    }
 	for (i = 0; i <= highest_fd; i++)
@@ -674,8 +675,9 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 					     but breaks the debug code.. */
 #endif
 					len = sendpreprep(cptr, user, pattern,
-							  p1, p2, p3, p4,
-							  p5, p6, p7, p8);
+							  p1, p2, p3, p4, p5,
+							  p6, p7, p8, p9, p10,
+							  p11);
 				(void)send_message(cptr, psendbuf, len);
 				break;
 			    }
@@ -691,10 +693,10 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  */
 /*VARARGS*/
 void	sendto_channel_butserv(chptr, from, pattern, p1, p2, p3,
-			       p4, p5, p6, p7, p8)
+			       p4, p5, p6, p7, p8, p9, p10, p11)
 aChannel *chptr;
 aClient *from;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	Link	*lp;
 	Reg	aClient	*acptr, *lfrm = from;
@@ -703,7 +705,7 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 	if (MyClient(from))
 	    {	/* Always send to the client itself */
 		sendto_prefix_one(from, from, pattern, p1, p2, p3, p4,
-				  p5, p6, p7, p8);
+				  p5, p6, p7, p8, p9, p10, p11);
 		if (IsQuiet(chptr))	/* Really shut up.. */
 			return;
 	    }
@@ -719,7 +721,8 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 		    {
 			if (!len)
 				len = sendpreprep(acptr, lfrm, pattern, p1, p2,
-						  p3, p4, p5, p6, p7, p8);
+						  p3, p4, p5, p6, p7, p8, p9,
+						  p10, p11);
 			(void)send_message(acptr, psendbuf, len);
 		    }
 
@@ -755,10 +758,11 @@ int	what;
  * (if there is a mask present) or to all if no mask.
  */
 /*VARARGS*/
-void	sendto_match_servs(chptr, from, format, p1,p2,p3,p4,p5,p6,p7,p8,p9)
+void	sendto_match_servs(chptr, from, format, p1, p2, p3, p4, p5, p6, p7,
+			   p8, p9, p10, p11)
 aChannel *chptr;
 aClient	*from;
-char	*format, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
+char	*format, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i, len=0;
 	Reg	aClient	*cptr;
@@ -788,7 +792,7 @@ char	*format, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
 #endif
 		if (!len)
 			len = sendprep(format, p1, p2, p3, p4, p5, p6, p7,
-				       p8, p9);
+				       p8, p9, p10, p11);
 		(void)send_message(cptr, sendbuf, len);
 	    }
 }
@@ -801,10 +805,10 @@ char	*format, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9;
  */
 /*VARARGS*/
 void	sendto_match_butone(one, from, mask, what, pattern,
-			    p1, p2, p3, p4, p5, p6, p7, p8)
+			    p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 aClient *one, *from;
 int	what;
-char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9,*p10,*p11;
 {
 	Reg	int	i;
 	Reg	aClient *cptr, *acptr = NULL;
@@ -831,7 +835,7 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 			   match_it(cptr, mask, what)))
 			continue;
 		sendto_prefix_one(cptr, from, pattern,
-				  p1, p2, p3, p4, p5, p6, p7, p8);
+				  p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,p11);
 	    }
 	return;
 }
@@ -843,9 +847,10 @@ char	*mask, *pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  * message generator.
  */
 /*VARARGS*/
-void	sendto_all_butone(one, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_all_butone(one, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8,
+			  p9, p10, p11)
 aClient *one, *from;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i;
 	Reg	aClient *cptr;
@@ -857,8 +862,9 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 			    {
 				if (!len1)
 					len1 = sendpreprep(cptr, from, pattern,
-							   p1, p2, p3, p4,
-							   p5, p6, p7, p8);
+							   p1, p2, p3, p4, p5,
+							   p6, p7, p8, p9, p10,
+							   p11);
 				(void)send_message(cptr, psendbuf, len1);
 			    }
 			else
@@ -866,7 +872,8 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 				if (!len2)
 					len2 = sendprep(cptr, pattern,
 							p1, p2, p3, p4,
-							p5, p6, p7, p8);
+							p5, p6, p7, p8,
+							p9, p10, p11);
 				(void)send_message(cptr, sendbuf, len2);
 			    }
 
@@ -880,9 +887,10 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 ** from- client which message is from *NEVER* NULL!!
 */
 /*VARARGS*/
-void	sendto_ops_butone(one, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_ops_butone(one, from, pattern,
+			  p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 aClient *one, *from;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	int	i;
 	Reg	aClient *cptr;
@@ -901,7 +909,7 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
 			continue;	/* ...was the one I should skip */
 		sentalong[i] = 1;
       		sendto_prefix_one(cptr->from, from, pattern,
-				  p1, p2, p3, p4, p5, p6, p7, p8);
+				  p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,p11);
 	    }
 	return;
 }
@@ -914,14 +922,16 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
  * -avalon
  */
 /*VARARGS*/
-void	sendto_prefix_one(to, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8)
+void	sendto_prefix_one(to, from, pattern,
+			  p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11)
 Reg	aClient *to;
 Reg	aClient *from;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	int	len;
 
-	len = sendpreprep(to, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8);
+	len = sendpreprep(to, from, pattern, p1, p2, p3, p4, p5, p6, p7, p8,
+			  p9, p10, p11);
 	send_message(to, psendbuf, len);
 	return;
 }
@@ -952,9 +962,9 @@ void	setup_svchans()
 }
 
 
-void	sendto_flag(chan, pattern, p1, p2, p3, p4, p5, p6)
+void	sendto_flag(chan, pattern, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10,p11)
 u_int	chan;
-char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6;
+char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6, *p7, *p8, *p9, *p10, *p11;
 {
 	Reg	aChannel *chptr = NULL;
 	SChan	*shptr;
@@ -969,7 +979,8 @@ char	*pattern, *p1, *p2, *p3, *p4, *p5, *p6;
 		(void)strcpy(nbuf, ":%s NOTICE %s :");
 		(void)strcat(nbuf, pattern);
 		sendto_channel_butserv(chptr, &me, nbuf, ME, chptr->chname,
-				       p1, p2, p3, p4, p5, p6);
+				       p1, p2, p3, p4, p5, p6, p7, p8, p9,
+				       p10, p11);
 	    }
 	return;
 }

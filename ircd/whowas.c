@@ -396,7 +396,7 @@ char	*parv[];
 			p[-1] = ',';
 	    }
 	sendto_one(sptr, rpl_str(RPL_ENDOFWHOWAS, parv[0]), parv[1]);
-	return 1;
+	return 2;
     }
 
 

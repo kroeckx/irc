@@ -777,7 +777,7 @@ char	*parv[];
 		for (i = 0; i < 10; i++)
 			sendto_one(sptr,"NOTICE %s :Entires with %d links : %d",
 			parv[0], i, link_pop[i]);
-		return (1);
+		return (2);
 	case 'r' :
 	    {
 		Reg	aClient	*acptr;
@@ -803,20 +803,20 @@ char	*parv[];
 			sendto_one(sptr,"NOTICE %s :%s hash to entry %d",
 				   parv[0], parv[2],
 				   hash_channel_name(parv[2]));
-		return (1);
+		return (2);
 	case 'h' :
 		if (parc > 2)
 			sendto_one(sptr,"NOTICE %s :%s hash to entry %d",
 				   parv[0], parv[2],
 				   hash_nick_name(parv[2]));
-		return (1);
+		return (2);
 	case 'n' :
 	    {
 		aClient	*tmp;
 		int	max;
 
 		if (parc <= 2 || !IsAnOper(sptr))
-			return (0);
+			return (1);
 		l = atoi(parv[2]) % _HASHSIZE;
 		if (parc > 3)
 			max = atoi(parv[3]) % _HASHSIZE;
@@ -831,7 +831,7 @@ char	*parv[];
 				sendto_one(sptr,"NOTICE %s :Node: %d #%d %s",
 					   parv[0], l, i, tmp->name);
 			    }
-		return (1);
+		return (2);
 	    }
 	case 'N' :
 	    {
@@ -839,7 +839,7 @@ char	*parv[];
 		int	max;
 
 		if (parc <= 2 || !IsAnOper(sptr))
-			return (0);
+			return (1);
 		l = atoi(parv[2]) % _CHANNELHASHSIZE;
 		if (parc > 3)
 			max = atoi(parv[3]) % _CHANNELHASHSIZE;
@@ -850,7 +850,7 @@ char	*parv[];
 			     i++, tmp = tmp->hnextch)
 				sendto_one(sptr,"NOTICE %s :Node: %d #%d %s",
 					   parv[0], l, i, tmp->chname);
-		return (1);
+		return (2);
 	    }
 	case 'S' :
 #else
@@ -864,15 +864,15 @@ char	*parv[];
 #ifndef	DEBUGMODE
 	}
 #endif
-	    return 1;
+	    return 2;
 #ifdef	DEBUGMODE
 	case 'z' :
 	    {
 		if (parc <= 2 || !IsAnOper(sptr))
-			return 0;
+			return 1;
 		l = atoi(parv[2]);
 		if (l < 256)
-			return 0;
+			return 1;
 		bigger_hash_table(&_HASHSIZE, clientTable, l);
 		sendto_one(sptr, "NOTICE %s :HASHSIZE now %d", parv[0], l);
 		break;
@@ -880,10 +880,10 @@ char	*parv[];
 	case 'Z' :
 	    {
 		if (parc <= 2 || !IsAnOper(sptr))
-			return 0;
+			return 1;
 		l = atoi(parv[2]);
 		if (l < 256)
-			return 0;
+			return 1;
 		bigger_hash_table(&_CHANNELHASHSIZE, channelTable, l);
 		sendto_one(sptr, "NOTICE %s :CHANNELHASHSIZE now %d",
 			   parv[0], l);
@@ -912,6 +912,6 @@ char	*parv[];
 		   parv[0], clhits, clmiss);
 	sendto_one(sptr,"NOTICE %s :Channel hits %d miss %d",
 		   parv[0], chhits, chmiss);
-	return 1;
+	return 2;
 #endif
 }

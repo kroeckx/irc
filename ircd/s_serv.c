@@ -113,11 +113,8 @@ int	parc;
 char	*parv[];
 {
 	if (hunt_server(cptr,sptr,":%s VERSION :%s",1,parc,parv)==HUNTED_ISME)
-	    {
 		sendto_one(sptr, rpl_str(RPL_VERSION, parv[0]),
 			   version, debugmode, ME, serveropts);
-		return 1;
-	    }
 	return 2;
 }
 
@@ -318,7 +315,7 @@ char	*parv[];
 	if (parc < 2 || *parv[1] == '\0')
 	    {
 			sendto_one(cptr,"ERROR :No servername");
-			return 2;
+			return 1;
 	    }
 	host = parv[1];
 	if (parc > 3 && (hop = atoi(parv[2])))
@@ -416,7 +413,7 @@ char	*parv[];
 				   host);
 			sendto_flag(SCH_ERROR, "No server info for %s from %s",
 				    host, get_client_name(cptr, TRUE));
-	  		return 0;
+	  		return 1;
 		    }
 
 		/*
@@ -527,7 +524,7 @@ char	*parv[];
 
 	if ((!IsUnknown(cptr) && !IsHandshake(cptr)) ||
 	    (cptr->flags & FLAGS_UNKCMD))
-		return 0;
+		return 1;
 	/*
 	** A local link that is still in undefined state wants
 	** to be a SERVER. Check if this is allowed and change
@@ -912,7 +909,7 @@ char	*parv[];
 		return exit_client(cptr, sptr, &me, "Already registered");
 
 	if (parc < 3)
-		return 0;
+		return 1;
 
 	name = parv[1];
 
@@ -969,10 +966,10 @@ char	*parv[];
 			   ME, RPL_INFO, parv[0],
 			   myctime(me.firsttime));
 		sendto_one(sptr, rpl_str(RPL_ENDOFINFO, parv[0]));
-		return 3;
+		return 5;
 	    }
 	else
-		return 5;
+		return 10;
 }
 
 /*
@@ -1016,7 +1013,7 @@ char	*parv[];
 
 	sendto_one(sptr, rpl_str(RPL_ENDOFLINKS, parv[0]),
 		   BadPtr(mask) ? "*" : mask);
-	return 1;
+	return 2;
 }
 
 /*
@@ -1124,7 +1121,7 @@ char	*parv[];
 	    }
 	else
 		return 3;
-	return 1;
+	return 2;
 }
 
 
@@ -1187,7 +1184,7 @@ int	mask;
 				continue;
 			c = (char)*(p+2);
 			host = BadPtr(tmp->host) ? null : tmp->host;
-			pass = BadPtr(tmp->passwd) ? null : tmp->passwd;
+			pass = BadPtr(tmp->passwd) ? NULL : tmp->passwd;
 			name = BadPtr(tmp->name) ? null : tmp->name;
 			port = (int)tmp->port;
 			/*
@@ -1195,10 +1192,12 @@ int	mask;
 			 * displayed on STATS reply. 	-Vesa
 			 */
 			if (tmp->status == CONF_KILL || tmp->status == CONF_VER)
-				sendto_one(sptr, rpl_str(p[1], to),c,host,pass,
+				sendto_one(sptr, rpl_str(p[1], to), c, host,
+					   (pass) ? pass : null,
 					   name, port, get_conf_class(tmp));
 			else
 				sendto_one(sptr, rpl_str(p[1], to), c, host,
+					   (pass) ? "*" : null,
 					   name, port, get_conf_class(tmp));
 		    }
 	return;
@@ -1436,7 +1435,7 @@ char	*parv[];
 	    }
 	else
 		return 3;
-	return 1;
+	return 2;
 }
 
 /*
@@ -1472,7 +1471,7 @@ char	*parv[];
 	else
 		sendto_flag(SCH_ERROR, "from %s via %s -- %s",
 			   sptr->name, get_client_name(cptr,FALSE), para);
-	return 1;
+	return 2;
     }
 
 /*
@@ -1535,7 +1534,7 @@ char	*parv[];
 		sendto_one(sptr, rpl_str(RPL_LUSERME, parv[0]),
 			   istat.is_myclnt, istat.is_myservice,
 			   istat.is_myserv);
-		return 1;
+		return 2;
 	    }
 	(void)collapse(parv[1]);
 	for (acptr = client; acptr; acptr = acptr->next)
@@ -1614,7 +1613,7 @@ char	*parv[];
 			   count_channels(sptr));
 	sendto_one(sptr, rpl_str(RPL_LUSERME, parv[0]), m_client, m_service,
 		   m_server);
-	return 1;
+	return 2;
     }
 
   
@@ -1769,7 +1768,7 @@ char	*parv[];
 	    {
 		sendto_one(sptr, err_str(ERR_NEEDMOREPARAMS, parv[0]),
 			   "WALLOPS");
-		return 0;
+		return 1;
 	    }
 
 	if (!IsServer(sptr))
@@ -1798,14 +1797,11 @@ int	m_time(cptr, sptr, parc, parv)
 aClient *cptr, *sptr;
 int	parc;
 char	*parv[];
-    {
+{
 	if (hunt_server(cptr,sptr,":%s TIME :%s",1,parc,parv) == HUNTED_ISME)
-	    {
 		sendto_one(sptr, rpl_str(RPL_TIME, parv[0]), ME, date((long)0));
-		return 1;
-	    }
 	return 2;
-    }
+}
 
 
 /*
@@ -1834,7 +1830,7 @@ char	*parv[];
 	    }
 	else
 		sendto_one(sptr, err_str(ERR_NOADMININFO, parv[0]), ME);
-	return 1;
+	return 2;
     }
 
 #if defined(OPER_REHASH) || defined(LOCOP_REHASH)
@@ -1910,7 +1906,7 @@ char	*parv[];
 			   timeofday - ac2ptr->from->firsttime,
 			   (int)DBufLength(&ac2ptr->from->sendQ),
 			   (int)DBufLength(&sptr->from->sendQ));
-		return 3;
+		return 5;
 	    }
 	case HUNTED_ISME:
 		break;
@@ -2075,7 +2071,7 @@ char	*parv[];
 	struct	tm	*tm;
 
 	if (hunt_server(cptr, sptr, ":%s MOTD :%s", 1,parc,parv)!=HUNTED_ISME)
-		return 3;
+		return 5;
 	/*
 	 * stop NFS hangs...most systems should be able to open a file in
 	 * 3 seconds. -avalon (curtesy of wumpus)

@@ -1068,7 +1068,7 @@ void ircd_readtune(filename)
 char *filename;
 {
 	int fd, t_data[6];
-	char buf[100];
+	char buf[100] = "";
 
 	if ((fd = open(filename, O_RDONLY)) != -1)
 	    {
