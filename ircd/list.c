@@ -18,26 +18,8 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* -- Jto -- 20 Jun 1990
- * extern void free() fixed as suggested by
- * gruner@informatik.tu-muenchen.de
- */
-
-/* -- Jto -- 03 Jun 1990
- * Added chname initialization...
- */
-
-/* -- Jto -- 24 May 1990
- * Moved is_full() to channel.c
- */
-
-/* -- Jto -- 10 May 1990
- * Added #include <sys.h>
- * Changed memset(xx,0,yy) into bzero(xx,yy)
- */
-
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.1 2001/04/07 00:12:44 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: list.c,v 1.9.2.2 2001/05/01 16:10:48 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -144,7 +126,7 @@ aClient	*from;
 		cptr->sockhost[0] = '\0';
 		cptr->buffer[0] = '\0';
 		cptr->authfd = -1;
-		cptr->auth = mystrdup(cptr->username);
+		cptr->auth = cptr->username;
 		cptr->exitc = EXITC_UNDEF;
 #ifdef	ZIP_LINKS
 		cptr->zip = NULL;
@@ -158,6 +140,13 @@ aClient	*cptr;
 {
 	if (cptr->info != DefInfo)
 		MyFree(cptr->info);
+	if (cptr->auth && *cptr->auth && cptr->auth != cptr->username)
+	{
+	    sendto_flag(SCH_ERROR, "Please report to ircd-bug@irc.org about cptr->auth allocated but not free()d!");
+		istat.is_authmem -= strlen(cptr->auth) + 1;
+		istat.is_auth -= 1;
+		MyFree(cptr->auth);
+	}
 	MyFree((char *)cptr);
 }
 

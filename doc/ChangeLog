@@ -1,3 +1,15 @@
+2001-05-01  Piotr Kucharski
+
+	* list.c/make_client(),s_auth.c/set_clean_username: revert change,
+	  it can point to static buffer (saves memory), we just have to be
+	  careful not to free() it.
+	* send.c: added some comments.
+	* sys_def.h: change MyFree() to set variable to NULL after free()
+
+2001-04-11  Piotr Kucharski
+
+	* s_misc.c: change sizeof(dynamic buffer) to strlen().
+
 2001-04-06  Piotr Kucharski
 
 	* whowas.c/m_whowas(): don't send away info.
