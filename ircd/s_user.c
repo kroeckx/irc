@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.25 2003/10/11 14:20:00 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.26 2003/10/12 19:52:47 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -708,7 +708,7 @@ char	*parv[];
 		*s = '\0';
 	strncpyzt(nick, parv[1], NICKLEN+1);
 
-	if (cptr->serv) /* we later use 'IsServer(sptr), why not here? --B. */
+	if (cptr->serv)
 	{
 		if (parc != 8 && parc != 2)
 		{
@@ -737,11 +737,16 @@ badparamcountkills:
 		}
 		else if (parc == 8)
 		{
+			/* :server NICK new hop user name srv flags :info */
 			user = parv[3];
 			host = parv[4];
 		}
-		else
-			user = host = "";
+		else /* parc == 2 */
+		{
+			/* :old NICK new */
+			user = sptr->user->username;
+			host = sptr->user->host;
+		}
 	}
 	else
 	{
@@ -913,12 +918,7 @@ badparamcountkills:
 	** same time, or net reconnecting) or just two net fragments becoming
 	** joined and having same nicks in use. We cannot have TWO users with
 	** same nick--purge this NICK from the system with a KILL... >;)
-	**
-	** The client indicated by 'acptr' is dead meat, give at least some
-	** indication of the reason why we are just dropping it cold.
 	*/
-	sendto_one(acptr, err_str(ERR_NICKCOLLISION, acptr->name),
-		   acptr->name, user, host);
 	/*
 	** This seemingly obscure test (sptr == cptr) differentiates
 	** between "NICK new" (TRUE) and ":old NICK new" (FALSE) forms.
@@ -931,9 +931,15 @@ badparamcountkills:
 		*/
 		if (parc != 8)
 		{
+			/* Should never got here */
 			/* New NICK *must* have proper param count */
 			goto badparamcountkills;
 		}
+		/* The client indicated by 'acptr' is dead meat, give at least
+		** some indication of the reason why we are just dropping it cold.
+		*/
+		sendto_one(acptr, err_str(ERR_NICKCOLLISION, acptr->name),
+			acptr->name, user, host);
 		sendto_flag(SCH_KILL,
 			    "Nick collision on %s (%s@%s)%s <- (%s@%s)%s",
 			    acptr->name,
@@ -963,6 +969,16 @@ badparamcountkills:
 	** must be killed from the incoming connection, and "old" must
 	** be purged from all outgoing connections.
 	*/
+	if (parc != 2)
+	{
+		/* Should never got here */
+		goto badparamcountkills;
+	}
+	/* The client indicated by 'acptr' is dead meat, give at least some
+	** indication of the reason why we are just dropping it cold.
+	*/
+	sendto_one(acptr, err_str(ERR_NICKCOLLISION, acptr->name),
+		acptr->name, user, host);
 	sendto_flag(SCH_KILL, "Nick change collision %s!%s@%s to %s %s <- %s",
 		    sptr->name, user, host, acptr->name, acptr->from->name,
 		    get_client_name(cptr, FALSE));
