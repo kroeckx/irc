@@ -1,5 +1,7 @@
 2001-05-05  Piotr Kucharski
 
+	* whowas.c/m_whowas(): 'whowas nick1,nick2 x' was not showing
+	  last x whowas for each nick, only for nick1.
 	* res_def.h: increased DNS cache table size.
 	* send.c/sendto_flog(): added syslog() support, fixed potential
 	  buffer overflow.
