@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.9 2001/02/10 23:32:34 q Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.10 2003/10/10 22:32:05 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -934,7 +934,7 @@ char	*parv[];
 		   parv[0], totlink, used_now, size);
 	if (!used_now)
 		used_now = 1;
-	sendto_one(sptr,"NOTICE %s :Hash Ratio (av. depth): %f %Full: %f",
+	sendto_one(sptr,"NOTICE %s :Hash Ratio (av. depth): %f %%Full: %f",
 		  parv[0], (float)((1.0 * totlink) / (1.0 * used_now)),
 		  (float)((1.0 * used_now) / (1.0 * size)));
 	sendto_one(sptr,"NOTICE %s :Deepest Link: %d Links: %d",
