@@ -1,5 +1,6 @@
 2001-05-05  Piotr Kucharski
 
+	* res_def.h: increased DNS cache table size.
 	* send.c/sendto_flog(): added syslog() support, fixed potential
 	  buffer overflow.
 	* s_user.c/ereject_client(),register_user(), s_bsd.c/add_connection(),
