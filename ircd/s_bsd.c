@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.27 2003/10/12 13:27:05 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.28 2003/12/09 23:08:26 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1272,7 +1272,8 @@ aClient *cptr;
 		aconf->hold = timeofday;
 		aconf->hold += (aconf->hold - cptr->since > HANGONGOODLINK) ?
 				HANGONRETRYDELAY : ConfConFreq(aconf);
-		if (nextconnect > aconf->hold)
+		/* nextconnect could be 0 */
+		if (nextconnect > aconf->hold || nextconnect == 0)
 			nextconnect = aconf->hold;
 	    }
 
