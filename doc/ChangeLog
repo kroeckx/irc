@@ -1,3 +1,8 @@
+2001-07-02  Piotr Kucharski
+
+	* channel.c/m_list(),m_names(): forwarding queries using
+	  hunt_server() makes sense only with parc > 2
+
 2001-06-30  Kurt Roeckx
 
 	* s_bsd.c/add_connection: use fd instead of acptr->fd, which isn't set
@@ -11,16 +16,21 @@
 	* s_debug.c/send_defines(): removed the space after LDCTL:
 	* channel.c/m_njoin(): Don't send MODE +O to clients.
 
+2001-06-06  Piotr Kucharski
+
+	* channel.c/reop_channel(): fixed typo, which made sometimes
+	  problems with that code; also changed 3 to MAXMODEPARAMS.
+
 2001-05-31  Piotr Kucharski
 
 	* support.c/inetntop(): logic flaw in checking for
-	ipv6_is_addr_v4mapped (":ffff:" case).
+	  ipv6_is_addr_v4mapped (":ffff:" case).
 
 2001-05-30  Piotr Kucharski
 
 	* s_serv.c/m_who(): almost complete rewrite to reduce unnecessary
 	  showing all clients, hence to save CPU
-	* mod_socks.c/socks_write(): missing mydata declaration
+	* mod_socks.c/socks_write(): missing mydata declaration.
 
 2001-05-16  Piotr Kucharski
 
@@ -39,7 +49,7 @@
 
 2001-05-14  Piotr Kucharski
 
-	* send.c/sendto_common_channels(): user ->clist, not ->members; big
+	* send.c/sendto_common_channels(): use ->clist, not ->members; big
 	  channels will benefit from it a lot (from jv).
 
 2001-05-13  Piotr Kucharski
@@ -128,7 +138,7 @@
 2001-03-05  Piotr Kucharski
 
 	* ircd.c/send_pings(): with getting rid of timed klines, we got rid
-	  of checking klines after rehash (from jv)
+	  of checking klines after rehash; let's better reinstate it (from jv)
 
 2001-03-04	Kurt Roeckx
 
