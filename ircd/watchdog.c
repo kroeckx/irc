@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: watchdog.c,v 1.1.2.1 1999/09/30 16:38:43 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: watchdog.c,v 1.1.2.2 1999/10/04 16:28:45 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -62,12 +62,9 @@ int d;
 		    sendto_flag(SCH_DEBUG, "dog #0: %d", slowness);
 	    return;
 	}
-    if (pain)
-	    sendto_flag(SCH_DEBUG, "dog awareness: %d", pain);
     if (slowness > 0)
 	{
 	    if (slowness > 1 || pain)
-		    sendto_flag(SCH_DEBUG, "dog #%d: %d", d, slowness);
 	    if (slowness == 1)
 		    ;
 	    else if (slowness == 2)
@@ -81,6 +78,8 @@ int d;
 	    pain -= 1;
     time_origin = timeofday;
     last = d;
+    if (pain || slowness > 1)
+	    sendto_flag(SCH_DEBUG, "dog #%d: %d -> %d", d, slowness, pain);
 }
 
 /*
