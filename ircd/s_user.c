@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.17 2001/03/13 08:58:27 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.18 2001/04/01 23:23:50 q Exp $";
 #endif
 
 #include "os.h"
@@ -1623,7 +1623,7 @@ char	*parv[];
 	Link	*lp;
 	aClient *acptr;
 	aChannel *chptr;
-	char	*nick, *tmp;
+	char	*nick, *tmp, *tmp2;
 	char	*p = NULL;
 	int	found = 0;
 
@@ -1643,7 +1643,8 @@ char	*parv[];
 
 	tmp = mystrdup(parv[1]);
 
-	for (tmp = canonize(tmp); (nick = strtoken(&p, tmp, ",")); tmp = NULL)
+	for (tmp2 = canonize(tmp); (nick = strtoken(&p, tmp2, ",")); 
+		tmp2 = NULL)
 	    {
 		int	invis, showperson, member, wilds;
 
