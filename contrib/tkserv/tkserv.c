@@ -24,7 +24,8 @@
 **
 ** PS: Casting rules the world! (doh)
 ** 
-** INET6 and fprintf() bug fixes by mro - 2000828
+** INET6 and fprintf() bug fixes by mro - 20000828
+** some buffer overflows fixes -- 20010306
 ** 
 */
 
@@ -350,7 +351,7 @@ int must_be_opered()
             if (!access_uh)
             {
                 tks_log("Corrupt access file. RTFM. :-)");
-
+                free(access_uh);
                 return(0);
             }
 
@@ -359,6 +360,7 @@ int must_be_opered()
             {
                 if (!fnmatch((char *) (strchr(access_uh, '!') + 1), uh, 0))
 		{
+                    free(access_uh);
                     return(0);
 		}
             }
@@ -369,6 +371,7 @@ int must_be_opered()
         tks_log("%s not found.", TKSERV_ACCESSFILE);
     }
 
+    free(access_uh);
     return(1);
 }
 
@@ -895,7 +898,8 @@ void squery_tkline(char **args)
     {
         passwd  = args[4];
         pattern = args[6];
-        strcpy(reason, args[7]);
+        strncpy(reason, args[7], TKS_MAXKILLREASON-1);
+	reason[TKS_MAXKILLREASON-1] = '\0';
         i = 8;
 
         /* I know... */
