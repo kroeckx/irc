@@ -30,7 +30,7 @@
 #endif
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.2 1998/04/13 02:13:06 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: res.c,v 1.12.2.3 1998/04/13 12:37:42 kalt Exp $";
 #endif
 
 /* #undef	DEBUG	/* because there is a lot of debug code in here :-) */
@@ -1327,7 +1327,11 @@ ResRQ	*rptr;
 	*/
 	for (i = 0; WHOSTENTP(rptr->he.h_addr_list[i].S_ADDR); i++)
 		if ((cp = find_cache_number(rptr,
+#ifdef INET6
+				(char *)(rptr->he.h_addr_list[i].S_ADDR))))
+#else
 				(char *)&(rptr->he.h_addr_list[i].S_ADDR))))
+#endif
 			return cp;
 
 	/*
