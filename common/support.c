@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.5 2001/05/06 00:03:17 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.6 2001/05/16 02:03:17 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -192,9 +192,8 @@ size_t the_size;
 	{
 		char	*p;
 
-		/* also check for FFFF? - Q */
-		p = strstr(local_dummy, ":ffff:");	
-		if (!p)
+		if (!(p = strstr(local_dummy, ":ffff:")) ||
+			!(p = strstr(local_dummy, ":FFFF:")))
 		{
 			return NULL;	/* crash and burn */
 		}
