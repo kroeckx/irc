@@ -1,3 +1,13 @@
+2000-04-09  Kurt Roeckx
+
+	* README, ircdwatch.8, INSTALL: Changed some forgotten references
+	  to @stealth.net to @irc.org
+	* hash.c/add_to_client_hash_table(): don't add unregistered clients
+	* s_bsd.c/setup_ping(): missing parentheses caused it to listen to
+	  all ip's instead of the selected.
+	* s_user.c/register_user(): removed some debug message
+	* channel.c/m_join(): call clean_channelname() faster.
+
 2000-02-10  Kurt Roeckx
 
 	* hash.c/hash_find_server(): prevent creation of illegal pointers
