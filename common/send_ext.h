@@ -39,7 +39,7 @@ EXTERN int sendto_one (aClient *to, char *pattern, ...);
 EXTERN void flush_connections __P((int fd));
 EXTERN void flush_fdary __P((FdAry *));
 EXTERN void setup_svchans();
-EXTERN void sendto_flog __P((aClient *cptr, char *msg, time_t duration,
+EXTERN void sendto_flog __P((aClient *cptr, char *msg,
 			     char *username, char *hostname));
 #if ! USE_STDARG
 EXTERN void sendto_channel_butone();
