@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.7 2000/05/14 16:59:35 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.8 2000/08/20 18:29:17 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -60,9 +60,7 @@ int	_SERVERSIZE = 0;
  *
  * A - GOPbot, B - chang, C - hanuaway, D - *.mu.OZ.AU
  *
- * The order shown above is just one instant of the server.  Each time a
- * lookup is made on an entry in the hash table and it is found, the entry
- * is moved to the top of the chain.
+ * The order shown above is just one instant of the server.
  */
 
 /*
@@ -82,7 +80,7 @@ int	*store;
 
 	for (; (ch = *name); name++)
 	{
-		hash <<= 1;
+		hash <<= 4;
 		hash += hashtab[(int)ch];
 	}
 	/*
@@ -116,7 +114,7 @@ int	*store;
 		name += 1 + CHIDLEN;
 	for (; (ch = *name) && --i; name++)
 	{
-		hash <<= 1;
+		hash <<= 4;
 		hash += hashtab[(u_int)ch] + (i << 1);
 	}
 	if (store)
@@ -149,7 +147,7 @@ int	size;
 	    {
 		failure = 0;
 		sq = (int)sqrt((double)size);
-		for (trial = 2; trial <= sq ; trial++)
+		for (trial = 3; trial <= sq ; trial += 2)
 		    {
 			if ((size % trial) == 0)
 			    {
@@ -174,6 +172,7 @@ int	size;
 	_HASHSIZE = bigger_prime(size);
 	clhits = 0;
 	clmiss = 0;
+	clsize = 0;
 	if (!clientTable)
 		clientTable = (aHashEntry *)MyMalloc(_HASHSIZE *
 						     sizeof(aHashEntry));
@@ -188,6 +187,7 @@ int	size;
 	_CHANNELHASHSIZE = bigger_prime(size);
 	chmiss = 0;
 	chhits = 0;
+	chsize = 0;
 	if (!channelTable)
 		channelTable = (aHashEntry *)MyMalloc(_CHANNELHASHSIZE *
 						     sizeof(aHashEntry));
@@ -200,6 +200,7 @@ static	void	clear_server_hash_table(size)
 int	size;
 {
 	_SERVERSIZE = bigger_prime(size);
+	svsize = 0;
 	if (!serverTable)
 		serverTable = (aHashEntry *)MyMalloc(_SERVERSIZE *
 						     sizeof(aHashEntry));
