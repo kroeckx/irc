@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: iauth.c,v 1.11 1999/06/17 01:22:20 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: iauth.c,v 1.11.2.1 2001/05/16 10:42:51 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -175,6 +175,7 @@ char	*argv[];
 
 	init_signals();
 	init_syslog();
+	xopt = conf_read(NULL);
 	init_filelogs();
 	sendto_log(ALOG_DMISC, LOG_NOTICE, "Daemon starting (%s%s).",
 		   make_version(),
@@ -185,7 +186,6 @@ char	*argv[];
 #endif
 		   );
 	init_io();
-	xopt = conf_read(NULL);
 	sendto_ircd("V %s", make_version());
 	sendto_ircd("O %s", xopt);
 	conf_ircd();

@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22.2.2 2000/12/08 22:15:22 q Exp $";
+static  char rcsid[] = "@(#)$Id: a_io.c,v 1.22.2.3 2001/05/16 10:42:51 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -717,6 +717,8 @@ loop_io()
 		    }
 	    }
 
+#if 0
+/* stupid code that tries to find a bug, but does nothing --Q */
 #if defined(IAUTH_DEBUG)
 	if (nfds > 0)
 		sendto_log(ALOG_DIO, 0, "io_loop(): nfds = %d !!!", nfds);
@@ -725,6 +727,7 @@ loop_io()
 	if (nfds == 0)
 		while (i <= cl_highest)
 		    {
+			/* Q got core here, he had i=-1 */
 			if (cldata[i].rfd > 0 && TST_READ_EVENT(cldata[i].rfd))
 			    {
 				/* this should not happen! */
@@ -733,6 +736,7 @@ loop_io()
 			i++;
 		    }
 # endif
+#endif
 #endif
 }
 
