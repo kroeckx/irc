@@ -5,11 +5,11 @@
 	* res_def.h: increased DNS cache table size.
 	* send.c/sendto_flog(): added syslog() support, fixed potential
 	  buffer overflow.
-	* s_user.c/ereject_client(),register_user(), s_bsd.c/add_connection(),
+	* s_user.c/ereject_user(),register_user(), s_bsd.c/add_connection(),
 	  s_misc.c/exit_client(): removed those syslog() calls, which are
-	  now in sendto_flog(); this also removed (oooold) bug in logging
-	  via syslog, when we supplied more parameters than %s in format,
-	  and superfluous param was not the last.
+	  now in sendto_flog(); this also removed (old) bug in ereject_user()
+	  logging via syslog, when we supplied more parameters than %s in
+	  format, and superfluous param was not the last.
 
 2001-05-04  Piotr Kucharski
 
