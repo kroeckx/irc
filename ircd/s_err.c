@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_err.c,v 1.25 1999/08/15 21:03:25 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.1 2000/02/10 19:10:25 q Exp $";
 #endif
 
 #include "os.h"
@@ -42,43 +42,6 @@ static	Numeric	local_replies[] = {
 /* 003 */	{ RPL_CREATED, ":This server was created %s" },
 /* 004 */	{ RPL_MYINFO, "%s %s aoOirw abeiIklmnoOpqrstv" },
 /* 005 */	{ RPL_BOUNCE, ":Try server %s, port %d" },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-		{ 0, (char *)NULL },
-/* 042 */	{ RPL_YOURID, ":Your universal ID is %s" },
 		{ 0, (char *)NULL }
 };
 
@@ -366,7 +329,7 @@ static	Numeric	numeric_replies[] = {
 /* 252 */	{ RPL_LUSEROP, "%d :operators online" },
 /* 253 */	{ RPL_LUSERUNKNOWN, "%d :unknown connections" },
 /* 254 */	{ RPL_LUSERCHANNELS, "%d :channels formed" },
-/* 255 */	{ RPL_LUSERME, ":I have %d clients, %d services and %d servers" },
+/* 255 */	{ RPL_LUSERME, ":I have %d users, %d services and %d servers" },
 /* 256 */	{ RPL_ADMINME, ":Administrative info about %s" },
 /* 257 */	{ RPL_ADMINLOC1, ":%s" },
 /* 258 */	{ RPL_ADMINLOC2, ":%s" },
@@ -418,7 +381,7 @@ char	*to;
 	Reg	Numeric	*nptr;
 	Reg	int	num = numeric;
 
-	if (num > 42)
+	if (num > 5)
 		num -= (num > 300) ? 300 : 100;
 
 	if (BadPtr(to))		/* for unregistered clients */
