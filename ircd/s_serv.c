@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.7 2001/10/19 21:09:10 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.8 2003/10/10 22:52:28 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1428,7 +1428,7 @@ char	*parv[];
 		    }
 		else
 		    {
-			if ((acptr = find_client(cm, NULL)))
+			if ((acptr = find_client(cm, NULL)) && MyConnect(acptr))
 				sendto_one(cptr, Lformat, ME,
 					RPL_STATSLINKINFO, parv[0],
 					get_client_name(acptr, isupper(stat)),
