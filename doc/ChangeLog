@@ -1,5 +1,7 @@
 2001-05-05  Piotr Kucharski
 
+	* a_log.c/init_filelogs(): don't open iauth.log when debug level
+	  is not set in iauth.conf.
 	* whowas.c/m_whowas(): 'whowas nick1,nick2 x' was not showing
 	  last x whowas for each nick, only for nick1.
 	* res_def.h: increased DNS cache table size.
