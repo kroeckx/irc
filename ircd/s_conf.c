@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.7 2000/12/08 22:20:15 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_conf.c,v 1.42.2.8 2001/02/07 12:15:39 q Exp $";
 #endif
 
 #include "os.h"
@@ -775,7 +775,7 @@ int	sig;
 	for (cltmp = NextClass(FirstClass()); cltmp; cltmp = NextClass(cltmp))
 		MaxLinks(cltmp) = -1;
 
-	if (sig != 2)
+	if (sig == 2)
 		flush_cache();
 	(void) initconf(0);
 	close_listeners();
