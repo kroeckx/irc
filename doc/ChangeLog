@@ -10,6 +10,8 @@
 	* s_user.c/m_ping(): Make PING work with masked servers.
 	* s_bsd.c/close_connection(): Don't remap the fd's.
 	* s_serv.c/m_connect(): Fix a typo: irc.conf -> ircd.conf.
+	* configure, configure.in: Add a cache check for the mathlib check,
+	  and fix a typo.
 
 2001-02-08  Kurt Roeckx
 
