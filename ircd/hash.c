@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.3 2000/02/10 18:38:42 q Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.4 2000/04/09 14:56:23 q Exp $";
 #endif
 
 #include "os.h"
@@ -311,6 +311,12 @@ char	*name;
 aClient	*cptr;
 {
 	Reg	u_int	hashv;
+
+	if (cptr->status < -1)
+	{
+		/* Don't add unregistered clients */
+		return -1;
+	}
 
 	hashv = hash_nick_name(name, &cptr->hashv);
 	cptr->hnext = (aClient *)clientTable[hashv].list;
