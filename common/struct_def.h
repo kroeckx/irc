@@ -492,11 +492,13 @@ struct	stats {
 	u_int	is_loc;	/* local connections made */
 	u_int	is_nosrv; /* user without server */
 	u_long	is_wwcnt; /* number of nicks overwritten in whowas[] */
-	u_long	is_wwt;	  /* sum of elapsed time on when overwriting whowas[]*/
+	unsigned long long	is_wwt;	/* sum of elapsed time on when 
+					** overwriting whowas[] */
 	u_long	is_wwMt;  /* max elapsed time on when overwriting whowas[] */
 	u_long	is_wwmt;  /* min elapsed time on when overwriting whowas[] */
 	u_long	is_lkcnt; /* number of nicks overwritten in locked[] */
-	u_long	is_lkt;   /* sum of elapsed time on when overwriting locked[]*/
+	unsigned long long	is_lkt;	/* sum of elapsed time on when
+					** overwriting locked[]*/
 	u_long	is_lkMt;  /* max elapsed time on when overwriting locked[] */
 	u_long	is_lkmt;  /* min elapsed time on when overwriting locked[] */
 	u_int	is_ckl;   /* calls to check_link() */
