@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.5 2000/04/09 15:14:28 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.6 2000/05/09 15:47:27 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -3148,7 +3148,7 @@ aClient	*cptr, *user;
 		if (*chptr->chname == '!' && !(cptr->serv->version & SV_NCHAN))
 			/* in reality, testing SV_NCHAN here is pointless */
 			continue;
-		if ((mask = index(chptr->chname, ':')))
+		if ((mask = rindex(chptr->chname, ':')))
 			if (match(++mask, cptr->name))
 				continue;
 		clen = strlen(chptr->chname);
