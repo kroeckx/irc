@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.8 2003/10/13 00:03:52 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.9 2003/10/13 00:11:43 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -30,7 +30,6 @@ static  char rcsid[] = "@(#)$Id: mod_socks.c,v 1.25.2.8 2003/10/13 00:03:52 chop
 /****************************** PRIVATE *************************************/
 
 #define CACHETIME 30
-
 #define SOCKSPORT 1080
 /*
    A lot of socks v4 proxies return 4,91 instead of 0,91 otherwise
@@ -52,7 +51,8 @@ struct proxylog
 #define OPT_CAREFUL 	0x008
 #define OPT_V4ONLY  	0x010
 #define OPT_V5ONLY  	0x020
-#define OPT_PROTOCOL	0x100
+#define OPT_PROTOCOL	0x040
+#define OPT_BOFH        0x080
 
 #define PROXY_NONE		0
 #define PROXY_OPEN		1
@@ -327,10 +327,9 @@ u_int cl;
 char *strver;
 {
     struct socks_private *mydata = cldata[cl].instance->data;
-    int again = 0;
     u_char state = PROXY_CLOSE;
     
-    /* data's in from the other end */
+    /* not enough data from the other end */
     if (cldata[cl].buflen < 2)
 	    return 0;
     
@@ -364,6 +363,7 @@ char *strver;
     else /* ST_V5 or ST_V5b */
 	{
 	    if (cldata[cl].inbuffer[0] == 5)
+		{
 		    if (cldata[cl].inbuffer[1] == 0)
 			    state = PROXY_OPEN;
 		    else
@@ -382,34 +382,40 @@ char *strver;
 					     cldata[cl].inbuffer[1] != 2)
 					    state = PROXY_OPEN;
 			}
+		}
 	    else
 		    state = PROXY_BADPROTO;
 	}
     
-    if (cldata[cl].mod_status == ST_V4 && state != PROXY_OPEN &&
-	!(mydata->options & OPT_V4ONLY))
+	if (cldata[cl].mod_status == ST_V4)
 	{
-	    cldata[cl].mod_status = ST_V5;
-	    cldata[cl].buflen=0;
-	    close(cldata[cl].rfd);
-	    cldata[cl].rfd = 0;
-	    again = 1;
+		if (state != PROXY_OPEN && !(mydata->options & OPT_V4ONLY))
+		{
+			cldata[cl].mod_status = ST_V5;
+			cldata[cl].buflen=0;
+			close(cldata[cl].rfd);
+			cldata[cl].rfd = 0;
+			goto again;
+		}
+	}
+	else if (cldata[cl].mod_status == ST_V5)
+	{
+		if (state == PROXY_OPEN && (mydata->options & OPT_CAREFUL))
+		{
+			cldata[cl].mod_status = ST_V5b;
+			cldata[cl].buflen=0;
+			cldata[cl].wfd = cldata[cl].rfd;
+			cldata[cl].rfd = 0;
+			goto again;
+		}
+	}
+	else	/* ST_V5b */
+	{
+		/* we just checked second phase of socks 5.
+		   nothing left to do. */
 	}
     
-    if (cldata[cl].mod_status == ST_V5 && state == PROXY_OPEN &&
-	(mydata->options & OPT_CAREFUL))
-	{
-	    cldata[cl].mod_status = ST_V5b;
-	    cldata[cl].buflen=0;
-	    cldata[cl].wfd = cldata[cl].rfd;
-	    cldata[cl].rfd = 0;
-	    again = 1;
-	}
-    
-    if (state == PROXY_OPEN && again == 0)
-	    socks_open_proxy(cl, strver);
-    
-    if (state == PROXY_UNEXPECTED)
+	if (state == PROXY_UNEXPECTED)
 	{
 	    sendto_log(ALOG_FLOG, LOG_WARNING,
 		       "socks%s: unexpected reply: %u,%u %s[%s]", strver,
@@ -418,36 +424,49 @@ char *strver;
 	    sendto_log(ALOG_IRCD, 0, "socks%s: unexpected reply: %u,%u",
 		       strver, cldata[cl].inbuffer[0],
 		       cldata[cl].inbuffer[1]);
-	    state = PROXY_CLOSE;
+		/* Oh well. Unexpected response can mean anything.
+		   If we're megaparanoid, we assume it's open proxy */
+	    state = mydata->options & OPT_BOFH ? PROXY_OPEN : PROXY_CLOSE;
 	}
-    
-    if (state == PROXY_BADPROTO && (mydata->options & OPT_PROTOCOL))
+    	else if (state == PROXY_BADPROTO) 
 	{
-	    sendto_log(ALOG_FLOG, LOG_WARNING,
+    		if (mydata->options & OPT_PROTOCOL)
+		{
+		    sendto_log(ALOG_FLOG, LOG_WARNING,
 		       "socks%s: protocol error: %u,%u %s[%s]", strver,
 		       cldata[cl].inbuffer[0], cldata[cl].inbuffer[1],
 		       cldata[cl].host, cldata[cl].itsip);
-	    sendto_log(ALOG_IRCD, 0, "socks%s: protocol error: %u,%u",
+		    sendto_log(ALOG_IRCD, 0, "socks%s: protocol error: %u,%u",
 		       strver, cldata[cl].inbuffer[0],
 		       cldata[cl].inbuffer[1]);
-	    state = PROXY_CLOSE;
+		}
+		/* oh well. protocol error can mean anything.
+		   so if we're megaparanoid, we assume it's open proxy */
+		state = mydata->options & OPT_BOFH ? PROXY_OPEN : PROXY_CLOSE;
 	}
+
+        /* We're past checking of socks 4, socks 5 and even socks 5b,
+           if it was needed. Now deal with final state */
+
+	/* Here state can be only OPEN, CLOSE or NONE */
+
+	if (state == PROXY_OPEN)
+	    socks_open_proxy(cl, strver);
     
-    if (again == 1)
-	{
-	    if (cldata[cl].mod_status == ST_V5b)
-		    return 0;
-	    else
-		    return socks_start(cl);
-	}
-    else
-	{
+    
 	    socks_add_cache(cl, state);
 	    close(cldata[cl].rfd);
 	    cldata[cl].rfd = 0;
 	    return -1;
-	}
-    return 0;
+
+again:
+	if (cldata[cl].mod_status == ST_V5b)
+		return 0;
+	else
+		return socks_start(cl);
+
+	/* not reached */
+	return 0;
 }
 
 /******************************** PUBLIC ************************************/
@@ -488,7 +507,13 @@ AnInstance *self;
 	    strcat(tmpbuf, ",reject");
 	    strcat(txtbuf, ", Reject");
 	}
-    if (strstr(self->opt, "paranoid"))
+    if (strstr(self->opt, "megaparanoid"))
+	{
+		mydata->options |= OPT_PARANOID|OPT_BOFH;
+		strcat(tmpbuf, ",megaparanoid");
+		strcat(txtbuf, ", Megaparanoid");
+	}
+    else if (strstr(self->opt, "paranoid"))
 	{
 	    mydata->options |= OPT_PARANOID;
 	    strcat(tmpbuf, ",paranoid");
