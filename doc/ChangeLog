@@ -1,5 +1,6 @@
-2001-04-07  Piotr Kucharski
+2001-04-06  Piotr Kucharski
 
+	* whowas.c/m_whowas(): don't send away info.
 	* s_auth.c: changing various sizeof(dynamic buffer) to strlen().
 	* list.c/make_client(),s_auth.c/set_clean_username: use strdup().
 
