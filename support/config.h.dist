@@ -370,7 +370,7 @@
  * NOTE: Undefining this leads to a significant increase in CPU usage if
  * you reject client which keeps connecting.
  */
-#define	SLOW_ACCEPT
+#undef	SLOW_ACCEPT
 
 /*
  * Defining this will make the server check for rapid connections from a single
@@ -381,7 +381,7 @@
  *
  * IMPORTANT: This **MUST** defined if SLOW_ACCEPT is NOT defined
  */
-#undef	CLONE_CHECK
+#define	CLONE_CHECK
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
@@ -500,8 +500,8 @@
  * If CLONE_CHECK has been defined, these control how the checks are performed,
  * and how the alarm is triggered.
  */
-# define	CLONE_MAX	2
-# define	CLONE_PERIOD	10
+# define	CLONE_MAX	10
+# define	CLONE_PERIOD	2
 #endif
 
 /*
@@ -591,4 +591,10 @@ error TIMEDKLINES must be defined for R_LINES_OFTEN to work (are you sure you ne
 ** You should not want to change this. ;)
 */
 #define	NOWRITEALARM	1
+
+/*
+** Accept only hostnames conforming to RFC1034/1035/1123.
+** Conformance of the internal resolver to RFC1123.
+*/
+#define	RESTRICT_HOSTNAMES	1
 
