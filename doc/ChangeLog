@@ -1,3 +1,25 @@
+2001-02-07  Kurt Roeckx
+
+	* support.c/inetpton(): Do it different. (fixes a buffer overflow.)
+	* configure, configure.in: Complain if neither strerror(), or 
+          sys_errlist[] is found.
+	* bsd.c, s_bsd.c, s_debug.c: Don't use sys_errlist[], use strerror().
+	* s_misc.c/rehash(): Now only "REHASH q", will flush the dns cache.
+	* s_service.c/best_service(): Return the closest, instead of the
+	  latest.
+	* channel.c: Remove en extra space while sending MODE, generated during
+          bursts.
+	* channel.c: Use MAXMODEPARAMS instead of 3.
+	* tkserv.c: Added support for crypted passwords.
+	* tkserv.c: Add support for ipv6.  Now uses '%', instead of ':' where
+	  it should.
+	* tkserv.c: Unix domain sockets weren't working properly.
+	* c_numeric.c, numeric_def.h, s_err.c, s_user.c, s_service.c: Fixed
+	  spelling of ERR_ERRONEOUSNICKNAME.
+	* s_conf.c/match_ipmask(): Check if the mask contains a number.
+	* s_err.c/rpl_str(), rep_err(): correctly send unknown error reply's.
+	* s_err.c, numeric_def.h: change RPL_BOUNCE to numeric 010.
+
 2000-12-11  Kurt Roeckx
 
 	* res.c, res_ext.c: fixed resolver problem for host with both an 
