@@ -1,3 +1,9 @@
+2000-02-04  Piotr Kucharski
+
+	* mod_socks.c/socks_read(): when using "careful" option, iauth
+	should not close connection before checking ST_V5b (from
+	KIKUCHI Takahiro)
+
 2000-01-01  Kurt Roeckx
 
 	* configure, configure.in: check for md5, FreeBSD uses it.
