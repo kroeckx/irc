@@ -364,6 +364,7 @@ int must_be_opered()
                     return(0);
 		}
             }
+            free(access_uh);
         }
     }
     else
