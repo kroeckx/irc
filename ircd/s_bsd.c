@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.12 2001/02/09 16:48:55 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.13 2001/02/10 23:36:27 q Exp $";
 #endif
 
 #include "os.h"
@@ -1184,7 +1184,7 @@ void	close_connection(cptr)
 aClient *cptr;
 {
 	Reg	aConfItem *aconf;
-	Reg	int	i,j;
+	Reg	int	i;
 #ifdef SO_LINGER
 	struct 	linger	sockling;
 
