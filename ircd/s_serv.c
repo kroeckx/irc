@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.6 2001/05/15 19:19:15 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_serv.c,v 1.65.2.7 2001/10/19 21:09:10 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1369,7 +1369,7 @@ char	*parv[];
 	if (IsServer(cptr) &&
 	    (stat != 'd' && stat != 'p' && stat != 'q' && stat != 's' &&
 	     stat != 'u' && stat != 'v') &&
-	    !(stat == 'o' && IsOper(sptr)))
+	    !((stat == 'o' || stat == 'c') && IsOper(sptr)))
 	    {
 		if (check_link(cptr))
 		    {
