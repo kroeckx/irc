@@ -574,7 +574,7 @@ struct Channel	{
 	Link	*members;	/* channel members */
 	Link	*invites;	/* outstanding invitations */
 	Link	*mlist;		/* list of extended modes: +b/+e/+I */
-	Link	*clist;		/* list of connections which are members */
+	Link	*clist;		/* list of local! connections which are members */
 	time_t	history;	/* channel history (aka channel delay) */
 	time_t	reop;		/* server reop stamp for !channels */
 	char	chname[1];
