@@ -562,3 +562,11 @@ error FD_SETSIZE must be bigger than MAXCONNECTIONS
 # define       IAUTH_BUFFER    65535
 #endif
 
+/*
+** Make sure that if zlib isn't found, or you don't want to use it, that you
+** don't define ZIP_LINKS
+*/
+#ifndef	USE_ZLIB
+#undef	ZIP_LINKS
+#endif
+
