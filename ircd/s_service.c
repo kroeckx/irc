@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_service.c,v 1.30 1999/07/02 16:49:37 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: s_service.c,v 1.30.2.1 2001/02/07 12:25:34 q Exp $";
 #endif
 
 #include "os.h"
@@ -90,8 +90,10 @@ aClient *cptr;
 			if ((bcptr = sp->bcptr) &&
 			    !myncmp(name, bcptr->name, len))
 			    {
-				acptr = bcptr;
-				break;
+				if (!acptr || bcptr->hopcount < acptr->hopcount)
+				{
+					acptr = bcptr;
+				}
 			    }
 	return (acptr ? acptr : cptr);
 }
