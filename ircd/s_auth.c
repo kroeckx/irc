@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.6 2003/10/11 17:58:58 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.7 2003/10/11 20:04:29 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -150,7 +150,7 @@ vsendto_iauth(char *pattern, va_list va)
 		p += i;
 		len -= i;
 	}
-	while (len > 0)
+	while (len > 0);
 
 	return 0;
 }
