@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.1 2000/02/03 18:57:37 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_auth.c,v 1.43.2.2 2000/05/05 23:23:47 q Exp $";
 #endif
 
 #include "os.h"
@@ -449,10 +449,9 @@ read_iauth()
 			}
 		    start = end;
 		}
-	    if (start != buf+olen)
-		    bcopy(start, obuf, olen = (buf+olen)-start+1);
-	    else
-		    olen = 0;
+	    olen -= start - buf;
+	    if (olen)
+		    memcpy(obuf, start, olen);
 	}
 }
 
