@@ -1,3 +1,8 @@
+2000-12-11  Kurt Roeckx
+
+	* res.c, res_ext.c: fixed resolver problem for host with both an 
+	  IN A and IN AAAA record.
+
 2000-12-08  Kurt Roeckx
 
 	* chkconf.c/initconf(): complain about not finding mandatory lines.
