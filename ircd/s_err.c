@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.5 2001/02/10 19:11:06 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_err.c,v 1.24.2.6 2003/10/10 22:30:37 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -62,7 +62,7 @@ static	Numeric	numeric_errors[] = {
 /* 413 */	{ ERR_NOTOPLEVEL, "%s :No toplevel domain specified" },
 /* 414 */	{ ERR_WILDTOPLEVEL, "%s :Wildcard in toplevel Domain" },
 /* 415 */	{ ERR_BADMASK, "%s :Bad Server/host mask" },
-/* 416 */	{ ERR_TOOMANYMATCHES, "%s %s :Output too long (try locally)" },
+/* 416 */	{ ERR_TOOMANYMATCHES, "%s :Output too long (try locally)" },
 		{ 0, (char *)NULL },
 		{ 0, (char *)NULL },
 		{ 0, (char *)NULL },
