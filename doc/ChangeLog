@@ -1,3 +1,9 @@
+2000-05-05  Kurt Roeckx
+
+	* a_conf.c/conf_read(): Check cfh properly
+	* s_auth.c/read_iauth(): olen was calculated wrongly (off by 1)
+	* s_auth.c/read_iauth(): olen could be != 0 when iauth is restarted
+
 2000-04-09  Kurt Roeckx
 
 	* README, ircdwatch.8, INSTALL: Changed some forgotten references
