@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.13 2001/03/02 20:35:23 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.14 2001/04/01 23:30:56 q Exp $";
 #endif
 
 #include "os.h"
@@ -2560,7 +2560,7 @@ char	*parv[];
 	aChannel *chptr;
 	int	chasing = 0, penalty = 0;
 	char	*comment, *name, *p = NULL, *user, *p2 = NULL;
-	char	*tmp;
+	char	*tmp, *tmp2;
 	int	mlen, len = 0, nlen;
 
 	if (parc < 3 || *parv[1] == '\0')
@@ -2621,7 +2621,7 @@ char	*parv[];
 		nlen = 0;
 
 		tmp = mystrdup(parv[2]);
-		for (; (user = strtoken(&p2, tmp, ",")); tmp = NULL)
+		for (tmp2 = tmp; (user = strtoken(&p2, tmp2, ",")); tmp2 = NULL)
 		    {
 			penalty++;
 			if (!(who = find_chasing(sptr, user, &chasing)))
