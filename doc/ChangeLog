@@ -1,5 +1,11 @@
 2.10.3p7
 
+2004-05-24  Piotr Kucharski
+
+	All backported from 2.11 tree:
+	* channel.c/set_mode(): use supplied key when removing, don't change it
+          before sending out to the one on the server.
+
 2004-05-09  Piotr Kucharski
 
 	All backported from 2.11 tree:
