@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.14 2001/03/04 19:21:57 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_bsd.c,v 1.73.2.15 2001/05/04 19:56:18 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1724,7 +1724,7 @@ aClient *cptr;
 		if ((fdnew = accept(cptr->fd, NULL, NULL)) < 0)
 		    {
 			if (errno != EWOULDBLOCK)
-				report_error("Cannot accept connections %s:%s",
+				report_error("Cannot accept connection %s:%s",
 					     cptr);
 			break;
 		    }
@@ -3077,7 +3077,16 @@ static	void	polludp()
 			return;
 		else
 		    {
-			report_error("udp port recvfrom (%s): %s", &me);
+			char buf[100];
+
+			sprintf(buf, "udp port recvfrom() from %s to %%s: %%s",
+#ifdef INET6
+				inetntop(AF_INET6, (char *)&from.sin6_addr, mydummy, MYDUMMY_SIZE)
+#else
+				inetntoa((char *)&from.sin_addr)
+#endif
+				);
+			report_error(buf, &me);
 			return;
 		    }
 	    }
