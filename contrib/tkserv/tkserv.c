@@ -23,6 +23,9 @@
 **       Thanks to both. =)
 **
 ** PS: Casting rules the world! (doh)
+** 
+** INET6 and fprintf() bug fixes by mro - 2000828
+** 
 */
 
 #include "os.h"
@@ -516,11 +519,18 @@ int add_tkline(char *host, char *user, char *reason, int lifetime)
 
         now = time(NULL);
 
-        fprintf(iconf, "K:%s:%s:%s:0 # %d %u tkserv\n", 
-                host, reason, user, lifetime, now);
+#ifdef INET6
+        fprintf(iconf, "K%%%s%%%s%%%s%%0 # %d %u tkserv\n", host, reason, user, lifetime, now);
+#else
+        fprintf(iconf, "K:%s:%s:%s:0 # %d %u tkserv\n", host, reason, user, lifetime, now);
+#endif
         fclose(iconf);
         rehash(1);
-        tks_log("K:%s:%s:%s:0 added for %d hour(s) by %s.",
+#ifdef INET6
+        tks_log("K%%%s%%%s%%%s%%0 added for %d hour(s) by %s.",
+#else
+        tks_log("K:%s:%s:%s:0 added for %d hour(s) by %s.", */
+#endif
             host, reason, user, lifetime, nuh);
 
         return(1);
@@ -554,7 +564,9 @@ int check_tklines(char *host, char *user, int lifetime)
         {
             if ((*buffer != 'K') || (!strstr(buffer, "tkserv")))
 	    {
-                fprintf(iconf_tmp, buffer);
+		/* buffer could contain %s,%d etc..., expecially with IPv6 style config - mro */
+                /* fprintf(iconf_tmp, buffer); */
+		fputs(buffer, iconf_tmp);
 	    }
             else
             {
@@ -570,13 +582,23 @@ int check_tklines(char *host, char *user, int lifetime)
 
                     strcpy(buf, buffer);
 
+#ifdef INET6
+                    token = (char *) strtok(buf, "%");
+                    token = (char *) strtok(NULL, "%");
+#else
                     token = (char *) strtok(buf, ":");
                     token = (char *) strtok(NULL, ":");
+#endif
                     
                     if (!strcasecmp(token, host))
                     {
+#ifdef INET6
+                        token = (char *) strtok(NULL, "%");
+                        token = (char *) strtok(NULL, "%");
+#else
                         token = (char *) strtok(NULL, ":");
                         token = (char *) strtok(NULL, ":");
+#endif
                         
                         if (!strcasecmp(token, user))
                         {
@@ -585,12 +607,12 @@ int check_tklines(char *host, char *user, int lifetime)
                         }
                         else
 			{
-                            fprintf(iconf_tmp, buffer);
+			fputs(buffer, iconf_tmp);
 			}
                     }
                     else
 		    {
-                        fprintf(iconf_tmp, buffer);
+			fputs(buffer, iconf_tmp);
 		    }
                 }
                 else
@@ -610,7 +632,7 @@ int check_tklines(char *host, char *user, int lifetime)
             
                     if (!(((now - then) / (60 * 60)) >= lifetime))
 		    {
-                        fprintf(iconf_tmp, buffer);
+			fputs(buffer, iconf_tmp);
 		    }
                     else
 		    {
@@ -806,10 +828,17 @@ void squery_tkline(char **args)
 
     while (args[i] && *args[i])
     {
+#ifdef INET6
+        if (strchr(args[i], '%'))
+#else
         if (strchr(args[i], ':'))
+#endif
         {
+#ifdef INET6
+            sendto_user("Percent signs are only allowed in the password.");
+#else
             sendto_user("Colons are only allowed in the password.");
-
+#endif
             return;
         }
 
