@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.3 2000/12/08 22:34:16 q Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.4 2001/02/07 11:08:08 q Exp $";
 #endif
 
 #include "os.h"
@@ -255,15 +255,18 @@ size_t the_size;
 */
 int	inetpton(int af, const char *src, void *dst)
 {
-	char	buf[23];	/* max string for ipv4 mapped ipv6 in
-				** compressed notation. */
+	int	i;
 
 	/* an empty string should listen to all */
 	if (af == AF_INET6 && *src && !strchr(src, ':'))
 	    {
-		strcpy(buf, "::ffff:");
-		strcpy(buf + 7, src);
-		return inet_pton(af, buf, dst);
+		i = inet_pton(AF_INET, src, dst);
+
+		/* ugly hack */
+		memcpy(dst + 12, dst, 4);
+		memset(dst, 0, 10);
+		memset(dst + 10, 0xff, 2);
+		return i;
 	    }
 	return inet_pton(af, src, dst);
 }
