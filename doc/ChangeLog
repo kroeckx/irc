@@ -1,3 +1,8 @@
+2001-05-15  Piotr Kucharski
+
+	* mod_socks.c/socks_write(): don't bother checking socks4 on ipv6
+	  addresses, socks4 doesn't support it anyway.
+
 2001-05-14  Piotr Kucharski
 
 	* send.c/sendto_common_channels(): user ->clist, not ->members; big
