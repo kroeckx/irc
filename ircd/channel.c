@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.26 2004/02/25 15:30:40 chopin Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.27 2004/02/25 16:47:41 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2203,10 +2203,13 @@ char	*parv[];
 		else
 			clean_channelname(name), s = NULL;
 
-		if (MyConnect(sptr) &&
+		chptr = get_channel(sptr, name, !CREATE);
+
+		if (chptr && IsMember(sptr, chptr))
+			continue;
+
+		if (MyConnect(sptr) && !(chptr && IsQuiet(chptr)) &&
 		    sptr->user->joined >= MAXCHANNELSPERUSER) {
-			/* Feature: Cannot join &flagchannels either
-			   if already joined MAXCHANNELSPERUSER times. */
 			sendto_one(sptr, err_str(ERR_TOOMANYCHANNELS,
 				   parv[0]), name);
 			/* can't return, need to send the info everywhere */
@@ -2221,12 +2224,17 @@ char	*parv[];
 			return exit_client(sptr, sptr, &me, "Virus Carrier");
 		    }
 
-		chptr = get_channel(sptr, name, CREATE);
+		if (!chptr)
+			chptr = get_channel(sptr, name, CREATE);
 
-		if (IsMember(sptr, chptr))
+		if (!chptr)
+		{
+			sendto_flag(SCH_ERROR, "Could not create channel!");
+			sendto_one(sptr, "%s *** %s :Could not create channel!",
+				ME, parv[0]);
 			continue;
-		if (!chptr ||
-		    (MyConnect(sptr) && (i = can_join(sptr, chptr, key))))
+		}
+		if (MyConnect(sptr) && (i = can_join(sptr, chptr, key)))
 		    {
 			sendto_one(sptr, err_str(i, parv[0]), name);
 			continue;
