@@ -24,7 +24,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.3 2000/12/01 21:20:00 q Exp $";
+static  char rcsid[] = "@(#)$Id: whowas.c,v 1.6.2.4 2000/12/01 21:29:39 q Exp $";
 #endif
 
 #include "os.h"
@@ -153,7 +153,7 @@ Reg	aClient	*cptr, *nodelay;
 			 ** This nickname has to be locked, thus copy it to the
 			 ** lock[] array.
 			 */
-			strncpyzt(locked[lk_index].nick, np->ww_nick, NICKLEN);
+			strcpy(locked[lk_index].nick, np->ww_nick);
 			locked[lk_index++].logout = np->ww_logout;
 			if (lk_index >= lk_size)
 				lk_index = 0;
@@ -289,7 +289,7 @@ time_t        timelimit;
 		{
 			return 0;
 		}
-		if (!myncmp(nick, lp->nick, NICKLEN))
+		if (!mycmp(nick, lp->nick))
 		{
 			return 1;
 		}
