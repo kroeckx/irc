@@ -1,3 +1,14 @@
+2000-10-22  Kurt Roeckx
+
+	* channel.c/set_mode(): mode -i should only remove invites
+	  if it's done by an op. (from Grega Pogacnik)
+	* res.c: Always query for both IN A, and IN AAAA if INET6 is
+	  defined.
+	* res.c/get_res(): when it complained about a bad hostname, 
+	  the ip's were not correct.
+	* res.c/update_list(): Using old pointer after realloc()
+	* channel.c/set_mode(): allow any key to be used to unset the key.
+
 2000-09-28  Kurt Roeckx
 
 	* s_debug.c/debug(): Format string fixes.
