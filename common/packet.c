@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: packet.c,v 1.8.2.1 2001/05/14 04:01:09 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: packet.c,v 1.8.2.2 2001/07/04 21:45:25 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -170,7 +170,7 @@ Reg	int	length;
 			** Socket is dead so exit (which always returns with
 			** FLUSH_BUFFER here).  - avalon
 			*/
-			if (cptr->flags & FLAGS_DEADSOCKET)
+			if (IsDead(cptr))
 			    {
 				if (cptr->exitc == EXITC_REG)
 					cptr->exitc = EXITC_DEAD;
