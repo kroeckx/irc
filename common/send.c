@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.12 2001/10/18 19:07:42 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: send.c,v 1.39.2.13 2001/10/18 21:43:05 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -182,26 +182,22 @@ int	len;
 			istat.is_dbufmore++;
 		}
 		else
+# endif
 		{
-			if (IsServer(to) || IsService(to))
+			char ebuf[BUFSIZE];
+
+			ebuf[0] = '\0';
+			if (IsService(to) || IsServer(to))
 			{
-				sendto_flag(SCH_ERROR,
-					"Max SendQ limit exceeded for %s: %d > %d",
+				SPRINTF(ebuf,
+				"Max SendQ limit exceeded for %s: %d > %d",
 					get_client_name(to, FALSE),
 					DBufLength(&to->sendQ), get_sendq(to));
 			}
 			to->exitc = EXITC_SENDQ;
-			return dead_link(to, "Max Sendq exceeded");
+			return dead_link(to, ebuf[0] ? ebuf :
+				"Max Sendq exceeded");
 		}
-# else /* HUB */
-		if (IsService(to) || IsServer(to))
-			sendto_flag(SCH_ERROR,
-				"Max SendQ limit exceeded for %s: %d > %d",
-			   	get_client_name(to, FALSE),
-				DBufLength(&to->sendQ), get_sendq(to));
-		to->exitc = EXITC_SENDQ;
-		return dead_link(to, "Max Sendq exceeded");
-# endif /* HUB */
 	}
 # ifdef	ZIP_LINKS
 	/*
