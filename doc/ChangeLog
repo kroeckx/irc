@@ -1,3 +1,24 @@
+2000-12-08  Kurt Roeckx
+
+	* chkconf.c/initconf(): complain about not finding mandatory lines.
+	* chkconf.c/validate(): make chkconf return -1 when initconf()
+	  failed.
+	* ircd.c/main(): Make sure that there is an M-line.
+	* res.c/proc_answer(): cp wasn't updated for unknown types.
+	* support.c, support_ext.h, a_io.c, mod_socks.c, s_bsd.c, s_conf.c,
+	  c_bsd.c: change inetntop(), and add inetpton(), to be able to use
+	  ipv4 addresses, when using ipv6.
+	* s_conf.c/match_ipmask(): Make sure that ipv4/mask still works when
+	  using ipv6.
+	* support.c/inetntop(): Debug() doesn't work for clients.
+
+2000-12-01  Kurt Roeckx
+
+	* whowas.c/find_history(), get_history(): it should be faster
+	  by avoiding work we shouldn't do.
+	* whowas.c, whowas_def.h: The locked array didn't keep the whole nick.
+	* s_user.c/m_ison(): prevent a buffer overflow.
+
 2000-10-22  Kurt Roeckx
 
 	* channel.c/set_mode(): mode -i should only remove invites
