@@ -214,6 +214,7 @@ extern	aClass	*make_class __P(());
 extern	aServer	*make_server __P(());
 extern	aClient	*make_client __P((aClient *));
 extern	Link	*find_user_link __P((Link *, aClient *));
+extern	Link	*find_channel_link __P((Link *, aChannel *));
 extern	void	add_client_to_list __P((aClient *));
 extern	void	checklist __P(());
 extern	void	remove_client_from_list __P((aClient *));

@@ -398,7 +398,7 @@ them to all servers around the world.
 So wildcard domains are a great help, but how to use them ?
 <p>
 They can be defined in the N-line for a given connection, in
-place of port number you write a magic number called
+place of ``Domain Mask'' you write a magic number called
 wildcard count.
 <p>
 Wildcard count tells you HOW MANY PARTS of your server's

@@ -982,6 +982,9 @@ char	*name;
 }
 
 #ifdef CACHED_MOTD
+aMotd		*motd = NULL;
+struct tm	motd_tm;
+
 void read_motd(filename)
 char *filename;
 {
@@ -991,7 +994,7 @@ char *filename;
 	char line[80];
 	register char *tmp;
 	
-	if ((fd = open(MOTD, O_RDONLY)) == -1)
+	if ((fd = open(filename, O_RDONLY)) == -1)
 		return;
 	if (fstat(fd, &Sb) == -1)
 	    {
@@ -1004,7 +1007,7 @@ char *filename;
 		MyFree(motd->line);
 		MyFree(motd);
 	    }
-	motd_tm = *localtime(&sb.st_mtime);
+	motd_tm = *localtime(&Sb.st_mtime);
 	(void)dgets(-1, NULL, 0); /* make sure buffer is at empty pos */
 	last = NULL;
 	while (dgets(fd, line, sizeof(line)-1) > 0)
@@ -1016,7 +1019,7 @@ char *filename;
 		temp = (aMotd *)MyMalloc(sizeof(aMotd));
 		if (!temp)
 			outofmemory();
-		strcpy(temp->line = mystrdup(line);
+		temp->line = mystrdup(line);
 		temp->next = NULL;
 		       if (!motd)
 			motd = temp;
@@ -1028,4 +1031,3 @@ char *filename;
 	close(fd);
 }     
 #endif
-

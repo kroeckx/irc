@@ -680,7 +680,7 @@ int	sig;
 				free_conf(tmp2);
 		    }
 #ifdef CACHED_MOTD
-	read_motd(MOTD);
+	read_motd(MPATH);
 #endif
 	rehashed = 1;
 	return ret;

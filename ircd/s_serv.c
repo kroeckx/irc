@@ -400,6 +400,17 @@ char	*parv[];
 
 	if (IsServer(cptr))
 	    {
+		/* A server can only be introduced by another server. */
+		if (!IsServer(sptr))
+		    {
+	  		sendto_one(cptr, "ERROR :%s trying to introduce %s",
+				   sptr->name, parv[1]);
+			sendto_flag(SCH_ERROR,
+				    "%s trying to introduce %s from %s",
+				    sptr->name, host,
+				    get_client_name(cptr, TRUE));
+	  		return 1;
+		    }
 		/*
 		** Server is informing about a new server behind
 		** this link. Create REMOTE server structure,
@@ -2243,8 +2254,7 @@ char *sname;
 		    server_name = (char **) MyRealloc((char *)server_name,
 					      sizeof(char *)*(server_max+=50));
 	    else
-		    server_name = (char **) MyMalloc((char *)server_name,
-					     sizeof(char *)*(server_max=50));
+		    server_name = (char **) MyMalloc(sizeof(char *)*(server_max=50));
 	  }
 	server_name[server_num] = mystrdup(sname);
 	return server_num++;

@@ -1582,6 +1582,7 @@ clientsonly..			*/
 				DBufClear(&cptr->recvQ);
 		    }
 
+		/* Is it okay not to test for other return values? -krys */
 		if (dolen > 0 &&
 		    (dopacket(cptr, readbuf, dolen) == FLUSH_BUFFER))
 			return FLUSH_BUFFER;

@@ -740,7 +740,7 @@ char	*argv[];
 	timeofday = time(NULL);
 #ifdef	CACHED_MOTD
 	motd = NULL;
-	read_motd(MOTD);
+	read_motd(MPATH);
 #endif
 	initstats();
 	inithashtables();

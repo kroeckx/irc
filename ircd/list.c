@@ -476,6 +476,17 @@ Reg	aClient *ptr;
 	return NULL;
 }
 
+Link  *find_channel_link(lp, ptr)
+Reg   Link    *lp;
+Reg   aChannel *ptr; 
+{ 
+	if (ptr)
+		for (; lp; lp = lp->next)
+			if (lp->value.chptr == ptr)
+				return (lp);
+	return NULL;    
+}
+
 Link	*make_link()
 {
 	Reg	Link	*lp;

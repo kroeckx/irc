@@ -1,8 +1,21 @@
+Wed Mar 26 19:58:28 1997  Christophe Kalt
+
+	* config.h.dist: define SVR4 if __svr4__ is there.
+
+	* packet.c: drop server sending an unknown command.
+
+	* s_user.c: changed m_who() for better performance (from Chris
+	Behrens).
+
+	* h.h, struct.h, list.c: better IsMember (from Chris Behrens).
+
+	* s_serv.c: don't let a user introduce a new server.
+
 Fri Mar 21 19:53:36 1997  Christophe Kalt
 
 	* h.h, struct.h, ircd.c, s_conf.c, s_misc.c, s_serv.c,
 	config.h.dist: server can now cache the MOTD in memory (from Chris
-	Behrens)
+	Behrens).  See CACHED_MOTD #define.
 
 	* service.h, channel.c, s_serv.c, s_service.c, s_user.c: additions
 	for services.

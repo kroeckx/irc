@@ -663,8 +663,12 @@ struct Channel	{
 #define	PubChannel(x)		((!x) || ((x)->mode.mode &\
 				 (MODE_PRIVATE | MODE_SECRET)) == 0)
 
-/* #define	IsMember(u, c)		(assert(*(c)->chname != '\0'), find_user_link((c)->members, u) ? 1 : 0) */
+/*
+#define	IsMember(u, c)		(assert(*(c)->chname != '\0'), find_user_link((c)->members, u) ? 1 : 0)
 #define	IsMember(u, c)		(find_user_link((c)->members, u) ? 1 : 0)
+*/
+#define       IsMember(u, c)          (u && (u)->user && \
+		       find_channel_link((u)->user->channel, c) ? 1 : 0)
 #define	IsChannelName(n)	((n) && (*(n) == '#' || *(n) == '&' || \
 					*(n) == '+'))
 #define	IsQuiet(x)		((x)->mode.mode & MODE_QUIET)

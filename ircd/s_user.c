@@ -1165,9 +1165,10 @@ char	*parv[];
 	return m_message(cptr, sptr, parc, parv, 1);
 }
 
-static	void	do_who(sptr, acptr, repchan)
+static	void	do_who(sptr, acptr, repchan, lp)
 aClient *sptr, *acptr;
 aChannel *repchan;
+Link *lp;
 {
 	char	status[5];
 	int	i = 0;
@@ -1178,10 +1179,15 @@ aChannel *repchan;
 		status[i++] = 'H';
 	if (IsAnOper(acptr))
 		status[i++] = '*';
-	if (repchan && is_chan_op(acptr, repchan))
-		status[i++] = '@';
-	else if (repchan && has_voice(acptr, repchan))
-		status[i++] = '+';
+	if ((repchan != NULL) && (lp == NULL))
+		lp = find_user_link(repchan->members, acptr);
+	if (lp != NULL)
+	    {
+		if (lp->flags & CHFL_CHANOP)
+			status[i++] = '@';
+		else if (lp->flags & CHFL_VOICE)
+			status[i++] = '+';
+	    }
 	status[i] = '\0';
 	sendto_one(sptr, rpl_str(RPL_WHOREPLY, sptr->name),
 		   (repchan) ? (repchan->chname) : "*", acptr->user->username,
@@ -1262,14 +1268,14 @@ char	*parv[];
 					if (IsInvisible(lp->value.cptr) &&
 					    !member)
 						continue;
-					do_who(sptr, lp->value.cptr, chptr);
+					do_who(sptr, lp->value.cptr, chptr,lp);
 				    }
 			penalty += 1;
 		    }
 		else if (chptr && IsAnonymous(chptr) &&
 			 (lp = find_user_link(chptr->members, sptr)))
 		    {
-			do_who(sptr, lp->value.cptr, chptr);
+			do_who(sptr, lp->value.cptr, chptr, lp);
 			penalty += 1;
 		    }
 	    }
@@ -1328,7 +1334,7 @@ char	*parv[];
 			     match(mask, acptr->user->host) == 0 ||
 			     match(mask, acptr->user->server) == 0 ||
 			     match(mask, acptr->info) == 0))
-				do_who(sptr, acptr, ch2ptr);
+				do_who(sptr, acptr, ch2ptr, NULL);
 		    }
 		penalty += 3;
 	    }

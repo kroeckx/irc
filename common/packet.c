@@ -140,6 +140,15 @@ Reg	int	length;
 				return exit_client(cptr, cptr, &me,
 						   "Dead Socket");
 			    }
+			/*
+			** Something is wrong, really wrong, and nothing
+			** else should be allowed to be parsed!
+			** This covers a bug which is somewhere else,
+			** since no decent server would send such thing
+			** as an unknown command. -krys
+			*/
+			if (IsServer(cptr) && (cptr->flags & FLAGS_UNKCMD))
+				break;
 #endif
 #ifdef	ZIP_LINKS
 			if ((cptr->flags & FLAGS_ZIP) && (zipped == 0) &&
