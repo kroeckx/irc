@@ -174,7 +174,7 @@ typedef	struct	Zdata	aZdata;
 #define	FLAGS_UNIX	 0x0010	/* socket is in the unix domain, not inet */
 #define	FLAGS_CLOSING    0x0020	/* set when closing to suppress errors */
 #define	FLAGS_LISTEN     0x0040 /* used to mark clients which we listen() on */
-#define	FLAGS_CHKACCESS  0x0080 /* ok to check clients access if set */
+#define	FLAGS_CHKACCESS  0x0080 /* ok to check clients access if set [unused]*/
 #define	FLAGS_DOINGDNS	 0x0100 /* client is waiting for a DNS response */
 #define	FLAGS_AUTH	 0x0200 /* client is waiting on rfc931 response */
 #define	FLAGS_WRAUTH	 0x0400	/* set if we havent writen to ident server */

@@ -105,7 +105,7 @@ extern	void	close_listeners __P(());
 extern	int	connect_server __P((aConfItem *, aClient *, struct hostent *));
 extern	void	get_my_name __P((aClient *, char *, int));
 extern	int	get_sockerr __P((aClient *));
-extern	int	inetport __P((aClient *, char *, int));
+extern	int	inetport __P((aClient *, char *, char *, int));
 extern	void	init_sys __P(());
 extern	int	read_message __P((time_t, FdAry *));
 extern	void	report_error __P((char *, aClient *));

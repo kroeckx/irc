@@ -1,3 +1,27 @@
+Mon Dec 30 15:08:20 1996  Christophe Kalt
+
+	* s_bsd.c, h.h:
+
+		* added support for virtual hosts.
+
+Wed Dec 18 12:08:29 1996  Christophe Kalt
+
+	* bsd.c:
+
+		* fixed read_message() bugs resulting from the merge.
+
+	* channel.c:
+
+		* limited the number of possible kicks to MAXMODEPARAMS.
+
+Mon Dec 16 09:36:54 1996  Christophe Kalt
+	
+	* list.c:
+
+		* don't free serv->user too early.
+
+		* removed duplicated(?) away memory count.
+	
 Fri Dec 13 10:28:43 1996  Christophe Kalt - Hmm, Friday the 13th!
 
 	* config.h.dist, s_auth.c, s_user.c, s_debug.c:

@@ -226,9 +226,9 @@ aClient *cptr;
  * depending on the IP# mask given by 'name'.  Returns the fd of the
  * socket created or -1 on error.
  */
-int	inetport(cptr, name, port)
+int	inetport(cptr, name, ip, port)
 aClient	*cptr;
-char	*name;
+char	*name, *ip;
 int	port;
 {
 	static	struct sockaddr_in server;
@@ -272,11 +272,14 @@ int	port;
 	if (port)
 	    {
 		server.sin_family = AF_INET;
-		server.sin_addr.s_addr = INADDR_ANY;
+		if (!ip || *ip == '*')
+			server.sin_addr.s_addr = INADDR_ANY;
+		else
+			server.sin_addr.s_addr = inet_addr(vipname);
 		server.sin_port = htons(port);
 		/*
 		 * Try 10 times to bind the socket with an interval of 20
-		 * seconds. Do this so we dont have to keepp trying manually
+		 * seconds. Do this so we dont have to keep trying manually
 		 * to bind. Why ? Because a port that has closed often lingers
 		 * around for a short time.
 		 * This used to be the case.  Now it no longer is.
@@ -343,7 +346,7 @@ aConfItem *aconf;
 	    }
 	else
 #endif
-		if (inetport(cptr, aconf->host, aconf->port))
+		if (inetport(cptr, aconf->host, aconf->name, aconf->port))
 			cptr->fd = -2;
 
 	if (cptr->fd >= 0)
@@ -1702,17 +1705,18 @@ FdAry	*fdp;
 #else
 # define POLLSETREADFLAGS (POLLIN|POLLRDNORM)
 # define POLLREADFLAGS (POLLSETREADFLAGS|POLLHUP|POLLERR)
-# define POLLWRITEFLAGS (POLLOUT|POLLWRNORM)
+# define POLLSETWRITEFLAGS (POLLOUT|POLLWRNORM)
+# define POLLWRITEFLAGS (POLLOUT|POLLWRNORM|POLLHUP|POLLERR)
 # define SET_READ_EVENT( thisfd ){  CHECK_PFD( thisfd );\
 				   pfd->events |= POLLSETREADFLAGS;}
 # define SET_WRITE_EVENT( thisfd ){ CHECK_PFD( thisfd );\
-				   pfd->events |= POLLWRITEFLAGS;}
+				   pfd->events |= POLLSETWRITEFLAGS;}
 # define CLR_READ_EVENT( thisfd, thispfd ) \
 					thispfd->revents &= ~POLLSETREADFLAGS
 # define CLR_WRITE_EVENT( thisfd, thispfd ) \
-					thispfd->revents &= ~POLLWRITEFLAGS
+					thispfd->revents &= ~POLLSETWRITEFLAGS
 # define TST_READ_EVENT( thisfd, thispfd ) \
-					(thispfd->revents & POLLSETREADFLAGS)
+					(thispfd->revents & POLLREADFLAGS)
 # define TST_WRITE_EVENT( thisfd, thispfd ) \
 					(thispfd->revents & POLLWRITEFLAGS)
 # define CHECK_PFD( thisfd ) 			\
@@ -1929,7 +1933,7 @@ FdAry	*fdp;
 #endif
 		CLR_READ_EVENT(udpfd, res_pfd);
 	    }
-	
+
 #ifndef	_DO_POLL_
 	for (i = fdp->highest; i >= 0; i--)
 #else
@@ -1941,36 +1945,54 @@ FdAry	*fdp;
 			continue;
 #else
 		fd = pfd->fd;
-		if (!(cptr = local[fd]) && !(cptr = authclnts[fd]))
-			continue;
-#endif
-		/*
-		 * check for the auth fd's
-		 */
-		if (auth > 0 && nfds > 0
-#ifdef	_DO_POLL_
-		    && (authclnts[fd] /* && authclnts[fd]->authfd == fd */)
-#endif
-		    )
+		if (cptr = authclnts[fd])
 		    {
+#endif
+			/*
+			 * check for the auth fd's
+			 */
+			if (auth > 0 && nfds > 0
+#ifndef	_DO_POLL_
+			    && cptr->authfd >= 0
+#endif
+			    )
 /*
 #ifdef	_DO_POLL_
-			cptr = authclnts[fd];
+			    && (authclnts[fd]->authfd == fd)
 #endif
 */
-			auth--;
-			if (TST_WRITE_EVENT(cptr->authfd, pfd))
 			    {
-				nfds--;
-				send_authports(cptr);
+/*
+#ifdef	_DO_POLL_
+				cptr = authclnts[fd];
+#endif
+*/
+				auth--;
+				if (TST_WRITE_EVENT(cptr->authfd, pfd))
+				    {
+					nfds--;
+					send_authports(cptr);
+				    }
+				else if (TST_READ_EVENT(cptr->authfd, pfd))
+				    {
+					nfds--;
+					read_authports(cptr);
+				    }
+				continue;
 			    }
-			else if (TST_READ_EVENT(cptr->authfd, pfd))
-			    {
-				nfds--;
-				read_authports(cptr);
-			    }
-			continue;
+#ifdef	_DO_POLL_
 		    }
+		fd = pfd->fd;
+		if (!(cptr = local[fd]))
+			continue;
+#else
+		fd = cptr->fd;
+/*
+		above, already
+		if (!(cptr = local[fd = fdp->fd[i]]))
+			continue;
+*/
+#endif
 		/*
 		 * accept connections
 		 */

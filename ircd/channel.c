@@ -1702,7 +1702,7 @@ char	*parv[];
 {
 	aClient *who;
 	aChannel *chptr;
-	int	chasing = 0, penalty = 0;
+	int	chasing = 0, penalty = 0, count = 0;
 	char	*comment, *name, *p = NULL, *user, *p2 = NULL;
 	int	mlen, len = 0, nlen;
 
@@ -1776,6 +1776,8 @@ char	*parv[];
 						   who->name, comment);
 				remove_user_from_channel(who,chptr);
 				penalty += 2;
+				if (++count >= MAXMODEPARAMS)
+					break;
 			    }
 			else
 				sendto_one(sptr,

@@ -908,8 +908,8 @@ Field: 1       2       3       4            5
    to setup both Unix Domain ports for the server to accept connections
    on as well as extra internet ports.
 
-       P:<Internet IP# Mask>:<*>:<*>:<PORT>
-Field: 1        2             3   4     5
+       P:<Internet IP# Mask>:<*>:<Internet IP#>:<PORT>
+Field: 1        2             3         4          5
 
 or
 
@@ -919,7 +919,7 @@ Field: 1        2             3   4     5
   Explanation
    Internet Ports
     Field 1
-	The internet IP mask defines where connections may come from and
+	The internet IP# mask defines where connections may come from and
 	be accepted. The IP mask uses either *'s or 0's as wildcards. The
 	following two lines are the same:
 
@@ -930,6 +930,10 @@ Field: 1        2             3   4     5
 	is decoded and compared segment by segment. Thus
 		P:128.2*.1.2:::6664
 	will not match 128.20.1.2.
+
+     Field 4
+	If the host on which the server runs has several IP addresses, you can
+	define for which IP address connections will be acepted.
 
      Field 5
 	The port number field tells the server which port number it should

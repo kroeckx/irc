@@ -556,7 +556,7 @@ int	debug;
 			   me.name, RPL_STATSDEBUG, nick, time(NULL) - start);
 
 	sendto_one(cptr,
-		   ":%s %d %s :Client Local %d(%d) Remote %d(%d) Auth%d(%d)",
+		   ":%s %d %s :Client Local %d(%d) Remote %d(%d) Auth %d(%d)",
 		   me.name, RPL_STATSDEBUG, nick, lc, lcm, rc, rcm,
 		   istat.is_auth, istat.is_authmem);
 	if (debug
