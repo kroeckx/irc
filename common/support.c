@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.4 2001/02/07 11:08:08 q Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.2.5 2001/05/06 00:03:17 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -238,7 +238,7 @@ size_t the_size;
 		    }
 		if (*(op-1)==':') *op++ = '0';
 		*op = '\0';
-#ifdef	CLIENT_COMPILE
+#ifndef	CLIENT_COMPILE
 		Debug((DEBUG_DNS,"Expanding `%s' -> `%s'", local_dummy,
 		       out));
 #endif
