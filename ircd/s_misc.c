@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.4 2001/05/05 23:05:10 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: s_misc.c,v 1.30.2.5 2001/10/19 18:44:27 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -884,35 +884,35 @@ char	*name;
 			sp->is_ni++;
 	    }
 
-	sendto_one(cptr, ":%s %d %s :accepts %u refused %u",
+	sendto_one(cptr, ":%s %d %s :accepts %lu refused %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_ac, sp->is_ref);
-	sendto_one(cptr, ":%s %d %s :unknown: commands %u prefixes %u",
+	sendto_one(cptr, ":%s %d %s :unknown: commands %lu prefixes %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_unco, sp->is_unpf);
-	sendto_one(cptr, ":%s %d %s :nick collisions %u unknown closes %u",
+	sendto_one(cptr, ":%s %d %s :nick collisions %lu unknown closes %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_kill, sp->is_ni);
-	sendto_one(cptr, ":%s %d %s :wrong direction %u empty %u",
+	sendto_one(cptr, ":%s %d %s :wrong direction %lu empty %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_wrdi, sp->is_empt);
-	sendto_one(cptr, ":%s %d %s :users without servers %u ghosts N/A",
+	sendto_one(cptr, ":%s %d %s :users without servers %lu ghosts N/A",
 		   ME, RPL_STATSDEBUG, name, sp->is_nosrv);
-	sendto_one(cptr, ":%s %d %s :numerics seen %u mode fakes %u",
+	sendto_one(cptr, ":%s %d %s :numerics seen %lu mode fakes %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_num, sp->is_fake);
-	sendto_one(cptr, ":%s %d %s :auth: successes %u fails %u",
+	sendto_one(cptr, ":%s %d %s :auth: successes %lu fails %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_asuc, sp->is_abad);
-	sendto_one(cptr,":%s %d %s :local connections %u udp packets %u",
+	sendto_one(cptr,":%s %d %s :local connections %lu udp packets %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_loc, sp->is_udpok);
-	sendto_one(cptr,":%s %d %s :udp errors %u udp dropped %u",
+	sendto_one(cptr,":%s %d %s :udp errors %lu udp dropped %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_udperr, sp->is_udpdrop);
 	sendto_one(cptr,
-   ":%s %d %s :link checks %u passed %u 15s/%u 30s dropped %uSq/%uYg/%uFl",
+   ":%s %d %s :link checks %lu passed %lu 15s/%lu 30s dropped %luSq/%luYg/%luFl",
 		   ME, RPL_STATSDEBUG, name, sp->is_ckl, sp->is_cklq,
 		   sp->is_cklok, sp->is_cklQ, sp->is_ckly, sp->is_cklno);
 	if (sp->is_wwcnt)
-		sendto_one(cptr, ":%s %d %s :whowas turnover %u/%u/%u [%u]",
+		sendto_one(cptr, ":%s %d %s :whowas turnover %lu/%lu/%lu [%lu]",
 			   ME, RPL_STATSDEBUG, name, sp->is_wwmt,
 			   (u_int) (sp->is_wwt / sp->is_wwcnt), sp->is_wwMt,
 			   KILLCHASETIMELIMIT);
 	if (sp->is_lkcnt)
-		sendto_one(cptr, ":%s %d %s :ndelay turnover %u/%u/%u [%u]",
+		sendto_one(cptr, ":%s %d %s :ndelay turnover %lu/%lu/%lu [%lu]",
 			   ME, RPL_STATSDEBUG, name, sp->is_lkmt,
 			   (u_int) (sp->is_lkt / sp->is_lkcnt), sp->is_lkMt,
 			   DELAYCHASETIMELIMIT);
@@ -921,15 +921,15 @@ char	*name;
 		   (bootopt & BOOT_STRICTPROT) ? 1 : 0);
 	sendto_one(cptr, ":%s %d %s :Client - Server",
 		   ME, RPL_STATSDEBUG, name);
-	sendto_one(cptr, ":%s %d %s :connected %u %u",
+	sendto_one(cptr, ":%s %d %s :connected %lu %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_cl, sp->is_sv);
-	sendto_one(cptr, ":%s %d %s :bytes sent %u.%uK %u.%uK",
+	sendto_one(cptr, ":%s %d %s :bytes sent %lu.%luK %lu.%luK",
 		   ME, RPL_STATSDEBUG, name,
 		   sp->is_cks, sp->is_cbs, sp->is_sks, sp->is_sbs);
-	sendto_one(cptr, ":%s %d %s :bytes recv %u.%uK %u.%uK",
+	sendto_one(cptr, ":%s %d %s :bytes recv %lu.%luK %lu.%luK",
 		   ME, RPL_STATSDEBUG, name,
 		   sp->is_ckr, sp->is_cbr, sp->is_skr, sp->is_sbr);
-	sendto_one(cptr, ":%s %d %s :time connected %u %u",
+	sendto_one(cptr, ":%s %d %s :time connected %lu %lu",
 		   ME, RPL_STATSDEBUG, name, sp->is_cti, sp->is_sti);
 #if defined(USE_IAUTH)
 	report_iauth_stats(cptr, name);
