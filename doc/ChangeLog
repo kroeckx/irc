@@ -1,3 +1,11 @@
+2003-12-09  Piotr Kucharski
+
+	* s_conf.c/find_denied(): try find_client with server name (from C:),
+	  not server address.
+	* s_bsd.c/close_connection(): when nextconnect was 0, it was not
+	  reset when server closed connection. This bug made autoconnect
+	  stop forever.
+
 2003-10-20  Piotr Kucharski
 
 	* res.c/bad_hostname(): isalnum() macro allowed too many chars,
