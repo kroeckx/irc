@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.13 1999/03/11 23:40:12 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: chkconf.c,v 1.13.2.1 2000/01/01 19:44:57 q Exp $";
 #endif
 
 #include "os.h"
@@ -146,11 +146,11 @@ int	opt;
 	    {
 		if (aconf)
 		    {
-			if (aconf->host)
+			if (aconf->host && (aconf->host != nullfield))
 				(void)free(aconf->host);
-			if (aconf->passwd)
+			if (aconf->passwd && (aconf->passwd != nullfield))
 				(void)free(aconf->passwd);
-			if (aconf->name)
+			if (aconf->name && (aconf->name != nullfield))
 				(void)free(aconf->name);
 		    }
 		else
