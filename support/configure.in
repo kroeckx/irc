@@ -665,7 +665,6 @@ if test $irc_cv_stdarg = yes; then
   AC_DEFINE(USE_STDARG)
 else
   AC_MSG_RESULT(no)
-  AC_MSG_ERROR([Compatibility code for systems without stdarg has not been written, please notify ircd-bugs@irc.org with description of your system type and version.])
 fi
 ])
 
@@ -818,6 +817,15 @@ dnl  AC_CONFIG_HEADER(dl.h)
 fi
 ])
 
+AC_DEFUN(IRC_LDM, [
+echo $enable_dsm
+if test -f ../ircd/s_ldm.c; then
+  AC_DEFINE(PRETTY_PLEASE)
+  LDMOBJ="s_ldm.o"
+  AC_SUBST(LDMOBJ)
+  enable_dsm=yes
+fi
+])
 
 dnl -------------------------------------------------------------------
 dnl modified Autoconf tests; their names begin with IRC_ instead of AC_
@@ -1435,7 +1443,7 @@ dnl ----
 dnl main
 dnl ----
 
-AC_REVISION([$Id: configure.in,v 1.47 1999/09/20 00:02:53 kalt Exp $])
+AC_REVISION([$Id: configure.in,v 1.46.4.1 1999/10/05 18:23:22 kalt Exp $])
 AC_PREREQ(2.13)
 IRC_INIT(../ircd/ircd.c)
 AC_CONFIG_HEADER(setup.h:../support/setup.h.in)
@@ -1513,6 +1521,7 @@ IRC_NON_BLOCKING_SYSTEM
 IRC_STDARG
 IRC_PATH_RESCONF
 IRC_IP6
+IRC_LDM
 IRC_SHAREDMODULES
 IRC_ALPHA_BETA
 

@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: support.c,v 1.17 1999/06/25 15:36:16 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: support.c,v 1.17.4.1 1999/10/05 18:23:21 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -816,6 +816,9 @@ char *make_version()
 		sprintf(ver + strlen(ver), "%c%d", DEVLEVEL, dv);
 	if (pl)	/* patchlevel */
 		sprintf(ver + strlen(ver), "p%d", pl);
+#if defined(PRETTY_PLEASE)
+	strcat(ver, "+ldm");
+#endif
 	return mystrdup(ver);
 }
 

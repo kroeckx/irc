@@ -16,7 +16,7 @@
 #*   along with this program; if not, write to the Free Software
 #*   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #*
-#*   $Id: Makefile.in,v 1.45.4.1 1999/09/30 16:39:00 kalt Exp $
+#*   $Id: Makefile.in,v 1.45.4.2 1999/10/05 18:23:21 kalt Exp $
 #*
 #*/
 
@@ -153,7 +153,7 @@ SERVER_COMMON_OBJS = bsd.o dbuf.o packet.o send.o match.o parse.o \
 SERVER_OBJS = channel.o class.o hash.o ircd.o list.o res.o s_auth.o \
               s_bsd.o s_conf.o s_debug.o s_err.o s_id.o s_misc.o s_numeric.o \
               s_serv.o s_service.o s_user.o s_zip.o watchdog.o whowas.o \
-              res_init.o res_comp.o res_mkquery.o
+              res_init.o res_comp.o res_mkquery.o @LDMOBJ@
 
 IAUTH_COMMON_OBJS = clsupport.o clmatch.o # This is a little evil
 IAUTH_OBJS = iauth.o a_conf.o a_io.o a_log.o \
@@ -439,6 +439,9 @@ res_comp.o: ../ircd/res_comp.c setup.h config.h
 
 res_mkquery.o: ../ircd/res_mkquery.c setup.h config.h
 	$(CC) $(S_CFLAGS) -c -o $@ ../ircd/res_mkquery.c
+
+s_ldm.o: ../ircd/s_ldm.c setup.h config.h
+	$(CC) $(S_CFLAGS) -c -o $@ ../ircd/s_ldm.c
 
 iauth.o: ../iauth/iauth.c config.h setup.h
 	$(CC) $(A_CFLAGS) -c -o $@ ../iauth/iauth.c

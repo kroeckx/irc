@@ -1,4 +1,4 @@
-/* $Id: acconfig.h,v 1.9 1999/03/10 00:30:17 kalt Exp $ */
+/* $Id: acconfig.h,v 1.9.4.1 1999/10/05 18:23:22 kalt Exp $ */
 
 /* Define if zlib package must be used for compilation/linking. */
 #undef USE_ZLIB
@@ -99,3 +99,5 @@
 
 /* Define to enable dynamically shared iauth module support */
 #undef USE_DSM
+
+#undef PRETTY_PLEASE

@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: parse.c,v 1.27 1999/09/20 22:39:55 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: parse.c,v 1.25.4.1 1999/10/05 18:23:21 kalt Exp $";
 #endif
 
 #include "os.h"
@@ -43,9 +43,6 @@ struct Message msgtab[] = {
 #endif
   { MSG_JOIN,    m_join,     MAXPARA, MSG_LAG|MSG_REGU, 0, 0, 0L},
   { MSG_MODE,    m_mode,     MAXPARA, MSG_LAG|MSG_REG, 0, 0, 0L},
-#ifndef CLIENT_COMPILE
-  { MSG_UNICK,   m_unick,    MAXPARA, MSG_LAG|MSG_NOU, 0, 0, 0L},
-#endif
   { MSG_NICK,    m_nick,     MAXPARA, MSG_LAG, 0, 0, 0L},
   { MSG_PART,    m_part,     MAXPARA, MSG_LAG|MSG_REGU, 0, 0, 0L},
   { MSG_QUIT,    m_quit,     MAXPARA, MSG_LAG, 0, 0, 0L},
@@ -67,7 +64,6 @@ struct Message msgtab[] = {
   { MSG_KILL,    m_kill,     MAXPARA, MSG_LAG|MSG_REG|MSG_NOU, 0, 0, 0L},
 #endif
 #ifndef CLIENT_COMPILE
-  { MSG_SAVE,    m_save,     MAXPARA, MSG_LAG|MSG_NOU, 0, 0, 0L},
   { MSG_USER,    m_user,     MAXPARA, MSG_LAG|MSG_NOU, 0, 0, 0L},
   { MSG_AWAY,    m_away,     MAXPARA, MSG_LAG|MSG_REGU, 0, 0, 0L},
   { MSG_UMODE,   m_umode,    MAXPARA, MSG_LAG|MSG_REGU, 0, 0, 0L},
@@ -97,34 +93,37 @@ struct Message msgtab[] = {
   { MSG_CLOSE,   m_close,    MAXPARA, MSG_LAG|MSG_REGU|MSG_OP, 0, 0, 0L},
   { MSG_RECONECT,m_reconnect,MAXPARA, MSG_LAG|MSG_NOU, 0, 0, 0L},
   { MSG_SERVICE, m_service,  MAXPARA, MSG_LAG|MSG_NOU, 0, 0, 0L},
-#ifdef	USE_SERVICES
+# ifdef	USE_SERVICES
   { MSG_SERVSET, m_servset,  MAXPARA, MSG_LAG|MSG_SVC, 0, 0, 0L},
-#endif
+# endif
   { MSG_SQUERY,  m_squery,   MAXPARA, MSG_LAG|MSG_REGU, 0, 0, 0L},
   { MSG_SERVLIST,m_servlist, MAXPARA, MSG_LAG|MSG_REG, 0, 0, 0L},
   { MSG_HASH,    m_hash,     MAXPARA, MSG_LAG|MSG_REG, 0, 0, 0L},
   { MSG_DNS,     m_dns,      MAXPARA, MSG_LAG|MSG_REG, 0, 0, 0L},
-#ifdef	OPER_REHASH
+# ifdef	OPER_REHASH
   { MSG_REHASH,  m_rehash,   MAXPARA, MSG_REGU|MSG_OP
-# ifdef	LOCOP_REHASH
+#  ifdef	LOCOP_REHASH
 					 |MSG_LOP
-# endif
+#  endif
 					, 0, 0, 0L},
-#endif
-#ifdef	OPER_RESTART
+# endif
+# ifdef	OPER_RESTART
   { MSG_RESTART,  m_restart,   MAXPARA, MSG_REGU|MSG_OP
-# ifdef	LOCOP_RESTART
+#  ifdef	LOCOP_RESTART
 					 |MSG_LOP
-# endif
+#  endif
 					, 0, 0, 0L},
-#endif
-#ifdef	OPER_DIE
+# endif
+# ifdef	OPER_DIE
   { MSG_DIE,  m_die,   MAXPARA, MSG_REGU|MSG_OP
-# ifdef	LOCOP_DIE
+#  ifdef	LOCOP_DIE
 					 |MSG_LOP
-# endif
+#  endif
 					, 0, 0, 0L},
-#endif
+# endif
+# ifdef PRETTY_PLEASE
+  { MSG_LDM,     m_ldm,      MAXPARA, MSG_REGU|MSG_OP|MSG_LOP, 0, 0, 0L},
+# endif
 #endif /* !CLIENT_COMPILE */
   { (char *) 0, (int (*)()) 0, 0, 0, 0, 0, 0L}
 };
@@ -161,18 +160,6 @@ Reg	aClient *cptr;
 
 	if (name && *name)
 		acptr = hash_find_client(name, cptr);
-
-	return acptr;
-    }
-
-aClient *find_uid(uid, cptr)
-char	*uid;
-Reg	aClient *cptr;
-    {
-	aClient *acptr = cptr;
-
-	if (uid && isdigit(*uid))
-		acptr = hash_find_uid(uid, cptr);
 
 	return acptr;
     }
@@ -656,7 +643,7 @@ char	*buffer, *bufend;
 		return -1;
 	if ((mptr->flags & MSG_NOU) && (MyPerson(from) || MyService(from)))
 	    {
-		sendto_one(from, replies[ERR_ALREADYREGISTRED], ME, BadTo(para[0]));
+		sendto_one(from, err_str(ERR_ALREADYREGISTRED, para[0]));
 		return-1;
 	    }
 	if (MyConnect(from) && !IsServer(from) &&
@@ -664,7 +651,7 @@ char	*buffer, *bufend;
 	    !((mptr->flags & MSG_OP) && (IsOper(from))) &&
 	    !((mptr->flags & MSG_LOP) && (IsLocOp(from))))
 		    {
-			sendto_one(from, replies[ERR_NOPRIVILEGES], ME, BadTo(para[0]));
+			sendto_one(from, err_str(ERR_NOPRIVILEGES, para[0]));
 			return -1;
 		    }
 #endif

@@ -52,3 +52,6 @@
 #include "version_ext.h"
 #include "watchdog_ext.h"
 #include "whowas_ext.h"
+#if defined(PRETTY_PLEASE)
+# include "s_ldm_ext.h"
+#endif
