@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.16 1999/08/15 21:00:08 kalt Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.1 2000/01/01 18:00:00 q Exp $";
 #endif
 
 #include "os.h"
@@ -27,16 +27,13 @@ static  char rcsid[] = "@(#)$Id: hash.c,v 1.16 1999/08/15 21:00:08 kalt Exp $";
 #undef HASH_C
 
 static	aHashEntry	*clientTable = NULL;
-static	aHashEntry	*uidTable = NULL;
 static	aHashEntry	*channelTable = NULL;
 static	aHashEntry	*serverTable = NULL;
 static	unsigned int	*hashtab = NULL;
 static	int	clhits = 0, clmiss = 0, clsize = 0;
-static	int	uidhits = 0, uidmiss = 0, uidsize = 0;
 static	int	chhits = 0, chmiss = 0, chsize = 0;
 static	int	svsize = 0;
 int	_HASHSIZE = 0;
-int	_UIDSIZE = 0;
 int	_CHANNELHASHSIZE = 0;
 int	_SERVERSIZE = 0;
 
@@ -94,31 +91,6 @@ int	*store;
 	*/
 	*store = hash;
 	hash %= _HASHSIZE;
-	return (hash);
-}
-
-/*
- * hash_uid
- *
- * this function must be *quick*.  Thus there should be no multiplication
- * or division or modulus in the inner loop.  subtraction and other bit
- * operations allowed.
- */
-static	u_int	hash_uid(uid, store)
-char	*uid;
-int	*store;
-{
-	Reg	u_char	*id = (u_char *)uid;
-	Reg	u_char	ch;
-	Reg	u_int	hash = 1;
-
-	for (; (ch = *uid); uid++)
-	{
-		hash <<= 1;
-		hash += hashtab[(int)ch];
-	}
-	*store = hash;
-	hash %= _UIDSIZE;
 	return (hash);
 }
 
@@ -208,19 +180,6 @@ int	size;
 		_HASHSIZE, size));
 }
 
-static	void	clear_uid_hash_table(size)
-int	size;
-{
-	_UIDSIZE = bigger_prime(size);
-	uidhits = 0;
-	uidmiss = 0;
-	if (!uidTable)
-		uidTable = (aHashEntry *)MyMalloc(_UIDSIZE *
-						  sizeof(aHashEntry));
-	bzero((char *)uidTable, sizeof(aHashEntry) * _UIDSIZE);
-	Debug((DEBUG_DEBUG, "uid Hash Table Init: %d (%d)", _UIDSIZE, size));
-}
-
 static	void	clear_channel_hash_table(size)
 int	size;
 {
@@ -252,8 +211,6 @@ void	inithashtables()
 	Reg int i;
 
 	clear_client_hash_table((_HASHSIZE) ? _HASHSIZE : HASHSIZE);
-	_UIDSIZE = _HASHSIZE;
-	clear_uid_hash_table(_UIDSIZE);
 	clear_channel_hash_table((_CHANNELHASHSIZE) ? _CHANNELHASHSIZE
                                  : CHANNELHASHSIZE);
 	clear_server_hash_table((_SERVERSIZE) ? _SERVERSIZE : SERVERSIZE);
@@ -326,23 +283,6 @@ int	new;
 		for (cptr = client; cptr; cptr = cptr->next)
 			(void)add_to_client_hash_table(cptr->name, cptr);
 	    }
-	else if (otab == uidTable)
-	    {
-		Debug((DEBUG_ERROR, "uid Hash Table from %d to %d (%d)",
-			    osize, new, uidsize));
-		sendto_flag(SCH_HASH, "uid Hash Table from %d to %d (%d)",
-			    osize, new, uidsize);
-		uidmiss = 0;
-		uidhits = 0;
-		uidsize = 0;
-		uidTable = table;
-		for (cptr = client; cptr; cptr = cptr->next)
-			if (cptr->user)
-				cptr->user->uhnext = NULL;
-		for (cptr = client; cptr; cptr = cptr->next)
-			if (cptr->user)
-				add_to_uid_hash_table(cptr->user->uid, cptr);
-	    }
 	else if (otab == serverTable)
 	    {
 		Debug((DEBUG_ERROR, "Server Hash Table from %d to %d (%d)",
@@ -378,26 +318,6 @@ aClient	*cptr;
 	clsize++;
 	if (clsize > _HASHSIZE)
 		bigger_hash_table(&_HASHSIZE, clientTable, 0);
-	return 0;
-}
-
-/*
- * add_to_uid_hash_table
- */
-int	add_to_uid_hash_table(uid, cptr)
-char	*uid;
-aClient	*cptr;
-{
-	Reg	u_int	hashv;
-
-	hashv = hash_uid(uid, &cptr->user->hashv);
-	cptr->user->uhnext = (aClient *)uidTable[hashv].list;
-	uidTable[hashv].list = (void *)cptr;
-	uidTable[hashv].links++;
-	uidTable[hashv].hits++;
-	uidsize++;
-	if (uidsize > _UIDSIZE)
-		bigger_hash_table(&_UIDSIZE, uidTable, 0);
 	return 0;
 }
 
@@ -475,51 +395,6 @@ aClient	*cptr;
 			    {
 				sendto_flag(SCH_ERROR, "cl-hash table failure");
 				Debug((DEBUG_ERROR, "cl-hash table failure")); 
-				/*
-				 * Should never actually return from here and
-				 * if we do it is an error/inconsistency in the
-				 * hash table.
-				 */
-				return -1;
-			    }
-		    }
-		prev = tmp;
-	    }
-	return 0;
-}
-
-/*
- * del_from_uid_hash_table
- */
-int	del_from_uid_hash_table(uid, cptr)
-char	*uid;
-aClient	*cptr;
-{
-	Reg	aClient	*tmp, *prev = NULL;
-	Reg	u_int	hashv;
-
-	hashv = cptr->user->hashv;
-	hashv %= _UIDSIZE;
-	for (tmp = (aClient *)uidTable[hashv].list; tmp;
-	     tmp = tmp->user->uhnext)
-	    {
-		if (tmp == cptr)
-		    {
-			if (prev)
-				prev->user->uhnext = tmp->user->uhnext;
-			else
-				uidTable[hashv].list=(void *)tmp->user->uhnext;
-			tmp->user->uhnext = NULL;
-			if (uidTable[hashv].links > 0)
-			    {
-				uidTable[hashv].links--;
-				clsize--;
-				return 1;
-			    }
-			else
-			    {
-				sendto_flag(SCH_ERROR, "id-hash table failure");
-				Debug((DEBUG_ERROR, "id-hash table failure")); 
 				/*
 				 * Should never actually return from here and
 				 * if we do it is an error/inconsistency in the
@@ -659,53 +534,6 @@ aClient	*cptr;
 }
 
 /*
- * hash_find_uid
- */
-aClient	*hash_find_uid(uid, cptr)
-char	*uid;
-aClient	*cptr;
-{
-	Reg	aClient	*tmp;
-	Reg	aClient	*prv = NULL;
-	Reg	aHashEntry	*tmp3;
-	u_int	hashv, hv;
-
-	hashv = hash_uid(uid, &hv);
-	tmp3 = &uidTable[hashv];
-
-	/*
-	 * Got the bucket, now search the chain.
-	 */
-	for (tmp = (aClient *)tmp3->list; tmp;
-	     prv = tmp, tmp = tmp->user->uhnext)
-		if (hv == tmp->user->hashv && mycmp(uid, tmp->user->uid) == 0)
-		    {
-			uidhits++;
-			/*
-			 * If the member of the hashtable we found isnt at
-			 * the top of its chain, put it there.  This builds
-			 * a most-frequently used order into the chains of
-			 * the hash table, giving speadier lookups on those
-			 * nicks which are being used currently.  This same
-			 * block of code is also used for channels and
-			 * servers for the same performance reasons.
-			 */
-			if (prv)
-			    {
-				aClient *tmp2;
-
-				tmp2 = (aClient *)tmp3->list;
-				tmp3->list = (void *)tmp;
-				prv->user->uhnext = tmp->user->uhnext;
-				tmp->user->uhnext = tmp2;
-			    }
-			return (tmp);
-		    }
-	uidmiss++;
-	return (cptr);
-}
-
-/*
  * hash_find_server
  */
 aClient	*hash_find_server(server, cptr)
@@ -749,11 +577,10 @@ aClient *cptr;
 	 */
 	for (;;)
 	    {
-		t--;
-		for (; t >= server; t--)
-			if (*(t+1) == '.')
+		while (--t > server)
+			if (*t == '.')
 				break;
-		if (t < server || *t == '*')
+		if (t == server || *--t == '*')
 			break;
 		ch = *t;
 		*t = '*';
@@ -1108,3 +935,5 @@ char	*parv[];
 	return 2;
 #endif
 }
+
+
