@@ -17,7 +17,7 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.8 2000/08/20 18:29:17 chopin Exp $";
+static  char rcsid[] = "@(#)$Id: hash.c,v 1.15.2.9 2001/02/10 23:32:34 q Exp $";
 #endif
 
 #include "os.h"
@@ -553,7 +553,7 @@ char	*server;
 aClient *cptr;
 {
 	Reg	aClient	*tmp, *prv = NULL;
-	Reg	char	*t, *s;
+	Reg	char	*t;
 	Reg	char	ch;
 	aHashEntry	*tmp3;
 	u_int	hashv, hv;
