@@ -1,4 +1,4 @@
-# @(#)$Id: README,v 1.5 1999/03/08 17:31:42 kalt Exp $
+# @(#)$Id: README,v 1.5.2.1 2003/10/11 19:57:45 chopin Exp $
 
 This directory contains the documentation related to this package.
 
@@ -36,5 +36,5 @@ m4macros	- note on m4 macros for the server configuration file
 
 related documents on the World Wide Web:
 
-		http://www.stealth.net/~kalt/irc/faq.html
-		http://www.irc.org/~irc/server/
+		http://akson.sgh.waw.pl/~chopin/ircd/faq.html
+		http://www.irc.org/techie.html

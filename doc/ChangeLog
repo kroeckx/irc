@@ -1,6 +1,6 @@
 2.10.3p4
 
-2003-10-10  Piotr Kucharski
+2003-10-11  Piotr Kucharski
 
 	* channel.c/m_join(): buffer overflow (reported by cras, exploited ;>
 	  by DE opers (Rince, f2u, morrow)).
