@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.5 2000/04/09 19:06:14 q Exp $";
+static  char rcsid[] = "@(#)$Id: s_user.c,v 1.86.2.6 2000/04/09 21:05:27 q Exp $";
 #endif
 
 #include "os.h"
@@ -964,7 +964,6 @@ nickkilldone:
 	if (IsServer(sptr))
 	    {
 		char	*pv[7];
-		int	i;
 
 		if (parc != 8)
 		    {
@@ -990,12 +989,8 @@ nickkilldone:
 		pv[4] = parv[7];
 		pv[5] = parv[6];
 		pv[6] = NULL;
-		i = m_user(cptr, sptr, 6, pv);
-		if (i > 0)
-		    {
-			(void)add_to_client_hash_table(nick, sptr);
-		    }
-		return i;
+		(void)add_to_client_hash_table(nick, sptr);
+		return m_user(cptr, sptr, 6, pv);
 	    }
 	else if (sptr->name[0])		/* NICK received before, changing */
 	    {
