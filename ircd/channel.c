@@ -32,7 +32,7 @@
  */
 
 #ifndef	lint
-static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.19 2001/06/29 21:11:39 q Exp $";
+static	char rcsid[] = "@(#)$Id: channel.c,v 1.109.2.20 2001/07/02 17:11:22 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -2884,7 +2884,7 @@ char	*parv[];
 	char	*name, *p = NULL;
 	int	rlen = 0;
 
-	if (parc > 1 &&
+	if (parc > 2 &&
 	    hunt_server(cptr, sptr, ":%s LIST %s %s", 2, parc, parv))
 		return 10;
 	if (BadPtr(parv[1]))
@@ -2965,7 +2965,7 @@ char	*parv[];
 	int	idx, flag, len, mlen, rlen = 0;
 	char	*s, *para = parc > 1 ? parv[1] : NULL;
 
-	if (parc > 1 &&
+	if (parc > 2 &&
 	    hunt_server(cptr, sptr, ":%s NAMES %s %s", 2, parc, parv))
 		return 10;
 
