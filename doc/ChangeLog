@@ -1,6 +1,23 @@
+2.10.3p7
+
 2004-05-09  Piotr Kucharski
 
+	All backported from 2.11 tree:
+	* list.c/remove_client_from_list(): negative remote client count bug,
+	  as directly connected servers have hopcount of 1, not 0.
+	* s_conf.c/match_ipmask(): show original mask in error.
+	* s_bsd.c/start_iauth(): send data to iauth in big chunks to save on
+	  metadata overhead.
 	* config.h.dist: check for empty TIMEDKLINES define.
+	* s_misc.c/initstats(): set localc, not remc.
+	* s_misc.c/read_motd(): correctly parse motd file without ending \n.
+	* res.c/init_resolver(): a hack to allow resolving inside FreeBSD jail.
+	* ircd.c/try_connections(): if no conf suitable for AC found, disable
+	  AC temporarily.
+	* s_misc.c/exit_client(): if remote server matching C-line exits and
+	  AC is temporarily disabled, enable it.
+	* s_bsd.c/close_connection(): if AC was temporarily disabled and local
+	  connection in state Handshake or Connecting state exits, enable AC.
 
 2004-03-01  Piotr Kucharski
 
