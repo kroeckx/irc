@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: ircd.c,v 1.153.2.1 2005/02/15 21:36:46 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: ircd.c,v 1.153.2.2 2005/05/13 19:11:43 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -1332,8 +1332,12 @@ static	void	setup_signals()
 	(void)sigaction(SIGTERM, &act, NULL);
 # if defined(USE_IAUTH)
 	act.sa_handler = s_slave;
+# else
+	act.sa_handler = SIG_IGN;
+# endif
 	(void)sigaddset(&act.sa_mask, SIGUSR1);
 	(void)sigaction(SIGUSR1, &act, NULL);
+# if defined(USE_IAUTH)
 	act.sa_handler = SIG_IGN;
 #  ifdef SA_NOCLDWAIT
         act.sa_flags = SA_NOCLDWAIT;
@@ -1374,6 +1378,8 @@ static	void	setup_signals()
 # if defined(USE_IAUTH)
 	(void)signal(SIGUSR1, s_slave);
 	(void)signal(SIGCHLD, SIG_IGN);
+# else
+	(void)signal(SIGUSR1, SIG_IGN);
 # endif
 	
 # if defined(__FreeBSD__)

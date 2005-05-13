@@ -1,14 +1,28 @@
 2.11.0p1  
 
+2005-05-13  Piotr Kucharski
+
+	Backported from 2.11.1:
+	* s_bsd.c/add_connection(): clone rejects were not properly logged.
+	* s_user.c/check_channelmask(): remove all ':' from end of supplied
+	  channelname, not only one.
+	* config_read.c: redefine strlcpy for fileio.c.
+
+2005-05-01  Piotr Kucharski
+
+	Backported from 2.11.1:
+	* config_read.c/config_read(): use mymalloc and mystrdup.
+	* chkconf.c: define mystrdup.
+
 2005-02-17  Piotr Kucharski
 
-	All backported from 2.11.0 branch:
+	All backported from 2.11.1:
 	* s_conf.c/do_tkline(), m_tkline(): use time_t, not int.
 	* config.h.dist: limit TKLINE_MAXTIME to 99999999.
 
 2005-02-15  Piotr Kucharski
 
-	All backported from 2.11.0 branch:
+	All backported from 2.11.1:
 	* mod_webproxy.c/proxy_init(): off-by-one config parse error.
 	* channel.c/check_channelmask(): empty mask matches any, just in case
 	  ':' is last char in channel name (problem reported by pigreco).
