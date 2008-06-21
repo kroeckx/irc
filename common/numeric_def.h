@@ -353,3 +353,6 @@
 
 #define	RPL_LOCALUSERS       265
 #define	RPL_GLOBALUSERS      266
+
+#define	RPL_ETRACEFULL       708
+#define	RPL_ETRACEEND        759
