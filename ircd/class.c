@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: class.c,v 1.21 2005/02/22 17:09:37 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: class.c,v 1.28 2008/06/22 16:09:07 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -26,6 +26,9 @@ static const volatile char rcsid[] = "@(#)$Id: class.c,v 1.21 2005/02/22 17:09:3
 #define CLASS_C
 #include "s_externs.h"
 #undef CLASS_C
+#ifdef ENABLE_CIDR_LIMITS
+#include "patricia_ext.h"
+#endif
 
 #define BAD_CONF_CLASS		-1
 #define BAD_PING		-2
@@ -129,9 +132,28 @@ int	get_con_freq(aClass *clptr)
  * immeadiately after the first one (class 0).
  */
 void	add_class(int class, int ping, int confreq, int maxli, int sendq,
-		int bsendq, int hlocal, int uhlocal, int hglobal, int uhglobal)
+		int bsendq, int hlocal, int uhlocal, int hglobal, int uhglobal
+#ifdef ENABLE_CIDR_LIMITS
+		, char *cidrlen_s
+#endif
+      )
 {
 	aClass *t, *p;
+#ifdef ENABLE_CIDR_LIMITS
+	char *tmp;
+	int cidrlen = 0, cidramount = 0;
+
+	if(cidrlen_s)
+	{
+		if((tmp = index(cidrlen_s, '/')))
+		{
+			*tmp++ = '\0';
+
+			cidramount = atoi(cidrlen_s);
+			cidrlen = atoi(tmp);
+		}
+	}
+#endif
 
 	t = find_class(class);
 	if ((t == classes) && (class != 0))
@@ -140,6 +162,10 @@ void	add_class(int class, int ping, int confreq, int maxli, int sendq,
 		NextClass(p) = NextClass(t);
 		NextClass(t) = p;
 		MaxSendq(p) = QUEUELEN;
+#ifdef ENABLE_CIDR_LIMITS
+		CidrLen(p) = 0;
+		p->ip_limits = NULL;
+#endif
 		istat.is_class++;
 	    }
 	else
@@ -154,11 +180,32 @@ void	add_class(int class, int ping, int confreq, int maxli, int sendq,
 	MaxLinks(p) = maxli;
 	if (sendq)
 		MaxSendq(p) = sendq;
-	MaxBSendq(p) = bsendq ? bsendq : MaxSendq(p);
+	MaxBSendq(p) = bsendq ? bsendq : 0;
 	MaxHLocal(p) = hlocal;
 	MaxUHLocal(p) = uhlocal;
 	MaxHGlobal(p) = hglobal;
 	MaxUHGlobal(p) = uhglobal;
+
+#ifdef ENABLE_CIDR_LIMITS
+	if (cidrlen > 0 && CidrLen(p) == 0 && p->ip_limits == NULL)
+	{
+		CidrLen(p) = cidrlen;
+#  ifdef INET6
+		p->ip_limits = (struct _patricia_tree_t *) patricia_new(128);
+#  else
+		p->ip_limits = (struct _patricia_tree_t *) patricia_new(32);
+#  endif
+	}
+	if (CidrLen(p) != cidrlen)
+	{
+		/* Hmpf, sendto_somewhere maybe to warn? --B. */
+		Debug((DEBUG_NOTICE, 
+			"Cannot change cidrlen on the fly (class %d)",
+			Class(p)));
+	}
+	if (CidrLen(p) > 0)
+		MaxCidrAmount(p) = cidramount;
+#endif
 	if (p != t)
 		Links(p) = 0;
 }
@@ -209,25 +256,39 @@ void	initclass(void)
 	PingFreq(FirstClass()) = PINGFREQUENCY;
 	MaxLinks(FirstClass()) = MAXIMUM_LINKS;
 	MaxSendq(FirstClass()) = QUEUELEN;
+	MaxBSendq(FirstClass()) = 0;
 	Links(FirstClass()) = 0;
 	NextClass(FirstClass()) = NULL;
 	MaxHLocal(FirstClass()) = 1;
 	MaxUHLocal(FirstClass()) = 1;
 	MaxHGlobal(FirstClass()) = 1;
 	MaxUHGlobal(FirstClass()) = 1;
+#ifdef ENABLE_CIDR_LIMITS
+	CidrLen(FirstClass()) = 0;
+	FirstClass()->ip_limits = NULL;
+#endif
 }
 
 void	report_classes(aClient *sptr, char *to)
 {
 	Reg	aClass	*cltmp;
+	char	tmp[64] = "";
 
 	for (cltmp = FirstClass(); cltmp; cltmp = NextClass(cltmp))
 	{
+#ifdef ENABLE_CIDR_LIMITS
+		if (MaxCidrAmount(cltmp) > 0 && CidrLen(cltmp) > 0)
+			/* leading space is important */
+			snprintf(tmp, sizeof(tmp), " %d/%d",
+				MaxCidrAmount(cltmp), CidrLen(cltmp));
+		else
+			tmp[0] = '\0';
+#endif
 		sendto_one(sptr, replies[RPL_STATSYLINE], ME, BadTo(to), 'Y',
 			Class(cltmp), PingFreq(cltmp), ConFreq(cltmp),
 			MaxLinks(cltmp), MaxSendq(cltmp), MaxBSendq(cltmp),
 			MaxHLocal(cltmp), MaxUHLocal(cltmp),
-			MaxHGlobal(cltmp), MaxUHGlobal(cltmp), Links(cltmp));
+			MaxHGlobal(cltmp), MaxUHGlobal(cltmp), Links(cltmp), tmp);
 	}
 }
 
@@ -238,7 +299,8 @@ int	get_sendq(aClient *cptr, int bursting)
 	Reg	aClass	*cl;
 
 	if (cptr->serv && cptr->serv->nline)
-		sendq = bursting ? MaxBSendq(cptr->serv->nline->class) :
+		sendq = bursting && MaxBSendq(cptr->serv->nline->class) ?
+			MaxBSendq(cptr->serv->nline->class) :
 			MaxSendq(cptr->serv->nline->class);
 	else if (cptr && !IsMe(cptr)  && (cptr->confs))
 		for (tmp = cptr->confs; tmp; tmp = tmp->next)
@@ -246,7 +308,8 @@ int	get_sendq(aClient *cptr, int bursting)
 			if (!tmp->value.aconf ||
 			    !(cl = tmp->value.aconf->class))
 				continue;
-			sendq = bursting ? MaxBSendq(cl) : MaxSendq(cl);
+			sendq = bursting && MaxBSendq(cl) ?
+				MaxBSendq(cl) : MaxSendq(cl);
 			break;
 		    }
 	return sendq;
