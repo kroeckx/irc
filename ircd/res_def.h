@@ -1,5 +1,5 @@
 /*
- * $Id: res_def.h,v 1.3 2001/10/20 17:57:28 q Exp $
+ * $Id: res_def.h,v 1.7 2008/06/24 00:12:56 chopin Exp $
  *
  * ircd/res_def.h (C)opyright 1992 Darren Reed.
  */
@@ -15,6 +15,15 @@
 #define MAXADDRS	35
 
 #define	AR_TTL		600	/* TTL in seconds for dns cache entries */
+
+#define FLG_A_VALID		1
+#ifdef INET6
+#define FLG_AAAA_VALID		2
+#endif
+#define FLG_PTR_PEND_FWD	4
+#define FLG_PTR_PEND_REV	8
+#define FLG_PTR_PEND		(FLG_PTR_PEND_FWD|FLG_PTR_PEND_REV)
+#define FLG_PTR_VALID		16
 
 struct	hent {
 	char	*h_name;	/* official name of host */
@@ -47,6 +56,7 @@ typedef	struct	reslist {
 typedef	struct	cache {
 	time_t	expireat;
 	time_t	ttl;
+	int	flags;
 	struct	hostent	he;
 	struct	cache	*hname_next, *hnum_next, *list_next;
 	} aCache;
