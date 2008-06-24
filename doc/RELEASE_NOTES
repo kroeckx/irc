@@ -1,15 +1,56 @@
-# @(#)$Id: RELEASE_NOTES,v 1.72 2006/06/16 19:13:47 chopin Exp $
+# @(#)$Id: RELEASE_NOTES,v 1.84 2008/06/24 22:29:48 chopin Exp $
 
 This is version 2.11.2 of the IRC software.
 ===============================================================================
+
+New features in 2.11.2:
+	* "KLINE" command (uses seperate file and is undoable other than manual
+	  edit of that file and rehash).
+	* MINLOCALNICKLEN to enforce minimum nick len used by local clients.
+	* "REHASH d" to reread resolv.conf
+	* "REHASH a" to restart iauth (to make it reread iauth.conf)
+	* standalone mode (ircd -p standalone) to avoid split mode for users 
+	  not linking any servers.
+	* ENABLE_CIDR_LIMITS (enabled by default) allows to limit client host
+	  counts in any CIDR size (per Y-line); useful for IPv6.
+	* opless channels can be joined by users matching +R, regardless of set
+	  channel limits (they still need (if applicable) proper +eI and key).
+	* X-lines got two more fields: one for matching nicks, another for
+	  limiting scope of X-line matching user host/ip mask.
+	* services can now have their distribution based on SID (it affects not
+	  only visibility, but also scope of information they get).
+	* new oper command "ETRACE": a hybrid between "STATS L" and "TRACE", also
+	  showing arguments used during registration; useful for bot hunting
+	  (requires ACL_TRACE oper priviledge).
+	* new oper command (if defined) "SIDTRACE": just like "ETRACE", but shows
+	  also remote clients from servers that share common SID prefix with us
+	  (requires new ACL_SIDTRACE oper priviledge).
+	* M4 passes INET6 define. If it's GNU variant, it also adds -I includedir.
+
+Important changes in 2.11.2 (since 2.11.1):
+	* &CLIENTS format is changed if XLINE is defined (sends first three
+	  parameters of client USER command before fourth one).
+	* MAXBANS increased to 64, TOPICLEN increased to 255.
+	* Y-line [user@]host limits are now counted against user IPs, not user
+	  hostnames. If you want old behaviour, undefine YLINE_LIMITS_IPHASH.
+	* &LOCAL unauth notices show ips now, not hostnames.
+	* res.c got fixed (hopefully this time for good).
 
 Important configuration changes in 2.11.2 (since 2.11.1):
 
 	* Y-line limits maxlinks behaviour is changed. Now all I-lines
 	  share the same maxlink if they are in the same class. If you
 	  want old behaviour, define YLINE_LIMITS_OLD_BEHAVIOUR.
+	* Y-lines can have yet another field for CIDR limits. Format: 13/24
+	  (means: 13 clients per each /24).
+	* X-lines got another field, so now it can match also on nicks
+	  given during registration.
+	* X-lines got yet another field, so now it can match also on user
+	  host/ip mask (narrowing the scope of X-line).
+	* S-lines need to be changed if used for TKLINE service: change type
+	  from 0x40000000 to 0x00100000. Service can KLINE now too (0x00200000).
 
-This is version 2.11.2 of the IRC software.
+This is version 2.11.1 of the IRC software.
 ===============================================================================
 
 New features in 2.11.1:
