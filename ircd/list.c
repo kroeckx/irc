@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: list.c,v 1.43 2006/05/03 18:56:01 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: list.c,v 1.47 2009/03/15 01:11:19 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -101,8 +101,7 @@ aClient	*make_client(aClient *from)
 	if (!from)
 		size = CLIENT_LOCAL_SIZE;
 
-	if (!(cptr = (aClient *)MyMalloc(size)))
-		outofmemory();
+	cptr = (aClient *)MyMalloc(size);
 	bzero((char *)cptr, (int)size);
 
 #ifdef	DEBUGMODE
@@ -568,6 +567,11 @@ aClass	*make_class(void)
 
 void	free_class(aClass *tmp)
 {
+#ifdef ENABLE_CIDR_LIMITS
+	if (tmp->ip_limits)
+		patricia_destroy(tmp->ip_limits, NULL);
+#endif
+
 	MyFree(tmp);
 #ifdef	DEBUGMODE
 	classs.inuse--;
@@ -590,6 +594,9 @@ aConfItem	*make_conf(void)
 	aconf->clients = aconf->port = 0;
 	aconf->next = NULL;
 	aconf->host = aconf->passwd = aconf->name = aconf->name2 = NULL;
+#ifdef XLINE
+	aconf->name3 = NULL;
+#endif
 	aconf->ping = NULL;
 	aconf->status = CONF_ILLEGAL;
 	aconf->pref = -1;
@@ -624,7 +631,11 @@ void	free_conf(aConfItem *aconf)
 	istat.is_confmem -= aconf->passwd ? strlen(aconf->passwd)+1 : 0;
 	istat.is_confmem -= aconf->name ? strlen(aconf->name)+1 : 0;
 	istat.is_confmem -= aconf->name2 ? strlen(aconf->name2)+1 : 0;
+#ifdef XLINE
+	istat.is_confmem -= aconf->name3 ? strlen(aconf->name3)+1 : 0;
+#endif
 	istat.is_confmem -= aconf->ping ? sizeof(*aconf->ping) : 0;
+	istat.is_confmem -= aconf->source_ip ? strlen(aconf->source_ip)+1 : 0;
 	istat.is_confmem -= sizeof(aConfItem);
 
 	MyFree(aconf->host);
@@ -637,6 +648,10 @@ void	free_conf(aConfItem *aconf)
 	MyFree(aconf->passwd);
 	MyFree(aconf->name);
 	MyFree(aconf->name2);
+#ifdef XLINE
+	if (aconf->name3)
+		MyFree(aconf->name3);
+#endif
 	MyFree(aconf);
 #ifdef	DEBUGMODE
 	aconfs.inuse--;
