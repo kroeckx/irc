@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: chkconf.c,v 1.47 2005/11/15 18:48:29 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: chkconf.c,v 1.52 2009/04/29 22:05:08 chopin Exp $";
 #endif
 
 #include "os.h"
@@ -150,6 +150,14 @@ static	int	openconf(void)
 {
 #ifdef	M4_PREPROC
 	int	pi[2];
+#ifdef HAVE_GNU_M4
+	char	*includedir, *includedirptr;
+
+	includedir = strdup(IRCDM4_PATH);
+	includedirptr = strrchr(includedir, '/');
+	if (includedirptr)
+		*includedirptr = '\0';
+#endif
 
 	/* ircd.m4 with full path now! Kratz */
 	if (access(IRCDM4_PATH, R_OK) == -1)
@@ -178,7 +186,17 @@ static	int	openconf(void)
 		 * goes out with report_error.  Could be dangerous,
 		 * two servers running with the same fd's >:-) -avalon
 		 */
-		(void)execlp(M4_PATH, "m4", IRCDM4_PATH, configfile, 0);
+		(void)execlp(M4_PATH, "m4",
+#ifdef HAVE_GNU_M4
+#ifdef USE_M4_PREFIXES
+			"-P",
+#endif
+			"-I", includedir,
+#endif
+#ifdef INET6
+			"-DINET6",
+#endif
+			IRCDM4_PATH, configfile, (char *) NULL);
 		perror("m4");
 		exit(-1);
 	default :
