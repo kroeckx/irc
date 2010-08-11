@@ -48,7 +48,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_conf.c,v 1.173 2007/12/15 23:21:13 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_conf.c,v 1.195 2010/08/11 17:16:51 bif Exp $";
 #endif
 
 #include "os.h"
@@ -56,6 +56,9 @@ static const volatile char rcsid[] = "@(#)$Id: s_conf.c,v 1.173 2007/12/15 23:21
 #define S_CONF_C
 #include "s_externs.h"
 #undef S_CONF_C
+#ifdef ENABLE_CIDR_LIMITS
+#include "patricia_ext.h"
+#endif
 
 #ifdef TIMEDKLINES
 static	int	check_time_interval (char *, char *);
@@ -267,6 +270,10 @@ char	*oline_flags_to_string(long flags)
 		*s++ = 'p';
 	if (flags & ACL_TRACE)
 		*s++ = 't';
+#ifdef ENABLE_SIDTRACE
+	if (flags & ACL_SIDTRACE)
+		*s++ = 'v';
+#endif
 	if (s == ofsbuf)
 		*s++ = '-';
 	*s++ = '\0';
@@ -307,6 +314,9 @@ long	oline_flags_parse(char *string)
 		case 'P': tmp |= ACL_NOPENALTY; break;
 		case 'p': tmp |= ACL_CANFLOOD; break;
 		case 't': tmp |= ACL_TRACE; break;
+#ifdef ENABLE_SIDTRACE
+		case 'v': tmp |= ACL_SIDTRACE; break;
+#endif
 		}
 	}
 	if (tmp & ACL_LOCOP)
@@ -323,6 +333,9 @@ long	oline_flags_parse(char *string)
 #endif
 #ifndef OPER_SQUIT
 	tmp &= ~ACL_SQUIT;
+#endif
+#ifndef OPER_SQUIT_REMOTE
+	tmp &= ~ACL_SQUITREMOTE;
 #endif
 #ifndef OPER_CONNECT
 	tmp &= ~ACL_CONNECT;
@@ -631,6 +644,56 @@ aConfItem	*count_cnlines(Link *lp)
 	return nline;
 }
 
+#ifdef ENABLE_CIDR_LIMITS
+static int	add_cidr_limit(aClient *cptr, aConfItem *aconf)
+{
+	patricia_node_t *pnode;
+
+	if(aconf->class->cidr_amount == 0 || aconf->class->cidr_len == 0)
+		return -1;
+
+	pnode = patricia_match_ip(ConfCidrTree(aconf), &cptr->ip);
+
+	/* doesnt exist, create and then allow */
+	if(pnode == NULL)
+	{
+		pnode = patricia_make_and_lookup_ip(ConfCidrTree(aconf),
+					&cptr->ip,
+					aconf->class->cidr_len);
+
+		if(pnode == NULL)
+			return -1;
+
+		pnode->data++;
+		return 1;
+	}
+
+	if((long)pnode->data >= aconf->class->cidr_amount)
+		return 0;
+
+	pnode->data++;
+	return 1;
+}
+
+static void	remove_cidr_limit(aClient *cptr, aConfItem *aconf)
+{
+	patricia_node_t *pnode;
+
+	if(ConfMaxCidrAmount(aconf) == 0 || ConfCidrLen(aconf) == 0)
+		return;
+
+	pnode = patricia_match_ip(ConfCidrTree(aconf), &cptr->ip);
+
+	if(pnode == NULL)
+		return;
+
+	pnode->data--;
+
+	if(((unsigned long) pnode->data) == 0)
+		patricia_remove(ConfCidrTree(aconf), pnode);
+}
+#endif /* ENABLE_CIDR_LIMITS */
+
 /*
 ** detach_conf
 **	Disassociate configuration from the client.
@@ -650,8 +713,15 @@ int	detach_conf(aClient *cptr, aConfItem *aconf)
 			if ((aconf) && (Class(aconf)))
 			    {
 				if (aconf->status & CONF_CLIENT_MASK)
+				{
 					if (ConfLinks(aconf) > 0)
 						--ConfLinks(aconf);
+#ifdef ENABLE_CIDR_LIMITS
+					if ((aconf->status & CONF_CLIENT))
+						remove_cidr_limit(cptr, aconf);
+#endif
+				}
+
        				if (ConfMaxLinks(aconf) == -1 &&
 				    ConfLinks(aconf) == 0)
 		 		    {
@@ -734,6 +804,10 @@ int	attach_conf(aClient *cptr, aConfItem *aconf)
 		anUser *user = NULL;
 		/* check on local/global limits per host and per user@host */
 
+#ifdef ENABLE_CIDR_LIMITS
+		if(!add_cidr_limit(cptr, aconf))
+			return -4; /* EXITC_LHMAX */
+#endif
 		/*
 		** local limits first to save CPU if any is hit.
 		**	host check is done on the IP address.
@@ -742,15 +816,30 @@ int	attach_conf(aClient *cptr, aConfItem *aconf)
 		if (ConfMaxHLocal(aconf) > 0 || ConfMaxUHLocal(aconf) > 0 ||
 		    ConfMaxHGlobal(aconf) > 0 || ConfMaxUHGlobal(aconf) > 0 )
 		{
+#ifdef YLINE_LIMITS_IPHASH
+			for ((user = hash_find_ip(cptr->user->sip, NULL));
+			     user; user = user->iphnext)
+				if (!mycmp(cptr->user->sip, user->sip))
+#else
 			for ((user = hash_find_hostname(cptr->sockhost, NULL));
 			     user; user = user->hhnext)
-			{
 				if (!mycmp(cptr->sockhost, user->host))
+#endif
 				{
 					ghcnt++;
+					if (ConfMaxHGlobal(aconf) > 0 &&
+					     ghcnt >= ConfMaxHGlobal(aconf))
+					{
+						return -6; /* EXITC_GHMAX */
+					}
 					if (MyConnect(user->bcptr))
 					{
 						hcnt++;
+						if (ConfMaxHLocal(aconf) > 0 &&
+						    hcnt >= ConfMaxHLocal(aconf))
+						{
+							return -4; /* EXITC_LHMAX */
+						}
 						if (!mycmp(user->bcptr->auth,
 							   cptr->auth))
 						{
@@ -773,23 +862,12 @@ int	attach_conf(aClient *cptr, aConfItem *aconf)
 						return -5; /* EXITC_LUHMAX */
 					}
 	
-					if (ConfMaxHLocal(aconf) > 0 &&
-					    hcnt >= ConfMaxHLocal(aconf))
-					{
-						return -4; /* EXITC_LHMAX */
-					}
 					if (ConfMaxUHGlobal(aconf) > 0 &&
 					    gucnt >= ConfMaxUHGlobal(aconf))
 					{
 						return -7; /* EXITC_GUHMAX */
 					}
-					if (ConfMaxHGlobal(aconf) > 0 &&
-					     ghcnt >= ConfMaxHGlobal(aconf))
-					{
-						return -6; /* EXITC_GHMAX */
-					}
 				}
-			}
 		}
 	}
 
@@ -935,20 +1013,12 @@ aConfItem	*find_conf_exact(char *name, char *user, char *host,
  */
 aConfItem	*find_Oline(char *name, aClient *cptr)
 {
-	Reg	aConfItem *tmp;
+	Reg	aConfItem *tmp, *tmp2 = NULL;
 	char	userhost[USERLEN+HOSTLEN+3];
 	char	userip[USERLEN+HOSTLEN+3];
 
 	sprintf(userhost, "%s@%s", cptr->username, cptr->sockhost);
-	sprintf(userip, "%s@%s", cptr->username, 
-#ifdef INET6
-		(char *)inetntop(AF_INET6, (char *)&cptr->ip, ipv6string,
-			sizeof(ipv6string))
-#else
-		(char *)inetntoa((char *)&cptr->ip)
-#endif
-	);
-
+	sprintf(userip, "%s@%s", cptr->username, cptr->user->sip);
 
 	for (tmp = conf; tmp; tmp = tmp->next)
 	    {
@@ -965,8 +1035,10 @@ aConfItem	*find_Oline(char *name, aClient *cptr)
 			continue;
 		if (tmp->clients < MaxLinks(Class(tmp)))
 			return tmp;
+		else
+			tmp2 = tmp;
 	    }
-	return NULL;
+	return tmp2;
 }
 
 
@@ -1250,6 +1322,14 @@ int	openconf(void)
 {
 #ifdef	M4_PREPROC
 	int	pi[2], i;
+# ifdef HAVE_GNU_M4
+	char	*includedir, *includedirptr;
+
+	includedir = strdup(IRCDM4_PATH);
+	includedirptr = strrchr(includedir, '/');
+	if (includedirptr)
+		*includedirptr = '\0';
+# endif
 #else
 	int ret;
 #endif
@@ -1288,7 +1368,17 @@ int	openconf(void)
 		 * goes out with report_error.  Could be dangerous,
 		 * two servers running with the same fd's >:-) -avalon
 		 */
-		(void)execlp(M4_PATH, "m4", IRCDM4_PATH, configfile, 0);
+		(void)execlp(M4_PATH, "m4",
+#ifdef HAVE_GNU_M4
+#ifdef USE_M4_PREFIXES
+			"-P",
+#endif
+			"-I", includedir,
+#endif
+#ifdef INET6
+			"-DINET6",
+#endif
+			IRCDM4_PATH, configfile, (char *) NULL);
 		if (serverbooting)
 		{
 			fprintf(stderr,"Fatal Error: Error executing m4 (%s)",
@@ -1393,6 +1483,9 @@ int 	initconf(int opt)
 	Reg	char	*tmp, *s;
 	int	fd, i;
 	char	*tmp2 = NULL, *tmp3 = NULL, *tmp4 = NULL;
+#ifdef ENABLE_CIDR_LIMITS
+	char	*tmp5 = NULL;
+#endif
 	int	ccount = 0, ncount = 0;
 	aConfItem *aconf = NULL;
 #if defined(CONFIG_DIRECTIVE_INCLUDE)
@@ -1486,6 +1579,9 @@ int 	initconf(int opt)
 		if (tmp2)
 			MyFree(tmp2);
 		tmp3 = tmp4 = NULL;
+#ifdef ENABLE_CIDR_LIMITS
+		tmp5 = NULL;
+#endif
 		tmp = getfield(line);
 		if (!tmp)
 			continue;
@@ -1609,10 +1705,13 @@ int 	initconf(int opt)
 #ifdef XLINE
 			if (aconf->status == CONF_XLINE)
 			{
-				DupString(aconf->source_ip, tmp);
+				DupString(aconf->name2, tmp);
 				if ((tmp = getfield(NULL)) == NULL)
 					break;
-				DupString(aconf->name2, tmp);
+				DupString(aconf->name3, tmp);
+				if ((tmp = getfield(NULL)) == NULL)
+					break;
+				DupString(aconf->source_ip, tmp);
 				break;
 			}
 #endif
@@ -1631,12 +1730,19 @@ int 	initconf(int opt)
 			if ((tmp3 = getfield(NULL)) == NULL)
 				break;
 			/* used in Y: global limits */
-			tmp4 = getfield(NULL);
+			if((tmp4 = getfield(NULL)) == NULL)
+				break;
+#ifdef ENABLE_CIDR_LIMITS
+			tmp5 = getfield(NULL);
+#endif
 		} while (0); /* to use break without compiler warnings */
 		istat.is_confmem += aconf->host ? strlen(aconf->host)+1 : 0;
 		istat.is_confmem += aconf->passwd ? strlen(aconf->passwd)+1 :0;
 		istat.is_confmem += aconf->name ? strlen(aconf->name)+1 : 0;
 		istat.is_confmem += aconf->name2 ? strlen(aconf->name2)+1 : 0;
+#ifdef XLINE
+		istat.is_confmem += aconf->name3 ? strlen(aconf->name3)+1 : 0;
+#endif
 		istat.is_confmem += aconf->source_ip ? strlen(aconf->source_ip)+1 : 0;
 
 		/*
@@ -1662,7 +1768,11 @@ int 	initconf(int opt)
 					  atoi(index(tmp3, '.') + 1) : 1,
  					  tmp4 ? atoi(tmp4) : 1,
 					  (tmp4 && index(tmp4, '.')) ?
-					  atoi(index(tmp4, '.') + 1) : 1);
+					  atoi(index(tmp4, '.') + 1) : 1
+#ifdef ENABLE_CIDR_LIMITS
+					  , tmp5
+#endif
+				);
 			continue;
 		}
 		/*
@@ -1730,10 +1840,22 @@ int 	initconf(int opt)
 		if (aconf->status & CONF_SERVICE)
 			aconf->port &= SERVICE_MASK_ALL;
 		if (aconf->status & (CONF_SERVER_MASK|CONF_SERVICE))
-			if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS ||
-			    !aconf->host || index(aconf->host, '*') ||
-			     index(aconf->host,'?') || !aconf->name)
-				continue;
+		{
+			char *hostptr = NULL;
+
+			/* since it's u@h syntax, let's ignore user part
+			   in checks below --B. */
+			hostptr = index(aconf->host, '@');
+			if (hostptr != NULL)
+				hostptr++;	/* move ptr after '@' */
+			else
+				hostptr = aconf->host;
+
+			if (ncount > MAXCONFLINKS || ccount > MAXCONFLINKS
+				|| !hostptr || index(hostptr, '*')
+				|| index(hostptr,'?') || !aconf->name)
+				continue;	/* next config line */
+		}
 
 		if (aconf->status &
 		    (CONF_SERVER_MASK|CONF_OPERATOR|CONF_SERVICE))
@@ -2521,6 +2643,7 @@ void do_kline(int tkline, char *who, time_t time, char *user, char *host, char *
 				sprintf(buff, "Kill line active: %.80s",
 					aconf->passwd);
 			}
+			acptr->exitc = tkline ? EXITC_TKLINE : EXITC_KLINE;
 			(void) exit_client(acptr, acptr, &me, buff);
 		}
 	}
@@ -2545,12 +2668,12 @@ int	prep_kline(int tkline, aClient *cptr, aClient *sptr, int parc, char **parv)
 	int	status = tkline ? CONF_TKILL : CONF_KILL;
 	time_t	time;
 	char	*user, *host, *reason;
-	int	i = 0;
+	int	err = 0;
 
 	/* sanity checks */
 	if (tkline)
 	{
-		i = wdhms2sec(parv[1], &time);
+		err = wdhms2sec(parv[1], &time);
 #ifdef TKLINE_MAXTIME
 		if (time > TKLINE_MAXTIME)
 			time = TKLINE_MAXTIME;
@@ -2569,17 +2692,27 @@ int	prep_kline(int tkline, aClient *cptr, aClient *sptr, int parc, char **parv)
 	
 	if (strlen(user) > USERLEN+HOSTLEN+1)
 	{
-		/* induce error */
-		i = 1;
+		err = 1;
 	}
-	if (!strcmp("@*", user) || !strcmp("*@", user) || !strcmp("@", user))
+	if (host)
 	{
-		/* Note that we don't forbid "*@*", only those, that lack
-		** some crucial parts, which can be seen as a typo. --Beeth */
-		i = 1;
+		*host++ = '\0';
 	}
+	if (!user || !host || *user == '\0' || *host == '\0' ||
+		(!strcmp("*", user) && !strcmp("*", host))) {
+		/* disallow all forms of bad u@h format and block *@* too */
+		err = 1;
+	}
+	if (!err && host && strchr(host, '/') && match_ipmask(host, sptr, 0) == -1)
+	{
+		/* check validity of 1.2.3.0/24 or it will be spewing errors
+		** for every connecting client. */
+		err = 1;
+	}
+#ifdef KLINE
 badkline:
-	if (i || !host)
+#endif
+	if (err)
 	{
 		/* error */
 		if (!IsPerson(sptr))
@@ -2601,7 +2734,6 @@ badkline:
 		status = tkline ? CONF_TOTHERKILL : CONF_OTHERKILL;
 		user++;
 	}
-	*host++ = '\0';
 #ifdef INET6
 	host = ipv6_convert(host);
 #endif
@@ -2629,7 +2761,7 @@ badkline:
 		if (utmp || htmp || rtmp)
 		{
 			/* Too lazy to copy it here. --B. */
-			i = 1;
+			err = 1;
 			goto badkline;
 		}
 
