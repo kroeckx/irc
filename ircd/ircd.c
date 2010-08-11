@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: ircd.c,v 1.162 2006/08/30 12:16:49 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: ircd.c,v 1.165 2010/08/11 17:39:00 bif Exp $";
 #endif
 
 #include "os.h"
@@ -81,6 +81,22 @@ RETSIGTYPE s_die(int s)
 	logfiles_close();
 	ircd_writetune(tunefile);
 	flush_connections(me.fd);
+#ifdef  UNIXPORT
+	{
+		aClient *acptr;
+		char unixpath[256];
+		for (acptr = ListenerLL; acptr; acptr = acptr->next)
+		{
+			if (IsUnixSocket(acptr))
+			{
+				sprintf(unixpath, "%s/%d",
+				    acptr->confs->value.aconf->host,
+				    acptr->confs->value.aconf->port);
+				(void)unlink(unixpath);
+			}
+		}
+	}
+#endif
 	exit(-1);
 }
 
@@ -340,7 +356,8 @@ static	time_t	try_connections(time_t currenttime)
 		 * try_connections() other servers have chance. --B. */
 		con_conf->hold += get_con_freq(Class(con_conf));
 
-		if (!iconf.aconnect)
+		if (iconf.aconnect == 0 || iconf.aconnect == 2 && 
+				timeofday - iconf.split > DELAYCHASETIMELIMIT)
 		{
 			sendto_flag(SCH_NOTICE,
 				"Connection to %s deferred. Autoconnect "
@@ -1479,8 +1496,13 @@ void ircd_readtune(char *filename)
 		ww_size = t_data[0];
 		lk_size = t_data[1];
 		_HASHSIZE = t_data[2];
+#ifdef USE_HOSTHASH
 		_HOSTNAMEHASHSIZE = t_data[2]; /* hostname has always same size
 						  as the client hash */
+#endif
+#ifdef USE_IPHASH
+		_IPHASHSIZE = t_data[2];
+#endif
 		_CHANNELHASHSIZE = t_data[3];
 		_SIDSIZE = t_data[4];
 		poolsize = t_data[5];
