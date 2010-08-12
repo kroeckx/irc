@@ -19,7 +19,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: parse.c,v 1.93 2005/11/17 15:15:00 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: parse.c,v 1.97 2010/08/12 16:29:30 bif Exp $";
 #endif
 
 #include "os.h"
@@ -112,6 +112,10 @@ struct Message msgtab[] = {
 #endif
 #ifdef KLINE
 { "KLINE",    2, MPAR, { _m(m_nop), _m(m_nopriv), _m(m_kline), _m(m_kline), _m(m_unreg) } },
+#endif
+{ "ETRACE",   0, MPAR, { _m(m_nop), _m(m_nopriv), _m(m_etrace), _m(m_nop), _m(m_unreg) } },
+#ifdef ENABLE_SIDTRACE
+{ "SIDTRACE", 0, MPAR, { _m(m_nop), _m(m_nopriv), _m(m_sidtrace), _m(m_nop), _m(m_unreg) } },
 #endif
 { NULL,       0,    0, { _m(NULL), _m(NULL), _m(NULL), _m(NULL), _m(NULL) } }
 };
@@ -256,6 +260,7 @@ aClient	*find_userhost(char *user, char *host, aClient *cptr, int *count)
 		if (host)
 		{
 			anUser *auptr;
+#ifdef USE_HOSTHASH
 			for (auptr = hash_find_hostname(host, NULL); auptr;
 					auptr = auptr->hhnext)
 			{
@@ -271,6 +276,27 @@ aClient	*find_userhost(char *user, char *host, aClient *cptr, int *count)
 					res = auptr->bcptr;
 				}
 			}
+#endif
+#ifdef USE_IPHASH
+#ifdef USE_HOSTHASH
+			if (!res)
+#endif
+			for (auptr = hash_find_ip(host, NULL); auptr;
+					auptr = auptr->iphnext)
+			{
+				if (MyConnect(auptr->bcptr)
+				    && !mycmp(user, auptr->username))
+				{
+					if (++(*count) > 1)
+					{
+						/* We already failed
+						 * - just return */
+						return res;
+					}
+					res = auptr->bcptr;
+				}
+			}
+#endif
 		}
 		else
 		{
@@ -643,7 +669,7 @@ int	parse(aClient *cptr, char *buffer, char *bufend)
 			if (buffer[0] != '\0')
 			    {
 				cptr->flags |= FLAGS_UNKCMD;
-				if (IsPerson(from))
+				if (IsPerson(from) || IsService(from))
 					sendto_one(from,
 					    ":%s %d %s %s :Unknown command",
 					    me.name, ERR_UNKNOWNCOMMAND,
@@ -875,8 +901,9 @@ static	int	cancel_clients(aClient *cptr, aClient *sptr, char *cmd)
 	if (IsServer(cptr))
 	    {
 		sendto_serv_butone(NULL, ":%s KILL %s :%s (%s[%s] != %s)",
-				   me.name, sptr->name, me.name,
-				   sptr->name, sptr->from->name,
+				   me.name,
+				   sptr->user ? sptr->user->uid : sptr->name,
+				   me.name, sptr->name, sptr->from->name,
 				   get_client_name(cptr, TRUE));
 		sptr->flags |= FLAGS_KILLED;
 		return exit_client(cptr, sptr, &me, "Fake Prefix");
