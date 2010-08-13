@@ -131,6 +131,7 @@
 #define	OPER_RESTART
 #define	OPER_SET
 #define	OPER_SQUIT
+#define	OPER_SQUIT_REMOTE
 #define	OPER_KLINE
 #define	OPER_TKLINE
 /* In a perfect world these two (or at least second) would be undefined. */
@@ -220,8 +221,10 @@
  * To use m4 as a preprocessor on the ircd.conf file, define M4_PREPROC.
  * The server will then call m4 each time it reads the ircd.conf file,
  * reading m4 output as the server's ircd.conf file.
+ * Defining USE_M4_PREFIXES makes GNU m4 use -P flag.
  */
 #undef	M4_PREPROC
+#undef	USE_M4_PREFIXES
 
 /*
  * Define if you want to use #include "file" in ircd.conf without M4. 
@@ -529,7 +532,7 @@
 
 /*
  * Split detection
- * This defines thresholds for turning on and off the split-mode,
+ * This defines default thresholds for turning on and off the split-mode,
  * where joins to new channels do not give chanop status.
  * This should always be bigger than the max counts of
  * users/servers in your TLD (or some other close group), so you
@@ -540,8 +543,8 @@
  *
  * Defining to 0 disables entering split-mode.
  */
-#define SPLIT_USERS	85000
-#define SPLIT_SERVERS	85
+#define DEFAULT_SPLIT_USERS	65000
+#define DEFAULT_SPLIT_SERVERS	80
 
 /*
 ** Notice sent to connecting users if the server is in the split-mode.
@@ -589,18 +592,17 @@
 #undef DISABLE_NICK0_REGISTRATION
 
 /*
-** Define this to significantly speed up rehash with large amounts of I-lines.
-** Wastes some memory each rehash (luckily not indefinitely).
+** Define this if you want to use Japanese channel names in JIS encoding.
 */
-#define FASTER_ILINE_REHASH
+#undef JAPANESE
 
 /*
-** Restores old behaviour of Y-lines maxlinks limit, which was counted
-** separately per each I-line using it.
-** Note: if you use it with FASTER_ILINE_REHASH, clients will be able
-** to exceed maxlinks limits after each rehash. Sorry.
+** If you want to allow your opers to be able to use SIDTRACE command to
+** see all clients from all servers that share the same SID prefix as your 
+** own, enable this. Useful for server "clusters", like 0PN. Requires also
+** proper ACLs in O-line.
 */
-#undef YLINE_LIMITS_OLD_BEHAVIOUR
+#undef ENABLE_SIDTRACE
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /* You shouldn't change anything below this line, unless absolutely needed. */
@@ -617,7 +619,6 @@
 ** Require at least one alphanum and no more than two nonalphanum.
 */
 #define	RESTRICT_USERNAMES
-
 
 /* Maximum length the queue of pending connections to one port may grow to.
  * Note that your system limits this, too. FreeBSD, for instance, has sysctl
@@ -735,6 +736,57 @@
 ** minimum nicklen allowed.
 */
 /* #define MINLOCALNICKLEN 2 */
+
+/*
+** You probably don't want to disable it, but if you run into any problems,
+** here's the knob.
+*/
+#define ENABLE_CIDR_LIMITS
+
+/*
+** Define this to significantly speed up rehash with large amounts of I-lines.
+** Wastes some memory each rehash (luckily not indefinitely).
+*/
+#define FASTER_ILINE_REHASH
+
+/*
+** Restores old behaviour of Y-lines maxlinks limit, which was counted
+** separately per each I-line using it.
+** Note: if you use it with FASTER_ILINE_REHASH, clients will be able
+** to exceed maxlinks limits after each rehash. Sorry.
+*/
+#undef YLINE_LIMITS_OLD_BEHAVIOUR
+
+/*
+** Y-line [user@]host limits are now using ip hash instead of hostname hash,
+** which means counts are against IPs, not hostnames.
+** If you don't like that behaviour, you can undefine it.
+*/
+#define YLINE_LIMITS_IPHASH
+
+/*
+** find_userhost (used in PRIVMSG user%host@server syntax) uses hostname
+** hash. Noone really used that syntax anyway, so noone should notice.
+** If you are rebellious or just don't want to waste memory -- define it.
+** Note that if there's a hostname hash needed (and thus compiled in) 
+** for other reasons, it will be used in find_userhost anyway.
+** Also note that defining this breaks compatibility with RFC 2812, as
+** clients no longer will be able to PRIVMSG user%host@server (though they 
+** will be able to use user%ip@server), but it would still be compatible 
+** with RFC 1459, which defined only "user@server" syntax.
+*/
+#undef FIND_USERHOST_IPHASH
+
+/*
+** Default behaviour of the server after the first netjoin is done.
+** Possible values: 0 (SET CACCEPT OFF), 1 (SET CACCEPT ON)
+** and 2 (SET CACCEPT SPLIT).
+*/
+#define CACCEPT_DEFAULT 2
+
+/* Minimum values admin can set. */
+#define SPLIT_USERS	50000
+#define SPLIT_SERVERS	50
 
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
 /*   STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP STOP  */
@@ -887,4 +939,19 @@
 #if !defined(NBLOCK_POSIX) && !defined(NBLOCK_BSD) && !defined(NBLOCK_SYSV)
 #undef LISTENER_MAXACCEPT
 #define LISTENER_MAXACCEPT 1
+#endif
+
+/* well, we save some memory if we don't actually need either of the hashes */
+#if defined(YLINE_LIMITS_IPHASH) || defined(FIND_USERHOST_IPHASH)
+#define USE_IPHASH
+#endif
+
+#if !defined(YLINE_LIMITS_IPHASH) || !defined(FIND_USERHOST_IPHASH)
+#define USE_HOSTHASH
+#endif
+
+#if defined(CACCEPT_DEFAULT)
+#if ((CACCEPT_DEFAULT) > 2) || ((CACCEPT_DEFAULT) < 0)
+#error CACCEPT_DEFAULT can be 0, 1 or 2.
+#endif
 #endif
