@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_serv.c,v 1.283 2007/12/16 05:46:46 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_serv.c,v 1.299 2011/01/20 14:26:56 bif Exp $";
 #endif
 
 #include "os.h"
@@ -388,6 +388,11 @@ int	check_version(aClient *cptr)
 			return exit_client(cptr, cptr, &me, "Bad flags");
 		}
 	}
+
+#ifdef JAPANESE
+	if (link && strchr(link, 'j'))	/* jp version */
+		cptr->flags |= FLAGS_JP;
+#endif
 
 	/* right now, I can't code anything good for this */
 	/* Stop whining, and do it! ;) */
@@ -797,7 +802,7 @@ int	m_server(aClient *cptr, aClient *sptr, int parc, char *parv[])
 
 		introduce_server(cptr, acptr);
 #ifdef	USE_SERVICES
-		check_services_butone(SERVICE_WANT_SERVER, acptr->name, acptr,
+		check_services_butone(SERVICE_WANT_SERVER, acptr->serv, acptr,
 				      ":%s SERVER %s %d %s :%s", parv[0],
 				      acptr->name, hop+1, acptr->serv->sid,
 				      acptr->info);
@@ -1037,9 +1042,14 @@ int	m_server_estab(aClient *cptr, char *sid, char *versionbuf)
 		    }
 
 		if (bconf->passwd[0])
-			sendto_one(cptr, "PASS %s %s IRC|%s %s%s",
+			sendto_one(cptr, "PASS %s %s IRC|%s %s%s%s",
 				bconf->passwd, pass_version, serveropts,
 				(bootopt & BOOT_STRICTPROT) ? "P" : "",
+#ifdef	JAPANESE
+				"j",
+#else
+				"",
+#endif
 #ifdef	ZIP_LINKS
 				(bconf->status == CONF_ZCONNECT_SERVER) ? "Z" :
 #endif
@@ -1207,7 +1217,7 @@ int	m_server_estab(aClient *cptr, char *sid, char *versionbuf)
 		cptr->name, cptr->serv->version, cptr->serv->sid));
 	add_fd(cptr->fd, &fdas);
 #ifdef	USE_SERVICES
-	check_services_butone(SERVICE_WANT_SERVER, cptr->name, cptr,
+	check_services_butone(SERVICE_WANT_SERVER, cptr->serv, cptr,
 			      ":%s SERVER %s %d %s :%s", ME, cptr->name,
 			      cptr->hopcount+1, cptr->serv->sid, cptr->info);
 #endif
@@ -1258,7 +1268,8 @@ int	m_server_estab(aClient *cptr, char *sid, char *versionbuf)
 					   (*buf) ? buf : "+", acptr->info);
 		    }
 		else if (IsService(acptr) &&
-			 match(acptr->service->dist, cptr->name) == 0)
+			 (match(acptr->service->dist, cptr->name) == 0 ||
+				match(acptr->service->dist, cptr->serv->sid) == 0))
 		{
 			sendto_one(cptr, ":%s SERVICE %s %s %d :%s",
 						acptr->service->servp->sid,
@@ -1708,11 +1719,11 @@ static  void    report_x_lines(aClient *sptr, char *to)
 		if (tmp->status != CONF_XLINE)
 			continue;
 
-		sendto_one(sptr,":%s %d %s X :%s %s %s %s %s", 
+		sendto_one(sptr,":%s %d %s X :%s %s %s %s %s %s", 
 			ME, RPL_STATSDEBUG, to,
 			BadTo(tmp->host), BadTo(tmp->passwd),
-			BadTo(tmp->name), BadTo(tmp->source_ip),
-			BadTo(tmp->name2));
+			BadTo(tmp->name), BadTo(tmp->name2),
+			BadTo(tmp->name3), BadTo(tmp->source_ip));
 	}
 }
 #endif
@@ -1853,7 +1864,7 @@ static void report_fd(aClient *sptr, aClient *acptr, char *to)
 
 int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 {
-	static	char	Lformat[]  = ":%s %d %s %s %u %lu %llu %lu %llu :%u";
+	static	char	Lformat[]  = ":%s %d %s %s %u %lu %llu %lu %llu :%d";
 	struct	Message	*mptr;
 	aClient	*acptr;
 	char	stat = parc > 1 ? parv[1][0] : '\0';
@@ -1899,10 +1910,13 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 	doall = !match(name, ME) && !match(cm, ME);
 	wilds = index(cm, '*') || index(cm, '?') || index(cm, '#');
 
+#if 0
+/* That's useless. Why bother? */
 	if (parc > 1 && parv[1][1] != '\0')
 	{
 		stat = '*';
 	}
+#endif
 
 	switch (stat)
 	{
@@ -1910,7 +1924,7 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 		/* send list of file descriptors 
 		 * Avaible only for local opers for security reasons.
 		 */
-		if (!IsAnOper(sptr) || !MyConnect(sptr))
+		if (!is_allowed(sptr, ACL_TRACE) || !MyConnect(sptr))
 		{
 			stat = '*';
 			break;
@@ -1955,6 +1969,9 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 			    {
 				if (!(acptr = local[i]))
 					continue;
+				if (IsUnknown(acptr) && 
+					!(IsAnOper(sptr) && SendWallops(sptr)))
+					continue;
 				if (IsPerson(acptr) && (!MyConnect(sptr)
 				    || !is_allowed(sptr, ACL_TRACE)) && acptr != sptr)
 					continue;
@@ -1966,7 +1983,7 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 					(int)DBufLength(&acptr->sendQ),
 					acptr->sendM, acptr->sendB,
 					acptr->receiveM, acptr->receiveB,
-					timeofday - acptr->firsttime);
+					(int)(timeofday - acptr->firsttime));
 			    }
 		    }
 		else
@@ -1978,7 +1995,7 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 					(int)DBufLength(&acptr->sendQ),
 					acptr->sendM, acptr->sendB,
 					acptr->receiveM, acptr->receiveB,
-					timeofday - acptr->firsttime);
+					(int)(timeofday - acptr->firsttime));
 			
 		    }
 		break;
@@ -1996,7 +2013,7 @@ int	m_stats(aClient *cptr, aClient *sptr, int parc, char *parv[])
 					CONF_NOCONNECT_SERVER);
 		break;
 	case 'd' : case 'D' : /* defines */
-		send_defines(cptr, parv[0]);
+		send_defines(cptr, parv[0], parv[1]);
 		break;
 	case 'H' : case 'h' : /* H, L and D conf lines */
 		report_configured_links(cptr, parv[0],
@@ -2763,7 +2780,7 @@ int	m_trace(aClient *cptr, aClient *sptr, int parc, char *parv[])
 				   acptr->from->name,
 				   acptr->from->serv->version,
 				   (acptr->from->flags & FLAGS_ZIP) ? "z" : "",
-        	               	   timeofday - acptr->from->firsttime,
+        	               	   (int)(timeofday - acptr->from->firsttime),
                 	           (int)DBufLength(&acptr->from->sendQ),
                         	   (int)DBufLength(&sptr->from->sendQ));
 
@@ -2805,13 +2822,9 @@ int	m_trace(aClient *cptr, aClient *sptr, int parc, char *parv[])
 				continue;   /* then don't show the client */
 			}
 			
-			/* Report unknown connections to local users
-			 * and remote opers with +w set */
-			if (IsUnknown(a2cptr)
-			    && !((IsAnOper(sptr) || MyClient(sptr))
-				 && SendWallops(sptr)
-				)
-			    )
+			/* Report unknown connections to opers with +w set */
+			if (IsUnknown(a2cptr) &&
+				!(IsAnOper(sptr) && SendWallops(sptr)))
 			{
 				continue;
 			}
@@ -2823,6 +2836,102 @@ int	m_trace(aClient *cptr, aClient *sptr, int parc, char *parv[])
 	
 	return 2;
 }
+
+/*
+ * m_etrace
+ * 	parv[0] = sender prefix
+ */
+int	m_etrace(aClient *cptr, aClient *sptr, int parc, char *parv[])
+{
+	aClient *acptr;
+	int i = 0;
+
+	if (!MyClient(sptr) || !is_allowed(sptr, ACL_TRACE))
+		return m_nopriv(cptr, sptr, parc, parv);
+
+	if (parc > 1)
+	{
+		if ((acptr = find_person(parv[1], NULL)) && MyClient(acptr))
+			sendto_one(sptr, replies[RPL_ETRACEFULL],
+				ME, sptr->name,
+				IsAnOper(acptr) ? "Oper" : "User",
+				get_client_class(acptr),
+				acptr->name, acptr->user->username,
+				acptr->user->host, acptr->user->sip,
+#ifdef XLINE
+				acptr->user2, acptr->user3, 
+#else
+				"-", "-",
+#endif
+				acptr->info);
+	}
+	else
+	{
+		for (i = 0; i <= highest_fd; i++)
+		{
+			if (!(acptr = local[i]))
+				continue;
+
+			if (!IsPerson(acptr))
+				continue;
+		
+			sendto_one(sptr, replies[RPL_ETRACEFULL],
+				ME, sptr->name, 
+				IsAnOper(acptr) ? "Oper" : "User", 
+				get_client_class(acptr), 
+				acptr->name, acptr->user->username, 
+				acptr->user->host, acptr->user->sip,
+#ifdef XLINE
+				acptr->user2, acptr->user3, 
+#else
+				"-", "-",
+#endif
+				acptr->info);
+		}
+	}
+
+	sendto_one(sptr, replies[RPL_ETRACEEND], ME, sptr->name, ME,
+			version, debugmode);
+	return 2;
+}
+
+#ifdef ENABLE_SIDTRACE
+int	m_sidtrace(aClient *cptr, aClient *sptr, int parc, char *parv[])
+{
+	aClient *acptr;
+
+	if (!MyClient(sptr) || !is_allowed(sptr, ACL_SIDTRACE))
+		return m_nopriv(cptr, sptr, parc, parv);
+
+	for (acptr = client; acptr; acptr = acptr->next)
+	{
+		if (!IsPerson(acptr))
+			continue;
+
+		if (strncmp(acptr->user->uid, me.serv->sid, SIDLEN-1))
+			continue;
+
+		sendto_one(sptr, replies[RPL_ETRACEFULL],
+			ME, sptr->name,
+			IsAnOper(acptr) ? "Oper" : "User", 
+			MyClient(acptr) ? get_client_class(acptr) : -1, 
+			acptr->name, acptr->user->username,
+			acptr->user->host, acptr->user->sip, 
+#ifdef XLINE
+			MyClient(acptr) ? acptr->user2 : "-",
+			MyClient(acptr) ? acptr->user3 : "-",
+#else
+			"-", "-",
+#endif
+			acptr->info);
+	}
+
+	sendto_one(sptr, replies[RPL_ETRACEEND], ME, sptr->name, "*",
+			version, debugmode);
+
+	return 3;
+}
+#endif
 
 /*
 ** m_motd
@@ -3153,11 +3262,15 @@ int	m_set(aClient *cptr, aClient *sptr, int parc, char *parv[])
 				{
 					iconf.aconnect = 0;
 				}
+				else if (!mycmp(parv[2], "ND"))
+				{
+					iconf.aconnect = 2;
+				}
 				else
 				{
 					sendto_one(sptr, ":%s NOTICE %s SET "
 						":Illegal value for ACONNECT. "
-						"Possible values: ON OFF",
+						"Possible values: ON OFF ND",
 						ME, parv[0]);
 					break;
 				}
@@ -3264,7 +3377,8 @@ int	m_set(aClient *cptr, aClient *sptr, int parc, char *parv[])
 		if (acmd & TSET_ACONNECT)
 		{
 			sendto_one(sptr, ":%s NOTICE %s :ACONNECT = %s", ME,
-				parv[0], iconf.aconnect == 1 ? "ON" : "OFF");
+				parv[0], iconf.aconnect == 2 ? "ND" : 
+				(iconf.aconnect == 1 ? "ON" : "OFF"));
 		}
 		if (acmd & TSET_CACCEPT)
 		{
@@ -3703,7 +3817,7 @@ static void report_listeners(aClient *sptr, char *to)
 		{
 			if (iconf.caccept == 0)
 				what = "noaccept";
-			else if (iconf.caccept == 2 && iconf.split == 1)
+			else if (iconf.caccept == 2 && IsSplit())
 				what = "splitnoaccept";
 			else
 				what = "active";

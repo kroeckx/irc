@@ -22,7 +22,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_misc.c,v 1.110 2007/12/15 23:21:13 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_misc.c,v 1.121 2011/01/20 14:26:56 bif Exp $";
 #endif
 
 #include "os.h"
@@ -233,8 +233,8 @@ char	*get_client_host(aClient *cptr)
 
 	if (!MyConnect(cptr))
 		return cptr->name;
-	if (!cptr->hostp)
-		return get_client_name(cptr, FALSE);
+	if (!cptr->user)
+		return get_client_name(cptr, TRUE);
 #ifdef UNIXPORT
 	if (IsUnixSocket(cptr))
 		sprintf(nbuf, "%s[%s]", cptr->name, ME);
@@ -243,7 +243,7 @@ char	*get_client_host(aClient *cptr)
 		(void)sprintf(nbuf, "%s[%-.*s@%-.*s]",
 			cptr->name, USERLEN,
 			(!(cptr->flags & FLAGS_GOTID)) ? "" : cptr->auth,
-			HOSTLEN, cptr->hostp->h_name);
+			HOSTLEN, cptr->user->sip);
 	return nbuf;
 }
 
@@ -741,7 +741,7 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 			}
 		}
 #ifdef	USE_SERVICES
-		check_services_butone(SERVICE_WANT_SQUIT, sptr->name, sptr,
+		check_services_butone(SERVICE_WANT_SQUIT, sptr->serv, sptr,
 				      ":%s SQUIT %s :%s", from->name,
 				      sptr->name, comment);
 #endif
@@ -775,7 +775,7 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 				check_services_butone(SERVICE_WANT_QUIT|
 						      SERVICE_WANT_RQUIT, 
 						      (sptr->user) ?
-						      sptr->user->server
+						      sptr->user->servp
 						      : NULL, cptr,
 						      ":%s QUIT :%s",
 						      sptr->name, comment);
@@ -799,7 +799,7 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 					}
 #ifdef	USE_SERVICES
 				check_services_butone(SERVICE_WANT_QUIT, 
-					      (sptr->user) ? sptr->user->server
+					      (sptr->user) ? sptr->user->servp
 						      : NULL, cptr,
 						      ":%s QUIT :%s",
 						      sptr->name, comment);
@@ -814,7 +814,7 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 			** for now --jv
 			*/
 			check_services_butone(SERVICE_WANT_QUIT, 
-					     (sptr->user) ? sptr->user->server
+					     (sptr->user) ? sptr->user->servp
 						      : NULL, cptr,
 						      ":%s QUIT :%s",
 						      sptr->name, comment);
@@ -902,8 +902,13 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 			add_history(sptr, (sptr == cptr) ? &me : NULL);
 #endif
 			off_history(sptr);
+#ifdef USE_HOSTHASH
 			del_from_hostname_hash_table(sptr->user->host,
 						     sptr->user);
+#endif
+#ifdef USE_IPHASH
+			del_from_ip_hash_table(sptr->user->sip, sptr->user);
+#endif
 		    }
 	    }
 	else if (sptr->name[0] && IsService(sptr))
@@ -928,7 +933,8 @@ static	void	exit_one_client(aClient *cptr, aClient *sptr, aClient *from,
 				{
 					continue;
 				}
-				if (match(sptr->service->dist, acptr->name))
+				if (match(sptr->service->dist, acptr->name) && 
+					match(sptr->service->dist, acptr->serv->sid))
 				{
 					continue;
 				}
@@ -1005,13 +1011,13 @@ void	initruntimeconf(void)
 	iconf.caccept = 2; /* accept clients when no split */
 
 	/* Defaults set in config.h */
-	iconf.split_minservers = SPLIT_SERVERS;
-	iconf.split_minusers = SPLIT_USERS;
+	iconf.split_minservers = MAX(DEFAULT_SPLIT_SERVERS, SPLIT_SERVERS);
+	iconf.split_minusers = MAX(DEFAULT_SPLIT_USERS, SPLIT_USERS);
 
 	if ((bootopt & BOOT_STANDALONE))
 	{
 		/* standalone mode */
-		iconf.split = 3;
+		iconf.split = -1;
 	}
 }
 
@@ -1146,8 +1152,6 @@ void	read_motd(char *filename)
 		else
 			line[len] = '\0';
 		temp = (aMotd *)MyMalloc(sizeof(aMotd));
-		if (!temp)
-			outofmemory();
 		temp->line = mystrdup(line);
 		temp->next = NULL;
 		       if (!motd)
@@ -1173,7 +1177,7 @@ void	check_split(void)
 		{
 			sendto_flag(SCH_NOTICE,
 				"Network split detected, split mode activated");
-			iconf.split = 1;
+			iconf.split = timeofday;
 		}
 	}
 	else
@@ -1188,6 +1192,9 @@ void	check_split(void)
 			{
 				firstrejoindone = 1;
 				activate_delayed_listeners();
+#ifdef CACCEPT_DEFAULT
+				iconf.caccept = CACCEPT_DEFAULT;
+#endif
 			}
 		}
 	}

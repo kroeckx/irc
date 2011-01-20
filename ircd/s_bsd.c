@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_bsd.c,v 1.184 2007/12/16 05:53:17 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_bsd.c,v 1.188 2011/01/20 14:26:56 bif Exp $";
 #endif
 
 #include "os.h"
@@ -809,7 +809,7 @@ void	daemonize(void)
 #if defined(HPUX) || defined(SVR4) || defined(DYNIXPTX) || \
     defined(_POSIX_SOURCE) || defined(SGI)
 		(void)setsid();
-#elif defined (__CYGWIN32__)
+#elif defined (__CYGWIN32__) || defined(__APPLE__)
     		(void)setpgrp();
 #else
 		(void)setpgrp(0, (int)getpid());
@@ -1263,9 +1263,14 @@ static	int completed_connection(aClient *cptr)
 		return -1;
 	    }
 	if (!BadPtr(aconf->passwd))
-		sendto_one(cptr, "PASS %s %s IRC|%s %s%s", aconf->passwd,
+		sendto_one(cptr, "PASS %s %s IRC|%s %s%s%s", aconf->passwd,
 			pass_version, serveropts,
 			(bootopt & BOOT_STRICTPROT) ? "P" : "",
+#ifdef JAPANESE
+			"j",
+#else
+			"",
+#endif
 #ifdef ZIP_LINKS
 			(aconf->status == CONF_ZCONNECT_SERVER) ? "Z" :
 #endif
@@ -1910,7 +1915,7 @@ static	void	read_listener(aClient *cptr)
 
 		/* Can cptr->confs->value.aconf be NULL? --B. */
 		if ((iconf.caccept == 0 ||
-			(iconf.caccept == 2 && iconf.split == 1))
+			(iconf.caccept == 2 && IsSplit()))
 			&& cptr->confs->value.aconf != NULL
 			&& IsConfDelayed(cptr->confs->value.aconf))
 		{
@@ -3486,7 +3491,7 @@ static	void	do_dns_async(void)
  * log such crap.
  *
  * Based on Ari `DLR' Heikkinen <aheikin@dlr.pspt.fi> irce0.9.1
- * by Piotr `Beeth' Kucharski <chopin@sgh.waw.pl>
+ * by Piotr `Beeth' Kucharski <chopin@42.pl>
  *
  * Note: calling with fd == -2 closes all delayed fds.
  */

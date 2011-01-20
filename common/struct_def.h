@@ -17,7 +17,7 @@
  *   along with this program; if not, write to the Free Software
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
- *   $Id: struct_def.h,v 1.143 2007/12/15 23:21:12 chopin Exp $
+ *   $Id: struct_def.h,v 1.152 2011/01/20 14:26:56 bif Exp $
  */
 
 typedef	struct	ConfItem aConfItem;
@@ -50,14 +50,14 @@ typedef struct        LineItem aExtData;
 #define UIDLEN		9	/* must not be bigger than NICKLEN --Beeth */
 #define	USERLEN		10
 #define	REALLEN	 	50
-#define	TOPICLEN	160
+#define	TOPICLEN	255
 #define	CHANNELLEN	50
 #define	PASSWDLEN 	20
 #define	KEYLEN		23
 #define	BUFSIZE		512		/* WARNING: *DONT* CHANGE THIS!!!! */
 #define	MAXRECIPIENTS 	20
-#define	MAXBANS		42
-#define	MAXBANLENGTH	1024
+#define	MAXBANS		64
+#define	MAXBANLENGTH	2048
 #define	BANLEN		(USERLEN + NICKLEN + HOSTLEN + 3)
 #define MAXPENALTY	10
 #define	CHIDLEN		5		/* WARNING: *DONT* CHANGE THIS!!!! */
@@ -181,6 +181,9 @@ typedef enum Status {
 				  ** a SQUIT. */
 #define	FLAGS_EOB	0x4000000 /* EOB received */
 #define FLAGS_LISTENINACTIVE 0x8000000 /* Listener does not listen() */
+#ifdef JAPANESE
+#define	FLAGS_JP	0x10000000 /* jp version, used both for chans and servs */
+#endif
 	
 #define	FLAGS_OPER	0x0001 /* operator */
 #define	FLAGS_LOCOP	0x0002 /* local operator -- SRB */
@@ -305,6 +308,9 @@ struct	ConfItem	{
 	char	*passwd;
 	char	*name;
 	char	*name2;
+#ifdef XLINE
+	char	*name3;
+#endif
 	int	port;
 	long	flags;		/* I-line flags */
 	int	pref;		/* preference value */
@@ -454,7 +460,9 @@ struct	User	{
 	char	host[HOSTLEN+1];
 	char	*server;
 	u_int	hhashv;		/* hostname hash value */
+	u_int	iphashv;	/* IP hash value */
 	struct User *hhnext;	/* next entry in hostname hash */
+	struct User *iphnext;	/* next entry in IP hash */
 				/* sip MUST be the last in this struct!!! */
 	char	sip[1];		/* ip as a string, big enough for ipv6
 				 * allocated to real size in make_user */
@@ -692,6 +700,9 @@ struct Channel	{
 	Link	*clist;		/* list of local! connections which are members */
 	time_t	history;	/* channel history (aka channel delay) */
 	time_t	reop;		/* server reop stamp for !channels */
+#ifdef JAPANESE
+	int flags;
+#endif
 	char	chname[1];
 };
 
@@ -787,7 +798,7 @@ struct Channel	{
 
 #define	IsMasked(x)		(x && x->serv && x->serv->maskedby != x)
 
-#define IsSplit()		(iconf.split == 1)
+#define IsSplit()		(iconf.split > 0)
 
 typedef	struct	{
 	u_long	is_user[2];	/* users, non[0] invis and invis[1] */
@@ -940,6 +951,9 @@ typedef enum ServerChannels {
 #define EXITC_BADPASS	'p'	/* bad password */
 #define EXITC_SENDQ	'Q'	/* send queue exceeded */
 #define EXITC_REF	'R'	/* Refused */
+#ifdef TKLINE
+#define EXITC_TKLINE	't'	/* tkline */
+#endif
 #define EXITC_AREF	'U'	/* Unauthorized by iauth */
 #define EXITC_AREFQ	'u'	/* Unauthorized by iauth, be quiet */
 #define EXITC_VIRUS	'v'	/* joined a channel used by PrettyPark virus */
@@ -990,11 +1004,11 @@ typedef enum ServerChannels {
 /* Runtime configuration structure */
 typedef struct
 {
-	int aconnect;	/* 0 - OFF 1 - ON */
-	int split;	/* 0 - NO 1 - YES */
+	int aconnect;	/* 0: off, 1: on, 2: ND */
+	int split;	/* -1: standalone, 0: no, >0 yes (and since when) */
 	int split_minservers;
 	int split_minusers;
-	int caccept;	/* 0 - OFF 1 - ON 2 - SPLIT */
+	int caccept;	/* 0: off, 1: on, 2: split */
 } iconf_t;
 
 /* O:line flags, used also in is_allowed() */
@@ -1022,9 +1036,10 @@ typedef struct
 #define ACL_NOPENALTY		0x20000
 #define ACL_TRACE		0x40000
 #define ACL_KLINE		0x80000
+#define ACL_SIDTRACE		0x100000
 
 #define ACL_ALL_REMOTE		(ACL_KILLREMOTE|ACL_SQUITREMOTE|ACL_CONNECTREMOTE)
-#define ACL_ALL			0xFFFFF
+#define ACL_ALL			0x1FFFFF
 
 #ifdef CLIENTS_CHANNEL
 /* information scope of &CLIENTS channel. */
