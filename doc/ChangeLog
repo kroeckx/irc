@@ -1,3 +1,248 @@
+2011-01-20  Piotr Kucharski
+
+	* s_bsd.c/read_listener(), s_serv.c/report_listeners(): use IsSplit()
+	  instead of iconf.split==1 (reported by BR).
+	* patricia_ext.h: forgotten #undef EXTERN (from kinlo).
+	* s_misc.c/initruntimeconf(): take max of SPLIT_ and DEFAULT_SPLIT_*.
+
+2.11.2p3
+
+2010-08-12  Piotr Kucharski
+
+	* channel.c/can_send(): bans and exceptions set with cidr work only
+	  on local server. side-effect of this was if you set non-cidr ban
+	  (say *@*) plus a cidr exception, you were no longer heard outside
+	  your server (you matched the ban, but cidr exception was not even
+	  checked). allow remote clients to talk without checking for bans
+	  and exceptions. (reported by BR).
+	* s_err.c, s_serv.c, s_user.c: fix various format string errors
+	  visible on amd64 (patch from jilles).
+	* parse.c/cancel_clients(), s_user.c/register_user(): fix all kills 
+	  that sent a nick to send a UID, except the impossible nick collision
+	  kill (patch from jilles).
+
+2010-08-11  Piotr Kucharski
+
+	* s_conf.c/prep_kline(): reject all not fully specified u@h masks and
+	  also *@* one.
+	* ircd.c/s_die(): clean up unix socket.
+	* s_service.c/m_service(): send SERVICE also to dist matching SID.
+
+2010-03-09  Piotr Kucharski
+
+	* s_conf.c/prep_kline(): match_ipmask() was getting host with '@' char
+	  prepended, that did not work at all.
+
+2009-12-11  Piotr Kucharski
+
+	* s_conf.c/prep_kline(): oper can crash his local ircd by issuing
+	  tkline with wrong parameters (reported by AsmPro).
+
+2.11.2p2
+
+2009-11-13  Piotr Kucharski
+
+	* channel.c/set_mode(): don't swap keys and limits on netjoin.
+	* s_misc.c/initruntimeconf(), config.h.dist: default and min. values
+	  of SPLIT vars; lower defaults to better match IRCnet status.
+	* struct_def.h, ircd.c/try_connections(), s_misc.c/check_split(),
+	  s_serv.c/m_set(): add "SET ACONNECT ND" to disable autoconnect
+	  after nickdelay expires (requested by BR); with nice sideeffect
+	  of showing in "stats d" when server entered split mode.
+	* s_conf.c/oline_flags_parse(), s_debug/serveropts[], config.h.dist:
+	  add OPER_SQUIT_REMOTE define and use it in version string (requested
+	  by BR to do V:line on it).
+
+2009-04-30  Piotr Kucharski
+
+	* s_conf.c/prep_kline(): check for erroneous netmasks in tkline.
+
+2009-03-15  Piotr Kucharski
+
+	* support.c/strtoken(): mysterious wallops from JP fix (kudos to jilles).
+	* list.c/free_class(), patricia.c, patricia_ext.h, s_externs.h: tidy up.
+	* s_conf.c/find_Oline(), s_user.c/m_oper(): better error msg for OPER
+	  failed due to class limits.
+	* s_user.c/register_user(): tiny fix for sunCC compiler.
+	* res.c: fix compilation with DEBUG problem.
+	* s_conf.c/find_Oline(): use user->sip.
+	* list.c/make_client(), s_misc.c/read_motd(): MyMalloc() does outofmemory
+	  on its own, no need to do that again.
+	* channel.c/jp_chname(), support.c/strtoken(): if cn[1] is null, cn[2]
+	  may access rubbish, reverse conditions to not allow it.
+	* channel.c/clean_channelname(): if japanese channel name is incorrect,
+	  return -1 to allow callee function to react; fix all functions that
+	  call clean_channelname() to deal with erroneous channel names.
+
+2.11.2p1
+
+2008-06-24  Piotr Kucharski
+
+	* res.c/proc_answer(), update_list(): fix incorrect caching of ips looked
+	  up for C/N-lines (patch from fiction).
+	* res.c/m_dns(): show flags for cache entries.
+	* initconf(): allow '*' in username part of user@host field of C/N/S line
+	  (reported by BR).
+	* chkconf.c/openconf(), s_conf.c/openconf(): pass INET6 to m4, if defined
+	  (patch from peder).
+	* configure.in, configure, setup.h.in: check for GNU m4.
+	* chkconf.c/openconf(), s_conf.c/openconf(): pass -I includedir to GNU m4
+	  allowing easier configs (patch from peder).
+	* chkconf.c/openconf(), s_conf.c/openconf(), setup.h.dist: define to use
+	  "-P" flag for GNU m4 (courtesy to peder).
+	* s_conf.c/check_split(): set default caccept value after first netjoin.
+
+2008-06-23  Piotr Kucharski
+
+	* res.c: more cleanup, so no v6 related code is in there for #undef INET6.
+
+2008-06-22  Piotr Kucharski
+
+	* class.c/add_class(), initclass(): don't set MaxBSendq if not explicitly
+	  set in Y-line (client classes have no need for it anyway).
+	* class.c/get_sendq(): don't use MaxBSendq if not set.
+	* res.c/gethost_byname_type(), proc_answer(), update_list(), make_cache(),
+	  find_cache_name(): add "valid" flags to cache entries, so we use cached
+	  entry only when it was ok in both directions; this fixes problems with
+	  dual v4/v6 names in dns and also some possible spoofs (patch from fiction).
+	* res.c: while at it, little cleanup.
+
+2008-06-21  Piotr Kucharski
+
+	* s_err.c, s_serv.c/m_etrace(): turns out that more fields was granted 
+	  different numeric in ratbox, so we change to match theirs; etrace now 
+	  behave always like ratbox "etrace -full".
+	* s_serv.c/m_sidtrace(): for local clients provide extra fields as well.
+	* s_serv.c/m_etrace(): extend oper check to IsAnOper, like sidtrace has.
+
+2008-06-20  Piotr Kucharski
+
+	* s_err.c, s_serv.c/m_etrace(): add additional user fields to output.
+
+2008-06-18  Piotr Kucharski
+
+	* class.c/initclass(): add missing init for maxbsendq for class 0.
+
+2008-06-15  Piotr Kucharski
+
+	* hash.c/hash_find_ip(): stupid bug making iphash unusable (report by tlund).
+	* s_serv.c/m_stats(): guard stats f with ACL_TRACE.
+
+2.11.2
+
+2008-06-13  Piotr Kucharski
+
+	* s_err.c: change RPL_ETRACEEND numeric to 759.
+
+2008-06-11  Piotr Kucharski
+
+	* channel.c/m_njoin(): fix negative history count in stats z (by fiction).
+	* s_serv.c/m_stats(), m_trace(): show unknown connections only to +w opers.
+	* s_err.c, s_serv.c/m_etrace(), m_sidtracce(): use new RPL_ETRACEEND.
+
+2008-06-10  Piotr Kucharski
+
+	* channel.c/set_mode(): change every unset key to '*', so in a case of
+	  desynch it will not get exposed on &CHANNEL.
+	* struct_def.h: add EXITC_TKLINE.
+	* s_conf.c/do_kline(): set properly EXITC_(T)KLINE (reported by BR).
+	* s_conf.c/attach_conf(), config.h.dist: allow reverting to previous 
+	  behaviour of Y-line host limits with #undef YLINE_LIMITS_IPHASH.
+	* parse.c, hash.c, hash_def.h, hash_ext.h, ircd.c, s_user.c, s_misc.c,
+	  config.h.dist: if ip hash or hostname hash is not needed, do not compile
+	  it in (by the power of #ifdefs).
+
+2.11.2b1
+
+2008-06-09  Piotr Kucharski
+
+	* configure.in, setup.h.in, os.h: check if strings.h can be included
+	  along with string.h
+
+2008-06-09  Jakub Vlasek
+
+	* struct_def.h: add iphashv and iphnext used by the IP hash table.
+	* hash.c, hash_def.h, hash_ext.h: add IP hash.
+	* s_conf/attach_conf(): use hash_find_ip() to check for local and
+	  global user limits.
+	* s_user.c/register_client(): Add user to the IP hash.
+	* s_misc.c/exit_one_client(): Remove user from the IP hash.
+
+2008-06-08  Piotr Kucharski
+
+	* channel.c/can_join(): if channel is opless, allow people matching
+	  reoplist to join channel overriding channel limit.
+	* s_misc.c, s_serv.c, s_service.c, s_service_ext.h, s_user.c: change
+	  "server" argument of check_services_butone from char to aServer.
+	* s_user.c/m_message(): allow services to send notices to uids.
+	* s_service.c/check_services_butone(), m_service(), m_servset(), 
+	  s_misc.c/exit_one_client(), s_serv.c/m_server_estab(), 
+	  s_user.c/hunt_server(): allow distribution to be based on SID,
+	  not only server name.
+	* s_misc.c/get_client_host(): show IP, not hostname, in all those &LOCAL
+	  notices about unauthorized access.
+	* struct_def.h: increased TOPICLEN, MAXBANS and MAXBANLENGHT.
+	* s_user.c/who_one(): show SID between hopcount and user info.
+	* s_serv.c/m_stats(): allow multichar stats.
+	* s_serv.c/m_stats(), s_debug.c/send_defines(): stats d5 return 005 as well.
+	* s_user.c/m_oper(): different message for failed oper attempt if
+	  attach_conf() failed with correct password (reported by MJRider).
+	* s_user.c/attach_conf(): move checks around to save some cpu cycles.
+	* services_def.h, send.c/sendto_flag(): add SERVICE_WANT_CLIENTS.
+	* s_err.c: extend replies[] up to 1000 entries.
+	* numeric_def.h, parse.c, struct_def.h, s_conf.c, s_err.c, s_serv_ext.h,
+	  s_serv.c, config.h.dist: added ETRACE and SIDTRACE commands (from anfl).
+
+2008-06-07  Piotr Kucharski
+
+	* s_user.c/who_find(): service can request who as well and it does not have
+	  user struct allocated => instant segv (reported by BR).
+	* service_def.h: add SERVICE_WANT_KLINE; unfortunately I had to change value
+	  of SERVICE_WANT_TKLINE, otherwise I'd have to rewrite a lot more for
+	  strtol() to work.
+	* s_user.c/is_allowed(): add kline acl for service.
+	* parse.c/parse(): tell service if command is unknown.
+	* struct_def.h: another field for aConf when XLINE (to keep hostmask/ip
+	  to match against).
+	* list.c/make_conf(), free_conf(): add new field.
+	* list.c/free_conf(): source_ip stats confmem stats were not updated.
+	* s_conf.c/initconf(): read new field if X-line conf (and change where
+	  they end up to be a bit more logical).
+	* s_user.c/register_user(): update changed fields and match on ip or
+	  host of the user.
+	* s_serv.c/report_x_lines(): update and add new field.
+
+2.11.2a2
+
+2008-06-06  Piotr Kucharski
+
+	* patricia.c, patricia_ext.h: new files to do CIDR limits (from anfl).
+	* class_def.h: new fields in class and macros for them (from anfl).
+	* class_ext.h, class.c/add_class(): adding and changing limits (from anfl).
+	* list.c/free_class(): freeing patricia (from anfl).
+	* s_conf.c/add_cidr_limit(), remove_cidr_limit(): functions to maintain 
+	  proper count for each CIDR subnet (from anfl).
+	* s_conf.c/detach_conf(), attach_conf(): use above two functions in proper
+	  places (from anfl).
+	* s_conf.c/initconf(): read one more field for conf line and pass it to
+	  add_class() (from anfl).
+	* Makefile.in, config.h.dist: make it work (from anfl).
+	* INSTALL.*: documentation for CIDR limits.
+	* class.c/report_classes(): show CIDR limits if they exist.
+	* s_err.c: change RPL_STATSYLINE format to output CIDR limits too.
+
+2008-06-04  Piotr Kucharski
+
+	* s_user.c/register_user(): improve CCL_CONNINFO to show all fields of
+	  connecting USER.
+
+2.11.2a1
+
+2008-06-03  Piotr Kucharski
+
+	* send.c, struct_def.h, support.c, channel.c, channel_ext.h, s_bsd.c,
+	  s_debug.c, s_serv.c, config.h.dist: added JP patch (huge!).
+
 2007-12-16  Piotr Kucharski
 
 	* s_conf.c/prep_kline(): tiny bug squashed, added more checks.
