@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: mod_socks.c,v 1.43 2004/10/03 17:13:42 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: mod_socks.c,v 1.44 2014/04/19 11:52:51 q Exp $";
 #endif
 
 #include "os.h"
@@ -593,6 +593,7 @@ static	char	*socks_init(AnInstance *self)
 
 	if (mydata->options == 0)
 	{
+		free(mydata);
 		return "Aie! unknown option(s): nothing to be done!";
 	}
 
