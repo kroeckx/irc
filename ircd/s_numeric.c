@@ -20,7 +20,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_numeric.c,v 1.8 2005/01/30 17:56:31 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_numeric.c,v 1.9 2014/04/19 08:44:43 q Exp $";
 #endif
 
 #include "os.h"
@@ -51,7 +51,7 @@ int	do_numeric(int numeric, aClient *cptr, aClient *sptr, int parc,
 {
 	aClient *acptr = NULL;
 	aChannel *chptr;
-	char	*nick, *p;
+	char	*nick, *p = NULL;
 	int	i;
 
 	if (parc < 1 || !IsServer(sptr))
