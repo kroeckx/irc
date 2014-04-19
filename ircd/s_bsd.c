@@ -35,7 +35,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_bsd.c,v 1.188 2011/01/20 14:26:56 bif Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_bsd.c,v 1.189 2014/04/19 08:54:36 q Exp $";
 #endif
 
 #include "os.h"
@@ -1312,6 +1312,7 @@ void close_client_fd(aClient *cptr)
 	struct 	linger	sockling;
 
 	sockling.l_onoff = 0;
+	sockling.l_linger = 0;
 #endif
 
 	if (cptr->authfd >= 0)
