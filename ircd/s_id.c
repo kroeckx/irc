@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: s_id.c,v 1.29 2005/02/08 02:47:11 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: s_id.c,v 1.30 2014/04/19 12:21:20 q Exp $";
 #endif
 
 #include "os.h"
@@ -69,7 +69,7 @@ char	*ltoid(long l, int n)
 static	char	idrpl[UIDLEN+1]; /* Currently nothing longer should be used. */
 	int	i = n - 1;
 
-	if (n > sizeof(idrpl))
+	if (n >= sizeof(idrpl))
 	{
 		/* This should not happen. */
 		return NULL;
