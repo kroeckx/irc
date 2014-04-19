@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: class.c,v 1.28 2008/06/22 16:09:07 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: class.c,v 1.29 2014/04/19 08:09:40 q Exp $";
 #endif
 
 #include "os.h"
@@ -154,6 +154,11 @@ void	add_class(int class, int ping, int confreq, int maxli, int sendq,
 		}
 	}
 #endif
+
+	if (maxli < 0)
+	{
+		maxli = 0;
+	}
 
 	t = find_class(class);
 	if ((t == classes) && (class != 0))
