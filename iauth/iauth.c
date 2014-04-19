@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: iauth.c,v 1.18 2005/01/03 22:16:59 q Exp $";
+static const volatile char rcsid[] = "@(#)$Id: iauth.c,v 1.19 2014/04/19 12:26:24 q Exp $";
 #endif
 
 #include "os.h"
@@ -139,7 +139,6 @@ void	write_pidfile(void)
 	(void) truncate(IAUTHPID_PATH, 0);
 	if (( fd = open(IAUTHPID_PATH, O_CREAT|O_WRONLY, 0600)) >= 0)
 	{
-		memset(pidbuf, '0', sizeof(pidbuf));
 		(void) sprintf(pidbuf, "%d\n", (int)getpid());
 		if (write(fd, pidbuf, strlen(pidbuf)) == -1)
 		{
