@@ -36,7 +36,7 @@ else
      echo "copying config.h from config.h.dist..."
      cp -p ../support/config.h.dist config.h
    fi
-    ./configure $*
+    ./configure "$*"
     if test $? = 0
     then
       echo "Have you read doc/README? (I hope so)"
