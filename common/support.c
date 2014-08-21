@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: support.c,v 1.46 2009/03/15 01:25:32 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: support.c,v 1.47 2014/08/21 13:10:42 bif Exp $";
 #endif
 
 #include "os.h"
@@ -124,7 +124,7 @@ char	*strtoken(char **save, char *str, char *fs)
 ** NOT encouraged to use!
 */
 
-char	*strtok(char *str, char *fs)
+char	*strtok(char *str, const char *fs)
 {
 	static char *pos;
 
