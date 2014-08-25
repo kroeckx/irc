@@ -1,7 +1,7 @@
 #
 # Default iauth configuration file
 #
-# $Id: iauth.conf.example,v 1.4 2004/09/21 15:40:38 chopin Exp $
+# $Id: iauth.conf.example,v 1.5 2014/08/25 14:08:57 bif Exp $
 #
 
 # Important note: there must be one tab only before modules options.
@@ -45,3 +45,9 @@ module webproxy
 #	port = 3128
 #	option = reject,careful
 #	reason = Denied access (insecure proxy found)
+
+# Reject clients based on DNS BL.
+#module dnsbl
+#	option = log,reject,servers=bl.example.org,bl2.example.org
+#	reason = Denied access (DNSBL)
+

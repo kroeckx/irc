@@ -1,5 +1,5 @@
-.\" @(#)$Id: iauth.conf.5,v 1.23 2004/12/16 16:14:06 chopin Exp $
-.TH IAUTH.CONF 5 "$Date: 2004/12/16 16:14:06 $"
+.\" @(#)$Id: iauth.conf.5,v 1.24 2014/08/25 14:08:57 bif Exp $
+.TH IAUTH.CONF 5 "$Date: 2014/08/25 14:08:57 $"
 .SH NAME
 iauth.conf \- The Internet Relay Chat Authentication Configuration File
 .SH DESCRIPTION
@@ -159,6 +159,19 @@ this parameter, module will accept any "HTTP/1.? 200" with an exception
 of servers sending "Date:" header along (which is common with some
 Apache+PHP configurations).
 
+.TP
+.B dnsbl
+This module checks client IP against DNS BL.
+
+This module understands three options:
+.B log
+to log IP and connect date
+.B reject
+to reject connections based on DNS BL
+.B servers
+comma separated list of DNS BL servers to query
+against for rejecting connecting hosts
+
 .SH EXAMPLE
 The following file will cause the IRC daemon to reject all connections
 originating from a system where an open proxy is running for hosts within
@@ -193,6 +206,10 @@ module webproxy
 module webproxy
         option = reject,careful
         port = 3128
+
+module dnsbl
+        option = log,reject,servers=bl.example.org,bl2.example.org
+        reason = Denied access (DNSBL)
 
 .fi
 .RE

@@ -1,3 +1,13 @@
+2014-08-25  Piotr Kucharski
+
+	* iauth/mod_dnsbl.c: add DNSBL iauth module
+	* iauth/mod_dnsbl_ext.h, iauth.conf.5, iauth.conf.example, a_conf.c,
+	  a_externs.h, Makefile.in: required changes to supporting files.
+
+2014-08-21  Piotr Kucharski
+
+	* support.c/support_ext.h: use const char for second param of strtok.
+
 2014-08-19  Kurt Roeckx
 
 	* configure: Use quotes when calling support/configure

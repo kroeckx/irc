@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: a_conf.c,v 1.39 2004/11/13 16:46:18 chopin Exp $";
+static const volatile char rcsid[] = "@(#)$Id: a_conf.c,v 1.40 2014/08/25 14:08:57 bif Exp $";
 #endif
 
 #include "os.h"
@@ -82,6 +82,7 @@ char	*conf_read(char *cfile)
 	Mlist[Mcnt++] = &Module_pipe;
 	Mlist[Mcnt++] = &Module_lhex;
 	Mlist[Mcnt++] = &Module_webproxy;
+	Mlist[Mcnt++] = &Module_dnsbl;
 	Mlist[Mcnt] = NULL;
 
 	cfh = fopen((cfile) ? cfile : IAUTHCONF_PATH, "r");
