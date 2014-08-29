@@ -8,8 +8,8 @@ dnl new tests
 dnl ---------
 
 AC_DEFUN(IRC_MATHLIB, [
-	AC_CHECK_LIB([m], [pow], [MATHLIBS=-lm], [])
-	AC_SUBST(MATHLIBS)
+  AC_CHECK_LIB([m], [pow], [MATHLIBS=-lm], [])
+  AC_SUBST(MATHLIBS)
 ])
 
 dns based on the version from the GNU Autoconf Macro Archive at:
@@ -23,15 +23,15 @@ AC_DEFUN([AC_FUNC_ACCEPT_ARGTYPES],
    [for ac_cv_func_accept_arg1 in 'int' 'unsigned int'; do
      for ac_cv_func_accept_arg2 in 'struct sockaddr' 'const struct sockaddr' 'void'; do
       for ac_cv_func_accept_arg3 in 'socklen_t' 'size_t' 'unsigned int' 'int'; do
-       AC_TRY_COMPILE(dnl
-[#ifdef HAVE_SYS_TYPES_H
+       AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-extern accept ($ac_cv_func_accept_arg1, $ac_cv_func_accept_arg2 *, $ac_cv_func_accept_arg3 *);],,dnl
-        [ac_not_found=no ; break 3], ac_not_found=yes)
+extern accept ($ac_cv_func_accept_arg1, $ac_cv_func_accept_arg2 *, $ac_cv_func_accept_arg3 *);]], [[]])],[dnl
+        ac_not_found=no ; break 3],[ac_not_found=yes])
       done
      done
     done
@@ -485,11 +485,11 @@ changequote([, ])dnl
 irc_code_posix="${irc_precode}O_NONBLOCK${irc_postcode}"
 irc_code_bsd="${irc_precode}O_NDELAY${irc_postcode}"
 irc_code_sysv="${irc_precode}FIONBIO${irc_postcode}"
-AC_RUN_IFELSE($irc_code_posix,
+AC_RUN_IFELSE([AC_LANG_SOURCE([$irc_code_posix])],
   irc_cv_non_blocking_system=posix,
-  AC_RUN_IFELSE($irc_code_bsd,
+  AC_RUN_IFELSE([AC_LANG_SOURCE([$irc_code_bsd])],
     irc_cv_non_blocking_system=bsd,
-    AC_RUN_IFELSE($irc_code_sysv,
+    AC_RUN_IFELSE([AC_LANG_SOURCE([$irc_code_sysv])],
       irc_cv_non_blocking_system=sysv,
       irc_cv_non_blocking_system=none)))
 ])
@@ -577,7 +577,7 @@ if test "x$enableval" = xyes; then
     AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
 #include <unistd.h>
 #include <netinet/in.h>]], [[struct in6_addr addr]])],
-	[irc_cv_v6type=native])
+    [irc_cv_v6type=native])
 
     if test "x$irc_cv_v6type" = x; then
       if test -d /usr/inet6; then
@@ -590,9 +590,9 @@ yes
     fi
 
     if test "x$irc_cv_v6type" = x; then
-	irc_cv_v6type=unknown
+      irc_cv_v6type=unknown
     fi
-  ])	
+  ])
 
   AC_MSG_RESULT($irc_cv_v6type)
 
@@ -602,11 +602,11 @@ yes
 
   dnl eventually update LIBS
   case $irc_cv_v6type in
-	linux)
-		LIBS="-L/usr/inet6/lib -linet6 $LIBS"
-		CFLAGS="$CFLAGS -I/usr/inet6/include"
-		;;
-	esac
+  linux)
+    LIBS="-L/usr/inet6/lib -linet6 $LIBS"
+    CFLAGS="$CFLAGS -I/usr/inet6/include"
+    ;;
+  esac
 
   dnl RFC 2553 check
   AC_CHECK_FUNCS(getipnodebyname)
@@ -668,7 +668,7 @@ if test "$irc_cv_aix" = no; then
   AC_MSG_RESULT(no)
 else
   AC_MSG_RESULT(yes)
-  AC_AIX
+  AC_USE_SYSTEM_EXTENSIONS
   if test "x$irc_cv_aix" = "x2 3"; then
     AC_DEFINE([AIX_3_2], [1], [Define if the operating system is AIX 3.2.])
   fi
@@ -715,8 +715,8 @@ dnl main
 dnl ----
 
 AC_INIT([irc],[2.11],[ircd-bugs@irc.org])
-AC_REVISION([$Id: configure.in,v 1.75 2008/06/24 21:44:19 chopin Exp $])
-AC_PREREQ(2.59)
+AC_REVISION([$Id: configure.in,v 1.76 2014/08/29 10:36:56 bif Exp $])
+AC_PREREQ([2.69])
 
 AC_ARG_WITH(logdir, [  --with-logdir=DIR       log files in DIR [[localstatedir/log]]], [
 logdir=$with_logdir
@@ -744,8 +744,8 @@ IRC_GNUM4
 AC_PROG_GCC_TRADITIONAL
 
 IRC_AIX
-AC_ISC_POSIX
-AC_MINIX
+AC_SEARCH_LIBS([strerror],[cposix])
+AC_USE_SYSTEM_EXTENSIONS
 IRC_SGI_CC
 IRC_HPUX_CC
 IRC_SUN
@@ -759,9 +759,9 @@ dnl See whether we can include both string.h and strings.h.
 AC_CACHE_CHECK([whether string.h and strings.h may both be included],
 ac_cv_header_string,
 [
-    AC_COMPILE_IFELSE(
-    [#include <string.h>
-    #include <strings.h>],
+    AC_COMPILE_IFELSE([AC_LANG_SOURCE([[
+    #include <string.h>
+    #include <strings.h>]])],
     [ac_cv_header_string=yes],
     [ac_cv_header_string=no])
 ])
