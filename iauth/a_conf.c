@@ -18,7 +18,7 @@
  */
 
 #ifndef lint
-static const volatile char rcsid[] = "@(#)$Id: a_conf.c,v 1.40 2014/08/25 14:08:57 bif Exp $";
+static const volatile char rcsid[] = "@(#)$Id: a_conf.c,v 1.41 2014/09/03 10:50:02 bif Exp $";
 #endif
 
 #include "os.h"
@@ -83,6 +83,9 @@ char	*conf_read(char *cfile)
 	Mlist[Mcnt++] = &Module_lhex;
 	Mlist[Mcnt++] = &Module_webproxy;
 	Mlist[Mcnt++] = &Module_dnsbl;
+#ifdef USE_PGSQL
+	Mlist[Mcnt++] = &Module_pgsql;
+#endif
 	Mlist[Mcnt] = NULL;
 
 	cfh = fopen((cfile) ? cfile : IAUTHCONF_PATH, "r");

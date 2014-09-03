@@ -1,5 +1,5 @@
 /************************************************************************
- *   IRC - Internet Relay Chat, iauth/a_externs.h
+ *   IRC - Internet Relay Chat, iauth/mod_pgsql_ext.h
  *   Copyright (C) 1998 Christophe Kalt
  *
  *   This program is free software; you can redistribute it and/or modify
@@ -17,23 +17,12 @@
  *   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*  This file includes all *_ext.h files containing external declarations
- *  for the authentication process.
+/*  This file contains external definitions for global variables and functions
+    defined in iauth/mod_pgsql.c.
  */
 
-#include "match_ext.h"
-#include "support_ext.h"
-
-#include "a_conf_ext.h"
-#include "a_io_ext.h"
-#include "a_log_ext.h"
-
-#include "mod_rfc931_ext.h"
-#include "mod_socks_ext.h"
-#include "mod_pipe_ext.h"
-#include "mod_lhex_ext.h"
-#include "mod_webproxy_ext.h"
-#include "mod_dnsbl_ext.h"
-#ifdef USE_PGSQL
-# include "mod_pgsql_ext.h"
+/*  External definitions for global variables.
+ */
+#ifndef MOD_PGSQL_C
+extern aModule Module_pgsql;
 #endif

@@ -1,7 +1,7 @@
 #
 # Default iauth configuration file
 #
-# $Id: iauth.conf.example,v 1.5 2014/08/25 14:08:57 bif Exp $
+# $Id: iauth.conf.example,v 1.6 2014/09/03 10:50:01 bif Exp $
 #
 
 # Important note: there must be one tab only before modules options.
@@ -14,6 +14,11 @@ notimeout
 # This makes the IRC server require that iauth performs the authentication
 # in order for a new user connection to be accepted
 required
+
+# Log connection to database and reject based on IP.
+#module pgsql
+#	option = log,reject,conn=dbname=ircd password=sikret
+#	reason = Denied access (SQL)
 
 # Perform ident lookups
 module rfc931

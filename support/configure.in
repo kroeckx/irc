@@ -49,6 +49,7 @@ dnl AC_DEFINE_UNQUOTED(ACCEPT_TYPE_ARG2,$ac_cv_func_accept_arg2)
  fi
 ])
 
+
 AC_DEFUN(IRC_PATH_ZLIB,
 [AC_MSG_CHECKING(for zlib package)
 AC_ARG_WITH(zlib, [AS_HELP_STRING([--with-zlib[[=ZDIR]]], [checks for zlib; if found, enables compressed links])])
@@ -144,6 +145,103 @@ else
 fi
 AC_SUBST(IRC_ZLIB_INCLUDE)
 AC_SUBST(IRC_ZLIB_LIBRARY)
+])
+
+
+AC_DEFUN(IRC_PATH_PGSQL,
+[AC_MSG_CHECKING(for pgsql package)
+AC_ARG_WITH(pgsql, [  --with-pgsql[[=PDIR]]     checks for pgsql, required for mod_pgsql], [], [with_pgsql=no])
+if test "x$with_pgsql" = xno; then
+  no_pgsql=yes
+else
+irc_pgsql_prefix=$with_pgsql
+AC_CACHE_VAL(irc_cv_path_pgsql,
+[no_pgsql=yes
+no_pgsql_include=yes
+no_pgsql_library=yes
+AC_PREPROC_IFELSE([AC_LANG_SOURCE([[#include <libpq-fe.h>]])],[no_pgsql_include=
+irc_pgsql_include=],[for irc_dir in "$irc_pgsql_include" \
+                     `test -z "$irc_pgsql_prefix" || echo "$irc_pgsql_prefix/include"` \
+                     `echo "$irc_pgsql_library" | sed s/lib/include/` \
+                     /usr/include /usr/local/include /usr/unsupported/include \
+                     /usr/share/include /usr/local/share/include /include \
+                     /usr/pgsql/include /usr/local/pgsql/include \
+                     /usr/include/pgsql /usr/local/include/pgsql \
+                     /usr/unsupported/include/pgsql /usr/share/include/pgsql \
+                     /usr/local/share/include/pgsql /include/pgsql \
+                     /usr/pgsql/include/pgsql /usr/local/pgsql/include/pgsql; \
+  do
+    if test -r "$irc_dir/libpq-fe.h"; then
+      no_pgsql_include=
+      irc_pgsql_include=$irc_dir
+      break
+    fi
+  done
+])
+irc_save_LIBS="$LIBS"
+LIBS="-lpq $LIBS"
+AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[PGconnectdb()]])],[no_pgsql_library=
+irc_pgsql_library=
+LIBS="$irc_save_LIBS"],[LIBS="$irc_save_LIBS"
+for irc_dir in "$irc_pgsql_library" \
+                    `test -z "$irc_pgsql_prefix" || echo "$irc_pgsql_prefix/lib"` \
+                    `echo "$irc_pgsql_include" | sed s/include/lib/` \
+                    /usr/lib /usr/local/lib /usr/unsupported/lib \
+                    /usr/share/lib /usr/local/share/lib /lib /usr/pgsql/lib \
+                    /usr/local/pgsql/lib /usr/lib/pgsql /usr/local/lib/pgsql \
+                    /usr/unsupported/lib/pgsql /usr/share/lib/pgsql \
+                    /usr/local/share/lib/pgsql /lib/pgsql \
+                    /usr/pgsql/lib/pgsql /usr/local/pgsql/lib/pgsql; \
+do
+  for irc_extension in a so sl; do
+    if test -r $irc_dir/libpq.$irc_extension; then
+      no_pgsql_library=
+      irc_pgsql_library=$irc_dir
+      break 2
+    fi
+  done
+done
+])
+if test "x$no_pgsql_include" = x && test "x$no_pgsql_library" = x; then
+  no_pgsql=
+fi
+if test "$no_pgsql" = yes; then
+  irc_cv_path_pgsql="no_pgsql=yes"
+else
+  irc_cv_path_pgsql="no_pgsql= irc_pgsql_include=$irc_pgsql_include irc_pgsql_library=$irc_pgsql_library"
+fi])
+  eval "$irc_cv_path_pgsql"
+fi
+if test "$no_pgsql" = yes; then
+  IRC_PGSQL_LIBRARY=
+  IRC_PGSQL_INCLUDE=
+  AC_MSG_RESULT(no)
+else
+  AC_DEFINE([USE_PGSQL], [1], [Define if pgsql package must be used for compilation/linking.])
+  if test "x$irc_pgsql_library" = x; then
+    irc_pgsql_library_message="found by the linker"
+    IRC_PGSQL_LIBRARY=-lpq
+  else
+    irc_pgsql_library_message="in $irc_pgsql_library"
+    IRC_PGSQL_LIBRARY=-L$irc_pgsql_library
+    if test ! "$irc_cv_solaris_2" = no; then
+      IRC_PGSQL_LIBRARY="$IRC_PGSQL_LIBRARY -R$irc_pgsql_library"
+    fi
+    IRC_PGSQL_LIBRARY="$IRC_PGSQL_LIBRARY -lpq"
+  fi
+  if test "x$irc_pgsql_include" = x; then
+    irc_pgsql_include_message="found by the compiler"
+    IRC_PGSQL_INCLUDE=
+  else
+    irc_pgsql_include_message="in $irc_pgsql_include"
+    IRC_PGSQL_INCLUDE=-I$irc_pgsql_include
+  fi
+  AC_MSG_RESULT([])
+  AC_MSG_RESULT([  library $irc_pgsql_library_message])
+  AC_MSG_RESULT([  header $irc_pgsql_include_message])
+fi
+AC_SUBST(IRC_PGSQL_INCLUDE)
+AC_SUBST(IRC_PGSQL_LIBRARY)
 ])
 
 
@@ -715,7 +813,7 @@ dnl main
 dnl ----
 
 AC_INIT([irc],[2.11],[ircd-bugs@irc.org])
-AC_REVISION([$Id: configure.in,v 1.77 2014/09/01 09:58:40 bif Exp $])
+AC_REVISION([$Id: configure.in,v 1.78 2014/09/03 10:50:02 bif Exp $])
 AC_PREREQ([2.69])
 AC_PRESERVE_HELP_ORDER
 
@@ -818,6 +916,7 @@ AC_CHECK_LIB(nsl, socket)
 
 IRC_MATHLIB
 IRC_PATH_ZLIB
+IRC_PATH_PGSQL
 
 AC_FUNC_SETPGRP
 AC_FUNC_SETVBUF_REVERSED
