@@ -1,3 +1,23 @@
+2014-09-03  Piotr Kucharski
+
+	* iauth/mod_pgsql.c: new module for having connection log and CIDR
+	  K:lines in postgres.
+	* iauth/mod_pgsql_ext.h, iauth.conf.5, iauth.conf.example, a_conf.c,
+	  a_externs.h, Makefile.in, configure.in, configure, setup.h.in:
+	  required changes to supporting files.
+
+2014-09-02  Piotr Kucharski
+
+	* ircd.c/try_connections(): get rid of paren disambiguity warning.
+
+2014-09-01  Piotr Kucharski
+
+	* configure.in: use AS_HELP_STRING for formatting of help strings.
+
+2014-08-29  Piotr Kucharski
+
+	* configure.in: update to newer autoconf.
+
 2014-08-25  Piotr Kucharski
 
 	* iauth/mod_dnsbl.c: add DNSBL iauth module
