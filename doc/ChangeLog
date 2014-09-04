@@ -2,6 +2,8 @@
 
 	* configure: Use proper variable to get correct parameters
 	  when calling support/configure
+        * iauth.8, iauth.conf.5, ircd.8: Fix warnings (from Kilian Krause
+	  <kilian@debian.org>)
 
 2014-09-03  Piotr Kucharski
 
