@@ -1,3 +1,8 @@
+2014-09-04  Kurt Roeckx
+
+	* configure: Use proper variable to get correct parameters
+	  when calling support/configure
+
 2014-09-03  Piotr Kucharski
 
 	* iauth/mod_pgsql.c: new module for having connection log and CIDR
