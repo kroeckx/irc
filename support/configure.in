@@ -12,7 +12,7 @@ AC_DEFUN(IRC_MATHLIB, [
   AC_SUBST(MATHLIBS)
 ])
 
-dns based on the version from the GNU Autoconf Macro Archive at:
+dnl based on the version from the GNU Autoconf Macro Archive at:
 dnl http://www.gnu.org/software/ac-archive/htmldoc/ac_func_accept_argtypes.html
 dnl
 AC_DEFUN([AC_FUNC_ACCEPT_ARGTYPES],
@@ -813,7 +813,7 @@ dnl main
 dnl ----
 
 AC_INIT([irc],[2.11],[ircd-bugs@irc.org])
-AC_REVISION([$Id: configure.in,v 1.78 2014/09/03 10:50:02 bif Exp $])
+AC_REVISION([$Id: configure.in,v 1.79 2014/09/05 22:09:39 bif Exp $])
 AC_PREREQ([2.69])
 AC_PRESERVE_HELP_ORDER
 
